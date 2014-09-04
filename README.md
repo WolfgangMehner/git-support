@@ -9,7 +9,7 @@ The development happens here:
 
 --------------------------------------------------------------------------------
 
-README for git-support.vim (Version 0.9.2pre) / Mar 01 2014
+README for git-support.vim (Version 0.9.2) / August 21 2014
 ================================================================================
 
   *  INSTALLATION
@@ -135,17 +135,20 @@ Any problems? See the TROUBLESHOOTING section at the end of the help file
   RELEASE NOTES
 ================================================================================
 
-  RELEASE NOTES FOR VERSION 0.9.2pre
+  RELEASE NOTES FOR VERSION 0.9.2
 --------------------------------------------------------------------------------
 - Added: Command :GitBash for running interactive Git commands.
 - Added: Command :GitSlist as a shorthand for ":GitStash list".
 - Added: New maps for the buffers: branch, remote, stash, tag
 - Added: New maps for the buffer: status
+- Added: New setting g:Git_BinPath, to set the path to the executables.
+- Added: Command-line completion for subcommands, branches, remotes, tags.
 - Changed: :GitShow shows different objects in an according way.
 - Changed: :GitCommitFile updates the file before committing.
 - Changed: :GitHelp shows man page text with appropriate width.
 - Changed: :GitStatus can be restricted to a path by passing it as an argument.
 - Changed: :GitStatus respects the option 'status.relativePaths'.
+- Changed: :GitStatus can work with changes introduced by Git version 1.8.5.
 - Changed: Calling :GitCheckout and :GitReset without arguments
   (see g:Git_CheckoutExpandEmpty and g:Git_ResetExpandEmpty).
 - Fixed: Jumping to files was still not working correctly.

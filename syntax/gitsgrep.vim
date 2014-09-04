@@ -17,12 +17,12 @@ syn case match
 " top-level categories:
 " - GitGrepFileLines
 
-syn region GitGrepFileLines     start=/^\z([^:-]\+\)[:-]/ end=/^\%(\z1[:-]\)\@!/ contains=GitGrepPath fold keepend
+syn region GitGrepFileLines     start=/^\z([^:]\+:\)/ end=/^\%(\z1\)\@!/ contains=GitGrepPath fold keepend
 
-syn match  GitGrepPath          "^[^:-]\+"    contained nextgroup=GitGrepSep1
-syn match  GitGrepSep1          "[:-]"        contained nextgroup=GitGrepLineNr
+syn match  GitGrepPath          "^[^:]\+"     contained nextgroup=GitGrepSep1
+syn match  GitGrepSep1          ":"           contained nextgroup=GitGrepLineNr
 syn match  GitGrepLineNr        "\d\+"        contained nextgroup=GitGrepSep2
-syn match  GitGrepSep2          "[:-]"        contained
+syn match  GitGrepSep2          ":"           contained
 
 "-------------------------------------------------------------------------------
 " Highlight
