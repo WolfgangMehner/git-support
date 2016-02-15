@@ -1,4 +1,4 @@
-*gitsupport.txt*                  Git Support                      Feb 22 2015
+*gitsupport.txt*                  Git Support                      Sep 20 2015
 
 Git Support                                          *git-support* *gitsupport*
 
@@ -119,6 +119,8 @@ run the commands in every subdirectory of the project.
   |:GitK| <args>                     start gitk with the given arguments
   |:GitBash| <args>                  run git in an external terminal
 
+  |:GitEdit| <fileid>                edit the file referred to by <fileid>
+
   |:GitSupportHelp|                  show plug-in help
   |:GitSupportSettings|              show plug-in settings
  ----------------------------------------------------------------------------
@@ -161,6 +163,12 @@ work on the current file: viewing diffs, adding or checking out the file, ...
 
 Some special commands are provided in the menu "specials". See their documen-
 tation for further help.
+
+The menu "custom" is configurable by the user. It can be used to list Git
+commands with regularly used combination of flags. (see |gitsupport-menus|)
+
+To quickly jump to important files, such as config and ignore files, use the
+menu "edit". (or the command |:GitEdit|)
 
 ------------------------------------------------------------------------------
 2.2  WORKFLOW                                       *gitsupport-overview-work*
@@ -369,14 +377,27 @@ By default, the first version opens the diff showing all unstaged changes. If
 shown. This makes the behavior of :GitDiff more consistent with commands like
 |:GitAdd|.
 
+Inside the diff buffer, use the map 'of' to open the file under the cursor.
+The map 'oj' will jump to line in the file corresponding to the line in the
+diff output.
+The chunk under the cursor can be added, checked out and reset using 'ac',
+'cc', and 'rc'. In visual mode only the selected lines are applied.
+
   Map       Meaning
  ----------------------------------------------------------------------------
   S-F1      help: show a list of all maps
   q         close the buffer
   u         update the buffer
 
-  of        file under cursor: open file (edit)
-  oj        file under cursor: open and jump to the position under the cursor
+  file under cursor ...
+  of        open file (edit)
+  oj        open and jump to the position under the cursor
+
+  chunk under cursor ...
+  ac        add to index (add chunk)
+  cc        undo change (checkout chunk)
+  rc        remove from index (reset chunk)
+            -> in visual mode, these maps only apply the selected lines
  ----------------------------------------------------------------------------
 
 Example:
@@ -423,7 +444,7 @@ repository.
   :GitHelp [<args>] ~
 
 Opens a buffer containing the help for one of Git's commands. If no command is
-given, opens the help for Git itself.
+given, opens the help for Git itself. Use tab-completion for convenience.
 
   Map       Meaning
  ----------------------------------------------------------------------------
@@ -642,6 +663,7 @@ Git command.
   ch        checkout HEAD (set index and working tree to HEAD)
   od        open diff
   of        open file (edit)
+  oj        open file (edit)
   ol        open log (with --stat)
   r         reset
   rp        reset --patch (^1)
@@ -691,6 +713,25 @@ example: >
   :GitBash add --patch %
 <
 Windows: If called without arguments, starts the git bash in interactive mode.
+
+------------------------------------------------------------------------------
+                                                                    *:GitEdit*
+  :GitEdit <fileid> ~
+
+Edit the file referred to by <fileid>, which must be one of the IDs below.
+Use tab-completion for convenience.
+
+  ID               File
+ ----------------------------------------------------------------------------
+  config-global    $HOME/.gitconfig
+  config-local     $GIT_CONFIG or .git/config
+  description      .git/description
+  hooks            .git/hooks/
+  ignore-global    -> value of "core.excludesfile"
+  ignore-local     .gitignore
+  ignore-private   .git/info/exclude
+  modules          .gitmodules
+ ----------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
                                          *:GitSupportHelp* *:GitSupportSettings*
@@ -905,6 +946,8 @@ This highlighting is also used for ":GitStash list", ":GitShow <commit>" and
  ----------------------------------------------------------------------------
   GitLogHash              the name of the commit (line "commit <hash>")
                           -> uses GitHighlight2
+  GitLogRef               refs obtained with "git log --decorate"
+                          -> uses GitHighlight1
   GitLogInfo              information about the commit
                             (lines like "Author: ..." or "Date: ...")
                           -> uses GitHighlight1
@@ -1059,7 +1102,7 @@ in the .vimrc file.
   |g:Git_GitBashExecutable| - g:Git_BinPath + sh.exe
 (^2) under UNIX, the default for g:Git_GitBashExecutable is the value of
   g:Xterm_Executable, which in turn is "xterm"
-(^3) UNIX only
+(^3) UNIX only, see |gitsupport-config-xterm|
 
 ------------------------------------------------------------------------------
 6.1  EXECUTABLE                                 *gitsupport-config-executable*
@@ -1281,4 +1324,4 @@ Jinhu Lu (vim.org user name: KingTiger):
   ( http://www.vim.org/scripts/script.php?script_id=3531 )
 
 ==============================================================================
-vim:tw=78:noet:ts=2:ft=help:norl:expandtab:
+vim:tw=78:expandtab:ts=2:ft=help:norl:
