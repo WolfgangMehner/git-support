@@ -3,13 +3,30 @@ Preface
 
 This repository is mainly for the use with plug-in managers.
 
-The development happens here:
-[WolfgangMehner/vim-plugins](https://github.com/WolfgangMehner/vim-plugins)
+Have a look at the [Screenshot Page](https://wolfgangmehner.github.io/vim-plugins/gitsupport.html).
+
+The development happens in [WolfgangMehner/vim-plugins](https://github.com/WolfgangMehner/vim-plugins).
+
+
+Preview Version
+================================================================================
+
+___This is a preview version!___
+
+Notable new feature:
+
+- Fully enabled for Neovim.
+- Run Git in a terminal window directly inside the editor.
+
+The terminal window relies on the new `+terminal` feature, which becomes
+available with a patch level of approx. `8.0.1000`.
+
+_Please read the release notes below._
 
 
 --------------------------------------------------------------------------------
 
-README for git-support.vim (Version 0.9.3) / July 23 2016
+README for git-support.vim (Version 0.9.4pre) / January 17 2018
 ================================================================================
 
   *  INSTALLATION
@@ -136,14 +153,12 @@ Any problems? See the TROUBLESHOOTING section at the end of the help file
 RELEASE NOTES
 ================================================================================
 
-RELEASE NOTES FOR VERSION 0.9.3
+RELEASE NOTES FOR VERSION 0.9.4pre
 ----------------------------------------------------------------------
-- Add: The diff buffer can be use to add/reset chunks, added new maps.
-- Add: Extended command-line completion to handle options for Git commands.
-- Add: New maps for the buffer: log
-- Add: Command :GitEdit to quickly jump to configuration files.
-- Change: The status buffer can handle renamed files.
-- Improve syntax highlighting.
+- Add command :GitTerm to execute Git in a terminal window (requires +terminal).
+- Improve :GitGrep (in case +conceal is available).
+- Improve :GitLog to support ranges.
+- Adapt for running under Neovim more smoothly.
 - Minor changes.
 
 

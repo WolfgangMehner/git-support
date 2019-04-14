@@ -1,8 +1,8 @@
-*gitsupport.txt*                  Git Support                      Jul 23 2016
+*gitsupport.txt*                  Git Support                      Jan 17 2018
 
 Git Support                                          *git-support* *gitsupport*
 
-                            Plug-in version 0.9.3
+                            Plug-in version 0.9.4pre
                         for Vim version 7.0 and above
                  Wolfgang Mehner <wolfgang-mehner at web.de>
 
@@ -95,7 +95,7 @@ run the commands in every subdirectory of the project.
   |:GitGrep| <args>                  (buf) git grep <args>
   |:GitGrepTop| <args>               (buf) git grep <args> (^1)
   |:GitHelp| [<args>]                (buf) git help <args>
-  |:GitLog| [<args>]                 (buf) git log <args>
+  |:GitLog| [<args>]                 (buf) git log <args> (supports ranges)
   |:GitMerge| [<args>]               (run) git merge <args>
   |:GitMergeUpstream| [<args>]       (run) git merge <args> <upstream-branch>
   |:GitMove| [<args>]                (run) git mv <args>
@@ -118,6 +118,7 @@ run the commands in every subdirectory of the project.
 
   |:GitK| <args>                     start gitk with the given arguments
   |:GitBash| <args>                  run git in an external terminal
+  |:GitTerm| <args>                  run git in a terminal window
 
   |:GitEdit| <fileid>                edit the file referred to by <fileid>
 
@@ -467,6 +468,12 @@ Is equivalent to: >
 The first version opens a buffer containing the log for the current branch.
 The second version runs log for the given arguments.
 
+  :[range]GitLog <args> ~
+
+The third version shows the log for the given range. In this case the
+arguments can not list further files.
+(this version uses the cmd.-line option `git log -L line1,line2:buffername`)
+
   Map       Meaning
  ----------------------------------------------------------------------------
   S-F1      help: show a list of all maps
@@ -715,6 +722,15 @@ example: >
 Windows: If called without arguments, starts the git bash in interactive mode.
 
 ------------------------------------------------------------------------------
+                                                                    *:GitTerm*
+  :GitTerm <args> ~
+
+Runs git in a terminal window. Useful for interactive commands, for example: >
+  :GitTerm diff --color-words %
+<
+Requires |+terminal|.
+
+------------------------------------------------------------------------------
                                                                     *:GitEdit*
   :GitEdit <fileid> ~
 
@@ -801,11 +817,12 @@ If the Git command has been recognized, such as: >
   :GitDiff
   :Git! diff
   :GitBash diff
+  :GitTerm diff
 then command-line options are completed: >
-  :GitBash diff --c
-  :GitBash diff --cached
-  :GitBash diff --color-words
-  :GitBash diff --c...
+  :GitTerm diff --c
+  :GitTerm diff --cached
+  :GitTerm diff --color-words
+  :GitTerm diff --c...
 <
 ==============================================================================
 4.  SYNTAX HIGHLIGHTING                                    *gitsupport-syntax*
@@ -1298,16 +1315,6 @@ A.  TROUBLESHOOTING - KNOWN ISSUES                *gitsupport-troubleshooting*
   - If you already are in the corresponding buffer, simply use:
       :GitAdd
 
-------------------------------------------------------------------------------
-
-* :GitBlame does not work correctly when the visual area consists only of the
-  first line.
-  - This seems to be a weakness with Vim's support for ranges. At least I
-    could not find a way around this.
-  - Workaround: Run :GitBlame on the first two lines.
-  - The usefulness of :GitBlame supporting ranges by far outweighs this
-    downside, in my opinion.
-
 ==============================================================================
 B.  RELEASE NOTES - CHANGE LOG                      *gitsupport-release-notes*
 ==============================================================================
@@ -1321,7 +1328,7 @@ C.  CREDITS                                               *gitsupport-credits*
 Jinhu Lu (vim.org user name: KingTiger):
 - the idea for command-line completion of branches, remotes, tags, ...
   (|gitsupport-cmds-cmd-line|) is taken from his plug-in "cmdline completion"
-  ( http://www.vim.org/scripts/script.php?script_id=3531 )
+  ( https://www.vim.org/scripts/script.php?script_id=3531 )
 
 ==============================================================================
 vim:tw=78:expandtab:ts=2:ft=help:norl:
