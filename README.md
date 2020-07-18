@@ -8,25 +8,9 @@ Have a look at the [Screenshot Page](https://wolfgangmehner.github.io/vim-plugin
 The development happens in [WolfgangMehner/vim-plugins](https://github.com/WolfgangMehner/vim-plugins).
 
 
-Preview Version
-================================================================================
-
-___This is a preview version!___
-
-Notable new feature:
-
-- Fully enabled for Neovim.
-- Run Git in a terminal window directly inside the editor.
-
-The terminal window relies on the new `+terminal` feature, which becomes
-available with a patch level of approx. `8.0.1000`.
-
-_Please read the release notes below._
-
-
 --------------------------------------------------------------------------------
 
-README for git-support.vim (Version 0.9.4) / April 23 2019
+README for git-support.vim (Version 0.9.4) / July 18 2020
 ================================================================================
 
   *  INSTALLATION
@@ -152,7 +136,7 @@ RELEASE NOTES FOR VERSION 0.9.4
 - Add command :GitTerm to execute Git in a terminal window (requires +terminal).
 - Improve :GitGrep (in case +conceal is available).
 - Improve :GitLog to support ranges.
-- Add a map to the buffer: status
+- Add maps to these buffers: branch, status
 - Adapt for running under Neovim more smoothly.
 - Minor changes.
 

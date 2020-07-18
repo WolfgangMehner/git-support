@@ -1,4 +1,4 @@
-README for git-support.vim (Version 0.9.4) / April 23 2019
+README for git-support.vim (Version 0.9.4) / July 18 2020
 ================================================================================
 
   *  INSTALLATION
@@ -124,7 +124,7 @@ RELEASE NOTES FOR VERSION 0.9.4
 - Add command :GitTerm to execute Git in a terminal window (requires +terminal).
 - Improve :GitGrep (in case +conceal is available).
 - Improve :GitLog to support ranges.
-- Add a map to the buffer: status
+- Add maps to these buffers: branch, status
 - Adapt for running under Neovim more smoothly.
 - Minor changes.
 
