@@ -11,8 +11,8 @@
 "  Organization:  
 "       Version:  see variable g:GitSupport_Version below
 "       Created:  06.10.2012
-"      Revision:  03.12.2019
-"       License:  Copyright (c) 2012-2019, Wolfgang Mehner
+"      Revision:  18.07.2020
+"       License:  Copyright (c) 2012-2020, Wolfgang Mehner
 "                 This program is free software; you can redistribute it and/or
 "                 modify it under the terms of the GNU General Public License as
 "                 published by the Free Software Foundation, version 2 of the
@@ -41,7 +41,7 @@ endif
 if &cp || ( exists('g:GitSupport_Version') && ! exists('g:GitSupport_DevelopmentOverwrite') )
 	finish
 endif
-let g:GitSupport_Version= '0.9.4'     " version number of this script; do not change
+let g:GitSupport_Version= '0.9.4-1'     " version number of this script; do not change
 
 "-------------------------------------------------------------------------------
 " Auxiliary functions.   {{{1

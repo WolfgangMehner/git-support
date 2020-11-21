@@ -1,5 +1,8 @@
---------------------------------------------------------------------------------
-  RELEASE NOTES FOR VERSION 0.9.4
+RELEASE NOTES FOR VERSION 0.9.4-1
+----------------------------------------------------------------------
+- Add a required data file.
+
+RELEASE NOTES FOR VERSION 0.9.4
 --------------------------------------------------------------------------------
 - Add command :GitTerm to execute Git in a terminal window (requires +terminal).
 - Improve :GitGrep (in case +conceal is available).
@@ -8,8 +11,7 @@
 - Adapt for running under Neovim more smoothly.
 - Minor changes.
 
---------------------------------------------------------------------------------
-  RELEASE NOTES FOR VERSION 0.9.3
+RELEASE NOTES FOR VERSION 0.9.3
 --------------------------------------------------------------------------------
 - Add: The diff buffer can be use to add/reset chunks, added new maps.
 - Add: Extended command-line completion to handle options for Git commands.
@@ -19,8 +21,7 @@
 - Improve syntax highlighting.
 - Minor changes.
 
---------------------------------------------------------------------------------
-  RELEASE NOTES FOR VERSION 0.9.2
+RELEASE NOTES FOR VERSION 0.9.2
 --------------------------------------------------------------------------------
 - Added: Command :GitBash for running interactive Git commands.
 - Added: Command :GitSlist as a shorthand for ":GitStash list".
@@ -42,8 +43,7 @@
 - Improved syntax highlighting.
 - Minor changes.
 
---------------------------------------------------------------------------------
-  RELEASE NOTES FOR VERSION 0.9.1
+RELEASE NOTES FOR VERSION 0.9.1
 --------------------------------------------------------------------------------
 - Added: New maps for the buffers: blame, diff and status
 - Changed: Commands which open a file will jump to its window, if one exists.
@@ -64,8 +64,6 @@
 - Improved syntax highlighting.
 - Minor bugfixes and improvements.
 
---------------------------------------------------------------------------------
-  RELEASE NOTES FOR VERSION 0.9
+RELEASE NOTES FOR VERSION 0.9
 --------------------------------------------------------------------------------
 - Initial release.
-

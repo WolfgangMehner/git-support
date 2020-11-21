@@ -1,16 +1,4 @@
-Preface
-================================================================================
-
-This repository is mainly for the use with plug-in managers.
-
-Have a look at the [Screenshot Page](https://wolfgangmehner.github.io/vim-plugins/gitsupport.html).
-
-The development happens in [WolfgangMehner/vim-plugins](https://github.com/WolfgangMehner/vim-plugins).
-
-
---------------------------------------------------------------------------------
-
-README for git-support.vim (Version 0.9.4) / July 18 2020
+README for git-support.vim (Version 0.9.4-1) / November 21 2020
 ================================================================================
 
   *  INSTALLATION
@@ -131,6 +119,10 @@ Any problems? See the TROUBLESHOOTING section at the end of the help file
 RELEASE NOTES
 ================================================================================
 
+RELEASE NOTES FOR VERSION 0.9.4-1
+----------------------------------------------------------------------
+- Add a required data file.
+
 RELEASE NOTES FOR VERSION 0.9.4
 ----------------------------------------------------------------------
 - Add command :GitTerm to execute Git in a terminal window (requires +terminal).
@@ -143,7 +135,7 @@ RELEASE NOTES FOR VERSION 0.9.4
 
 RELEASE NOTES FOR OLDER VERSIONS
 ----------------------------------------------------------------------
--> see file `git-support/doc/ChangeLog`
+-> see file `ChangeLog.md`
 
 
 --------------------------------------------------------------------------------

@@ -170,10 +170,10 @@ filelists.git = {
 	'doc/gitsupport.txt',
 	'plugin/git-support.vim',
 	'git-support/data/',
-	'git-support/doc/',
 	'git-support/rc/',
-	'git-support/README.md',
 	'syntax/gits*.vim',
+	'CHANGELOG.md',
+	'README.md',
 }
 
 filelists_repo.git = {

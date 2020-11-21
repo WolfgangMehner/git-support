@@ -2,7 +2,7 @@
 
 Git Support                                          *git-support* *gitsupport*
 
-                            Plug-in version 0.9.4
+                           Plug-in version 0.9.4-1
                         for Vim version 7.0 and above
                  Wolfgang Mehner <wolfgang-mehner at web.de>
 
