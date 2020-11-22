@@ -14,7 +14,7 @@ from right there. Further commands allow to quickly add the file in the
 current buffer or show its diff.
 Please read the documentation.
 
-This plug-in can be used with Vim version 7.3+ and Neovim 0.2.1+.
+This plug-in can be used with Vim version 7.4+ and Neovim 0.2.1+.
 
 
 --------------------------------------------------------------------------------

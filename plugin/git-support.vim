@@ -6,7 +6,7 @@
 " 
 "                 See help file gitsupport.txt .
 "
-"   VIM Version:  7.0+
+"   VIM Version:  7.4+
 "        Author:  Wolfgang Mehner, wolfgang-mehner@web.de
 "  Organization:  
 "       Version:  see variable g:GitSupport_Version below
@@ -28,10 +28,10 @@
 " Basic checks.   {{{1
 "-------------------------------------------------------------------------------
 
-" need at least 7.0
-if v:version < 700
+" need at least 7.4
+if v:version < 740
 	echohl WarningMsg
-	echo 'The plugin git-support.vim needs Vim version >= 7.'
+	echo 'The plugin git-support.vim needs Vim version >= 7.4'
 	echohl None
 	finish
 endif

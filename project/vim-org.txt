@@ -13,10 +13,8 @@ Integration of Git for Vim/gVim:
 - show the stash, logs, branches, tags, remotes, ...
 - show the Git help in a buffer, or open it in the browser
 - each buffer comes with a short help: press <SHIFT+F1>
-- run arbitrary Git commands and optionally redirect their output into a buffer
-- start gitk with arguments: :GitK --all
 
-- comes with a menu, which also severs as an overview of the plug-in's functionality
+- comes with a menu, which also serves as an overview of the plug-in's functionality
 - custom menu for often used combination of arguments
 - configurable syntax highlighting designed to match Git's own highlighting
 - automatic folds for diffs and logs
@@ -37,9 +35,7 @@ GitHub
 --------------------------------------------------------
 Git Support is on GitHub. We are happy to receive your questions, suggestions, and bug reports here:
 
-    https://github.com/WolfgangMehner/vim-plugins
-
-(Please help us keep track of all the issues and name your report/request "Git-Support: <title>") 
+    https://github.com/WolfgangMehner/git-support
 ================================================================================
 ===== install details
 ================================================================================

@@ -3,7 +3,7 @@
 Git Support                                          *git-support* *gitsupport*
 
                            Plug-in version 0.9.4-1
-                        for Vim version 7.0 and above
+                        for Vim version 7.4 and above
                  Wolfgang Mehner <wolfgang-mehner at web.de>
 
 Integration of Git for Vim/gVim. The plug-in at hand allows to use Git from
