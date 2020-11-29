@@ -32,6 +32,37 @@ function! gitsupport#commands#AddFromCmdLine ( q_params )
 	return gitsupport#run#RunDirect( git_exec, 'add '.params, 'env', git_env )
 endfunction
 
+function! gitsupport#commands#CheckoutFromCmdLine ( q_params )
+	let git_exec = gitsupport#config#GitExecutable()
+	let git_env  = gitsupport#config#Env()
+
+	if a:q_params == '' && g:Git_CheckoutExpandEmpty == 'yes'
+		if ! gitsupport#common#Question( 'Check out current file?', 'highlight', 'warning' )
+			echo "aborted"
+			return
+		endif
+
+		let params = '-- '.expand( '%:S' )
+	else
+		let params = a:q_params
+	endif
+
+	return gitsupport#run#RunDirect( git_exec, 'checkout '.params, 'env', git_env )
+endfunction
+
+function! gitsupport#commands#ResetFromCmdLine ( q_params )
+	let git_exec = gitsupport#config#GitExecutable()
+	let git_env  = gitsupport#config#Env()
+
+	if a:q_params == '' && g:Git_ResetExpandEmpty == 'yes'
+		let params = '-- '.expand( '%:S' )
+	else
+		let params = a:q_params
+	endif
+
+	return gitsupport#run#RunDirect( git_exec, 'reset '.params, 'env', git_env )
+endfunction
+
 function! gitsupport#commands#RmFromCmdLine ( q_params )
 	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
@@ -44,7 +75,7 @@ function! gitsupport#commands#RmFromCmdLine ( q_params )
 
 	let ret_code = gitsupport#run#RunDirect( git_exec, 'rm '.params, 'env', git_env )
 
-	if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' ) == 1
+	if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' )
 		bdelete
 		echo "deleted"
 	endif

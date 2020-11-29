@@ -1083,14 +1083,17 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 
 if s:Enabled && s:Git_NextGen
 	command! -nargs=* -complete=file   GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
+	command! -nargs=* -complete=file   GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
 	command! -nargs=*                  GitFetch           :call gitsupport#commands#DirectFromCmdLine('fetch',<q-args>)
 	command! -nargs=*                  GitMerge           :call gitsupport#commands#DirectFromCmdLine('merge',<q-args>)
 	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#DirectFromCmdLine('mv',<q-args>)
 	command! -nargs=*                  GitPull            :call gitsupport#commands#DirectFromCmdLine('pull',<q-args>)
 	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
+	command! -nargs=* -complete=file   GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
 elseif s:Enabled
 	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
+	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
 	command! -nargs=*                                                GitMergeUpstream   :call GitS_Merge('upstream',<q-args>,'')
@@ -1100,6 +1103,7 @@ elseif s:Enabled
 	command! -nargs=*                                                GitPush            :call GitS_Push(<q-args>)
 	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
+	command! -nargs=* -complete=file                                 GitReset           :call GitS_Reset(<q-args>)
 endif
 
 if s:Enabled
@@ -1108,7 +1112,6 @@ if s:Enabled
 "	command! -nargs=* -complete=file -count=1000                     GitTab             :call GitS_Split('tab',<count>,<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
 	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
 	command! -nargs=? -complete=file                                 GitCommitFile      :call GitS_Commit('file',<q-args>,'')
 	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
@@ -1119,7 +1122,6 @@ if s:Enabled
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitReset           :call GitS_Reset(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitShow            :call GitS_Show('update',<q-args>)
 	command! -nargs=*                                                GitStash           :call GitS_Stash(<q-args>,'')
 	command! -nargs=*                                                GitSlist           :call GitS_Stash('list '.<q-args>,'')
@@ -3071,12 +3073,12 @@ endfunction    " ----------  end of function GitS_Remove  ----------
 " Flags: -> s:StandardRun
 "-------------------------------------------------------------------------------
 "
-function! GitS_Reset( param, flags )
+function! GitS_Reset( param )
 	"
 	if g:Git_ResetExpandEmpty == 'yes'
-		let flags = a:flags.'e'
+		let flags = 'e'
 	else
-		let flags = a:flags
+		let flags = ''
 	endif
 	"
 	return s:StandardRun ( 'reset', a:param, flags )
@@ -3866,16 +3868,16 @@ function! s:Status_FileAction( action )
 		if f_status == 'modified' || f_status == 'new file' || f_status == 'deleted' || f_status =~ '^[MADC].$'
 			" reset a modified, new or deleted file?
 			if s:Question( 'Reset file "'.f_name_old.'"?' ) == 1
-				call GitS_Reset( '-q -- '.shellescape( f_name_old ), '' )   " use '-q' to prevent return value '1' and suppress output
+				call GitS_Reset( '-q -- '.shellescape( f_name_old ) )   " use '-q' to prevent return value '1' and suppress output
 				return 1
 			endif
 		elseif f_status == 'renamed' || f_status =~ '^R.$'
 			" reset a modified, new or deleted file?
 			if s:Question( 'Reset the old file "'.f_name_old.'"?' ) == 1
-				call GitS_Reset( '-q -- '.shellescape( f_name_old ), '' )   " use '-q' to prevent return value '1' and suppress output
+				call GitS_Reset( '-q -- '.shellescape( f_name_old ) )   " use '-q' to prevent return value '1' and suppress output
 			endif
 			if s:Question( 'Reset the new file "'.f_name_new.'"?' ) == 1
-				call GitS_Reset( '-q -- '.shellescape( f_name_new ), '' )   " use '-q' to prevent return value '1' and suppress output
+				call GitS_Reset( '-q -- '.shellescape( f_name_new ) )   " use '-q' to prevent return value '1' and suppress output
 			endif
 			if s:Question( 'Undo the rename?' ) == 1
 				call rename( f_name_new, f_name_old )
@@ -3912,7 +3914,7 @@ function! s:Status_FileAction( action )
 		"
 		" section "unmerged", action "reset"
 		if s:Question( 'Reset unmerged file "'.f_name_old.'"?' ) == 1
-			call GitS_Reset( '-- '.shellescape( f_name_old ), '' )
+			call GitS_Reset( '-- '.shellescape( f_name_old ) )
 			return 1
 		endif
 		"
