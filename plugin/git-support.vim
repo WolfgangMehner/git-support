@@ -1078,10 +1078,10 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 " custom commands   {{{2
 
 if s:Enabled && s:Git_NextGen
-	command! -nargs=*                  GitFetch           :call gitsupport#aux#DirectFromCmdLine('fetch',<q-args>)
-	command! -nargs=* -complete=file   GitMv              :call gitsupport#aux#DirectFromCmdLine('mv',<q-args>)
-	command! -nargs=*                  GitPull            :call gitsupport#aux#DirectFromCmdLine('pull',<q-args>)
-	command! -nargs=*                  GitPush            :call gitsupport#aux#DirectFromCmdLine('push',<q-args>)
+	command! -nargs=*                  GitFetch           :call gitsupport#commands#DirectFromCmdLine('fetch',<q-args>)
+	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#DirectFromCmdLine('mv',<q-args>)
+	command! -nargs=*                  GitPull            :call gitsupport#commands#DirectFromCmdLine('pull',<q-args>)
+	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
 elseif s:Enabled
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>)

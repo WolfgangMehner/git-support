@@ -1,6 +1,6 @@
 "-------------------------------------------------------------------------------
 "
-"          File:  aux.vim
+"          File:  commands.vim
 "
 "   Description:  
 "
@@ -12,7 +12,7 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#aux#DirectFromCmdLine ( cmd, q_params )
+function! gitsupport#commands#DirectFromCmdLine ( cmd, q_params )
 	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
 
