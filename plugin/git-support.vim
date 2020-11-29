@@ -867,6 +867,9 @@ endif
 " == Various settings ==   {{{2
 "-------------------------------------------------------------------------------
 
+let s:Git_NextGen = 0
+call s:GetGlobalSetting ( 'Git_NextGen' )
+
 let s:Git_LoadMenus      = 'yes'    " load the menus?
 let s:Git_RootMenu       = '&Git'   " name of the root menu
 "
@@ -1071,9 +1074,22 @@ let s:HelpTxtStd .= "u       : update"
 "
 let s:HelpTxtStdNoUpdate  = "S-F1    : help\n"
 let s:HelpTxtStdNoUpdate .= "q       : close"
-"
+
 " custom commands   {{{2
-"
+
+if s:Enabled && s:Git_NextGen
+	command! -nargs=*                  GitFetch           :call gitsupport#aux#DirectFromCmdLine('fetch',<q-args>)
+	command! -nargs=* -complete=file   GitMv              :call gitsupport#aux#DirectFromCmdLine('mv',<q-args>)
+	command! -nargs=*                  GitPull            :call gitsupport#aux#DirectFromCmdLine('pull',<q-args>)
+	command! -nargs=*                  GitPush            :call gitsupport#aux#DirectFromCmdLine('push',<q-args>)
+elseif s:Enabled
+	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
+	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>)
+	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>)
+	command! -nargs=*                                                GitPull            :call GitS_Pull(<q-args>)
+	command! -nargs=*                                                GitPush            :call GitS_Push(<q-args>)
+endif
+
 if s:Enabled
 "	command! -nargs=* -complete=file                                 GitAbove           :call GitS_Split('above',<count>,<q-args>)
 "	command! -nargs=* -complete=file                                 GitBelow           :call GitS_Split('below',<count>,<q-args>)
@@ -1087,17 +1103,12 @@ if s:Enabled
 	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
 	command! -nargs=+                                                GitCommitMsg       :call GitS_Commit('msg',<q-args>,'')
 	command! -nargs=* -complete=file                                 GitDiff            :call GitS_Diff('update',<q-args>)
-	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>,'')
 	command! -nargs=+ -complete=file                                 GitGrep            :call <SID>Grep('update',<q-args>)
 	command! -nargs=+ -complete=file                                 GitGrepTop         :call <SID>Grep('top',<q-args>)
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
 	command! -nargs=*                                                GitMergeUpstream   :call GitS_Merge('upstream',<q-args>,'')
-	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>,'')
-	command! -nargs=*                                                GitPull            :call GitS_Pull(<q-args>,'')
-	command! -nargs=*                                                GitPush            :call GitS_Push(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
@@ -2451,9 +2462,9 @@ endfunction    " ----------  end of function GitS_Diff  ----------
 " Flags: -> s:StandardRun
 "-------------------------------------------------------------------------------
 "
-function! GitS_Fetch( param, flags )
+function! GitS_Fetch( param )
 	"
-	return s:StandardRun ( 'fetch', a:param, a:flags, 'c' )
+	return s:StandardRun ( 'fetch', a:param, '', 'c' )
 	"
 endfunction    " ----------  end of function GitS_Fetch  ----------
 "
@@ -2877,9 +2888,9 @@ endfunction    " ----------  end of function GitS_Merge  ----------
 " Flags: -> s:StandardRun
 "-------------------------------------------------------------------------------
 "
-function! GitS_Move( param, flags )
+function! GitS_Move( param )
 	"
-	return s:StandardRun ( 'mv', a:param, a:flags, 'c' )
+	return s:StandardRun ( 'mv', a:param, 'c' )
 	"
 endfunction    " ----------  end of function GitS_Move  ----------
 "
@@ -2889,7 +2900,7 @@ endfunction    " ----------  end of function GitS_Move  ----------
 " Flags: -> s:StandardRun
 "-------------------------------------------------------------------------------
 "
-function! GitS_Pull( param, flags )
+function! GitS_Pull( param )
 	"
 	return s:StandardRun ( 'pull', a:param, a:flags, 'c' )
 	"
@@ -2901,9 +2912,9 @@ endfunction    " ----------  end of function GitS_Pull  ----------
 " Flags: -> s:StandardRun
 "-------------------------------------------------------------------------------
 "
-function! GitS_Push( param, flags )
+function! GitS_Push( param )
 	"
-	return s:StandardRun ( 'push', a:param, a:flags, 'c' )
+	return s:StandardRun ( 'push', a:param, 'c' )
 	"
 endfunction    " ----------  end of function GitS_Push  ----------
 "
