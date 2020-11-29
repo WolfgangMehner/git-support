@@ -69,32 +69,6 @@ function! s:GetEnvStr ( env )
 	return env_str
 endfunction
 
-function! s:ParseOptions ( opts, args )
-
-	let opts = a:opts
-	let vargs = a:args
-	let nargs = len( a:args )
-
-	let idx = 0
-	while idx < nargs
-		let key = vargs[idx]
-		if ! has_key( opts, key )
-			call s:ErrorMsg( 'unknown option: '.key )
-			return 0
-		elseif idx+1 >= nargs
-			call s:ErrorMsg( 'value missing: '.key )
-			return 0
-		elseif type( vargs[idx+1] ) != type( opts[key] )
-			call s:ErrorMsg( 'value has wrong type: '.key )
-			return 0
-		endif
-
-		let opts[key] = vargs[idx+1]
-		let idx += 2
-	endwhile
-	return 1
-endfunction
-
 function! gitsupport#run#RunDirect ( cmd, params, ... )
 
 	" options
@@ -104,7 +78,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 				\   'mode': 'print',
 				\ }
 
-	if ! s:ParseOptions( opts, a:000 )
+	if ! gitsupport#common#ParseOptions( opts, a:000 )
 		return
 	endif
 
@@ -192,7 +166,7 @@ function! gitsupport#run#OpenBuffer( name, ... )
 				\   'topic': '',
 				\ }
 
-	if ! s:ParseOptions( opts, a:000 )
+	if ! gitsupport#common#ParseOptions( opts, a:000 )
 		return
 	endif
 
