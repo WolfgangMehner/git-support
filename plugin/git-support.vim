@@ -2465,7 +2465,7 @@ endfunction    " ----------  end of function GitS_Diff  ----------
 "
 function! GitS_Fetch( param )
 	"
-	return s:StandardRun ( 'fetch', a:param, '', 'c' )
+	return s:StandardRun ( 'fetch', a:param, '' )
 	"
 endfunction    " ----------  end of function GitS_Fetch  ----------
 "
@@ -2891,7 +2891,7 @@ endfunction    " ----------  end of function GitS_Merge  ----------
 "
 function! GitS_Move( param )
 	"
-	return s:StandardRun ( 'mv', a:param, 'c' )
+	return s:StandardRun ( 'mv', a:param, '' )
 	"
 endfunction    " ----------  end of function GitS_Move  ----------
 "
@@ -2903,7 +2903,7 @@ endfunction    " ----------  end of function GitS_Move  ----------
 "
 function! GitS_Pull( param )
 	"
-	return s:StandardRun ( 'pull', a:param, a:flags, 'c' )
+	return s:StandardRun ( 'pull', a:param, '' )
 	"
 endfunction    " ----------  end of function GitS_Pull  ----------
 "
@@ -2915,7 +2915,7 @@ endfunction    " ----------  end of function GitS_Pull  ----------
 "
 function! GitS_Push( param )
 	"
-	return s:StandardRun ( 'push', a:param, 'c' )
+	return s:StandardRun ( 'push', a:param, '' )
 	"
 endfunction    " ----------  end of function GitS_Push  ----------
 "
