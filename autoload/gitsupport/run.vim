@@ -1,6 +1,6 @@
 "-------------------------------------------------------------------------------
 "
-"          File:  common.vim
+"          File:  run.vim
 "
 "   Description:  
 "
@@ -95,7 +95,7 @@ function! s:ParseOptions ( opts, args )
 	return 1
 endfunction
 
-function! gitsupport#common#RunDirect ( cmd, params, ... )
+function! gitsupport#run#RunDirect ( cmd, params, ... )
 
 	" options
 	let opts = {
@@ -142,7 +142,7 @@ endfunction
 
 let s:all_jobs = []
 
-"function! gitsupport#common#Run ( cmd, params, ... )
+"function! gitsupport#run#Run ( cmd, params, ... )
 "
 "	let job_id = job_start(
 "				\ [a:cmd] + a:params,
@@ -168,7 +168,7 @@ let s:all_jobs = []
 "	return
 "endfunction
 
-function! gitsupport#common#RunToBuffer ( cmd, params, ... )
+function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
 	let job_id = job_start(
 				\ [a:cmd] + a:params,
@@ -182,7 +182,7 @@ function! gitsupport#common#RunToBuffer ( cmd, params, ... )
 
 endfunction
 
-function! gitsupport#common#OpenBuffer( name, ... )
+function! gitsupport#run#OpenBuffer( name, ... )
 
 	" options
 	let opts = {
