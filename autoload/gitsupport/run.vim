@@ -82,7 +82,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 		return
 	endif
 
-	let cmd = s:GetEnvStr( opts.env ) . a:cmd
+	let cmd = s:GetEnvStr( opts.env ) . shellescape( a:cmd )
 
 	if type( a:params ) == type( [] ) 
 		let cmd .= ' ' . join( a:params, ' ' )

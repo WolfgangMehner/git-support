@@ -19,3 +19,16 @@ function! gitsupport#commands#DirectFromCmdLine ( cmd, q_params )
 	return gitsupport#run#RunDirect( git_exec, a:cmd.' '.a:q_params, 'env', git_env )
 endfunction
 
+function! gitsupport#commands#AddFromCmdLine ( q_params )
+	let git_exec = gitsupport#config#GitExecutable()
+	let git_env  = gitsupport#config#Env()
+
+	if a:q_params == '' && g:Git_AddExpandEmpty == 'yes'
+		let params = '-- '.expand( '%:S' )
+	else
+		let params = a:q_params
+	endif
+
+	return gitsupport#run#RunDirect( git_exec, 'add '.params, 'env', git_env )
+endfunction
+

@@ -61,6 +61,11 @@ else
 	let s:Git_GitBashExecutable = ''                    " do not use GitBash
 endif
 
+call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',      'no' )
+call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty', 'no' )
+call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',     'no' )
+call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',    'no' )
+
 let s:Git_Env = {}
 	
 call s:GetGlobalSetting ( 'Git_Executable' )

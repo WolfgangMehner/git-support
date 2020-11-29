@@ -870,6 +870,10 @@ endif
 let s:Git_NextGen = 0
 call s:GetGlobalSetting ( 'Git_NextGen' )
 
+if s:Git_NextGen
+	let git_exec = gitsupport#config#GitExecutable()
+endif
+
 let s:Git_LoadMenus      = 'yes'    " load the menus?
 let s:Git_RootMenu       = '&Git'   " name of the root menu
 "
@@ -1078,11 +1082,13 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 " custom commands   {{{2
 
 if s:Enabled && s:Git_NextGen
+	command! -nargs=* -complete=file   GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
 	command! -nargs=*                  GitFetch           :call gitsupport#commands#DirectFromCmdLine('fetch',<q-args>)
 	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#DirectFromCmdLine('mv',<q-args>)
 	command! -nargs=*                  GitPull            :call gitsupport#commands#DirectFromCmdLine('pull',<q-args>)
 	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
 elseif s:Enabled
+	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>)
 	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>)
@@ -1094,7 +1100,6 @@ if s:Enabled
 "	command! -nargs=* -complete=file                                 GitAbove           :call GitS_Split('above',<count>,<q-args>)
 "	command! -nargs=* -complete=file                                 GitBelow           :call GitS_Split('below',<count>,<q-args>)
 "	command! -nargs=* -complete=file -count=1000                     GitTab             :call GitS_Split('tab',<count>,<q-args>)
-	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
@@ -1443,8 +1448,8 @@ endfunction    " ----------  end of function GitS_RunBuf  ----------
 "
 function! GitS_Add( param, flags )
 	"
-	if a:flags =~ '[^cef]'
-		return s:ErrorMsg ( 'Unknown flag "'.matchstr( a:flags, '[^cef]' ).'".' )
+	if a:flags =~ '[^ef]'
+		return s:ErrorMsg ( 'Unknown flag "'.matchstr( a:flags, '[^ef]' ).'".' )
 	endif
 	"
 	if a:flags =~ 'e' && empty( a:param ) | let param = s:EscapeCurrent()
@@ -1455,11 +1460,6 @@ function! GitS_Add( param, flags )
 	"
 	let cmd = s:Git_Executable.' add '.param
 	"
-	if a:flags =~ 'c' && s:Question ( 'Execute "git add '.param.'"?' ) != 1
-		echo "aborted"
-		return
-	endif
-	"
 	let text = system ( cmd )
 	"
 	if v:shell_error == 0 && text =~ '^\s*$'
@@ -1468,9 +1468,6 @@ function! GitS_Add( param, flags )
 		echo "ran successfully:\n".text       | " success
 	else
 		echo "\"".cmd."\" failed:\n\n".text   | " failure, may use the force instead
-		if ! a:flags =~ 'f'
-			echo "\nUse \":GitAdd! ...\" to force adding the files.\n"
-		endif
 	endif
 	"
 endfunction    " ----------  end of function GitS_Add  ----------

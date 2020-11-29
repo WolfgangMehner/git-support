@@ -226,24 +226,21 @@ buffer.
 ------------------------------------------------------------------------------
                                                                      *:GitAdd*
   :GitAdd [<args>] ~
-  :GitAdd! [<args>] ~
 
-Executes "git add ...". The second version forces the add. If no arguments are
-given, adds the current buffer.
+Executes "git add ...". If no arguments are given and |g:Git_AddExpandEmpty|
+is set to 'yes', adds the current buffer.
 
 Examples:
 
-Add the current buffer: >
+Add the current buffer, with `g:Git_AddExpandEmpty == 'yes'"`: >
   :GitAdd
 Similarly: >
   :GitAdd -- %
 Is equivalent to: >
   git add -- <currentfile>
 
-Add all the Vim scripts in the current directory: >
-  :GitAdd! *.vim
-Is equivalent to: >
-  git add -f *.vim
+Settings:
+- |g:Git_AddExpandEmpty|
 
 ------------------------------------------------------------------------------
                                                                    *:GitBlame*
@@ -376,8 +373,7 @@ Both version run diff for the given arguments. The behavior of the first
 version depends on the setting |g:Git_DiffExpandEmpty|.
 By default, the first version opens the diff showing all unstaged changes. If
 |g:Git_DiffExpandEmpty| is set to 'yes', only the diff of the current file is
-shown. This makes the behavior of :GitDiff more consistent with commands like
-|:GitAdd|.
+shown.
 
 Inside the diff buffer, use the map 'of' to open the file under the cursor.
 The map 'oj' will jump to line in the file corresponding to the line in the
@@ -1093,6 +1089,7 @@ in the .vimrc file.
   |g:Git_CustomMenu|            [ ... ]     custom menu entries
 
       expansion of empty argument lists to the current file:
+  |g:Git_AddExpandEmpty|        'no'        for |:GitAdd|
   |g:Git_CheckoutExpandEmpty|   'no'        for |:GitCheckout|
   |g:Git_DiffExpandEmpty|       'no'        for |:GitDiff|
   |g:Git_ResetExpandEmpty|      'no'        for |:GitReset|
@@ -1198,26 +1195,26 @@ With these lines, <F10> will open the status buffer: >
 ------------------------------------------------------------------------------
 6.4  SETTINGS                                     *gitsupport-config-settings*
 ------------------------------------------------------------------------------
-                             *g:Git_CheckoutExpandEmpty* *g:Git_DiffExpandEmpty*
-                                                      *g:Git_ResetExpandEmpty*
+                              *g:Git_AddExpandEmpty* *g:Git_CheckoutExpandEmpty*
+                                *g:Git_DiffExpandEmpty* *g:Git_ResetExpandEmpty*
 The default behavior of |:GitDiff|, when called without arguments, is to show
 a diff containing all unstaged changes.
 
-In order to make the behavior more consistent with commands like |:GitAdd|,
-this can be changed by setting: >
+This can be changed by setting: >
   let g:Git_DiffExpandEmpty = 'yes'
 Now calling ":GitDiff" without any arguments opens a buffer displaying only
 the changes of the file in the current buffer, which is the same as calling: >
   :GitDiff %
 So the empty argument list is "expanded".
-But even with g:Git_DiffExpandEmpty == 'yes', you can still display a diff
+But even with `g:Git_DiffExpandEmpty == 'yes'`, you can still display a diff
 containing all changes by calling: >
   :GitDiff --
 This is not detected to be an empty argument list.
 
-Similarly, the behavior of |:GitCheckout| and |:GitReset| can be changed to
-operate on the file in the current buffer when called without arguments, by
-setting: >
+Similarly, the behavior of |:GitAdd|, |:GitCheckout|, and |:GitReset| can be
+changed to operate on the file in the current buffer when called without
+arguments, by setting: >
+  let g:Git_AddExpandEmpty      = 'yes'
   let g:Git_CheckoutExpandEmpty = 'yes'
   let g:Git_ResetExpandEmpty    = 'yes'
 <
