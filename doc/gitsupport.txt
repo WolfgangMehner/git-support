@@ -1,8 +1,8 @@
-*gitsupport.txt*                  Git Support                      Jul 18 2020
+*gitsupport.txt*                  Git Support                      Nov 29 2020
 
 Git Support                                          *git-support* *gitsupport*
 
-                           Plug-in version 0.9.4-1
+                          Plug-in version 0.9.9-dev
                         for Vim version 7.4 and above
                  Wolfgang Mehner <wolfgang-mehner at web.de>
 
@@ -97,7 +97,6 @@ run the commands in every subdirectory of the project.
   |:GitHelp| [<args>]                (buf) git help <args>
   |:GitLog| [<args>]                 (buf) git log <args> (supports ranges)
   |:GitMerge| [<args>]               (run) git merge <args>
-  |:GitMergeUpstream| [<args>]       (run) git merge <args> <upstream-branch>
   |:GitMove| [<args>]                (run) git mv <args>
   |:GitMv| [<args>]                  (run) git mv <args>
   |:GitPull| [<args>]                (run) git pull <args>
@@ -485,17 +484,11 @@ arguments can not list further files.
  ----------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
-                                                 *:GitMerge* *:GitMergeUpstream*
+                                                                   *:GitMerge*
   :GitMerge [<args>] ~
-  :GitMergeUpstream [<args>] ~
 
-The first version executes "git merge ...". The second version automatically
-obtains the name of the upstream branch and merges it into the current branch.
-arguments can still be given: >
-  :GitMergeUpstream --ff-only
-Is equivalent to: >
-  git merge --ff-only <upstream-branch>
-<
+Executes "git merge ...".
+
 ------------------------------------------------------------------------------
                                                              *:GitMove* *:GitMv*
   :GitMove [<args>] ~

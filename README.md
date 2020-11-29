@@ -1,4 +1,4 @@
-README for git-support.vim (Version 0.9.4-1) / November 21 2020
+README for git-support.vim (Version 0.9.9-dev) / November 29 2020
 ================================================================================
 
   *  INSTALLATION
@@ -119,18 +119,12 @@ Any problems? See the TROUBLESHOOTING section at the end of the help file
 RELEASE NOTES
 ================================================================================
 
-RELEASE NOTES FOR VERSION 0.9.4-1
+RELEASE NOTES FOR VERSION 0.9.9
 ----------------------------------------------------------------------
-- Add a required data file.
-
-RELEASE NOTES FOR VERSION 0.9.4
-----------------------------------------------------------------------
-- Add command :GitTerm to execute Git in a terminal window (requires +terminal).
-- Improve :GitGrep (in case +conceal is available).
-- Improve :GitLog to support ranges.
-- Add maps to these buffers: branch, status
-- Adapt for running under Neovim more smoothly.
-- Minor changes.
+- Add option `g:Git_AddExpandEmpty`
+- Remove add with a bang `:GitAdd!`, use `:GitAdd -f` instead
+- Remove command `:GitMergeUpstream`, default behavior of `:GitMerge` with no
+  arguments
 
 
 RELEASE NOTES FOR OLDER VERSIONS

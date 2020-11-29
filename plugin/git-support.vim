@@ -41,7 +41,7 @@ endif
 if &cp || ( exists('g:GitSupport_Version') && ! exists('g:GitSupport_DevelopmentOverwrite') )
 	finish
 endif
-let g:GitSupport_Version= '0.9.4-1'     " version number of this script; do not change
+let g:GitSupport_Version= '0.9.9-dev'     " version number of this script; do not change
 
 "-------------------------------------------------------------------------------
 " Auxiliary functions.   {{{1
@@ -1084,12 +1084,15 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 if s:Enabled && s:Git_NextGen
 	command! -nargs=* -complete=file   GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
 	command! -nargs=*                  GitFetch           :call gitsupport#commands#DirectFromCmdLine('fetch',<q-args>)
+	command! -nargs=*                  GitMerge           :call gitsupport#commands#DirectFromCmdLine('merge',<q-args>)
 	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#DirectFromCmdLine('mv',<q-args>)
 	command! -nargs=*                  GitPull            :call gitsupport#commands#DirectFromCmdLine('pull',<q-args>)
 	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
 elseif s:Enabled
 	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
+	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
+	command! -nargs=*                                                GitMergeUpstream   :call GitS_Merge('upstream',<q-args>,'')
 	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>)
 	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>)
 	command! -nargs=*                                                GitPull            :call GitS_Pull(<q-args>)
@@ -1112,8 +1115,6 @@ if s:Enabled
 	command! -nargs=+ -complete=file                                 GitGrepTop         :call <SID>Grep('top',<q-args>)
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
-	command! -nargs=*                                                GitMergeUpstream   :call GitS_Merge('upstream',<q-args>,'')
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
@@ -4743,7 +4744,6 @@ function! s:InitMenus()
 	exe ahead.'-Sep01-          :'
 
 	exe ahead.'&grep,\ use\ top-level\ dir<TAB>:GitGrepTop       :GitGrepTop<space>'
-	exe ahead.'&merge,\ upstream\ branch<TAB>:GitMergeUpstream   :GitMergeUpstream<space>'
 	exe shead.'&stash\ list<TAB>:GitSlist                        :GitSlist<CR>'
 
 	" Custom Menu   {{{2
