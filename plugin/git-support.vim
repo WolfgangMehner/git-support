@@ -1088,6 +1088,7 @@ if s:Enabled && s:Git_NextGen
 	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#DirectFromCmdLine('mv',<q-args>)
 	command! -nargs=*                  GitPull            :call gitsupport#commands#DirectFromCmdLine('pull',<q-args>)
 	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
+	command! -nargs=* -complete=file   GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
 elseif s:Enabled
 	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
@@ -1097,6 +1098,8 @@ elseif s:Enabled
 	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>)
 	command! -nargs=*                                                GitPull            :call GitS_Pull(<q-args>)
 	command! -nargs=*                                                GitPush            :call GitS_Push(<q-args>)
+	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
+	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
 endif
 
 if s:Enabled
@@ -1116,8 +1119,6 @@ if s:Enabled
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
-	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitReset           :call GitS_Reset(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitShow            :call GitS_Show('update',<q-args>)
 	command! -nargs=*                                                GitStash           :call GitS_Stash(<q-args>,'')

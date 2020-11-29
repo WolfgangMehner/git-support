@@ -32,3 +32,21 @@ function! gitsupport#commands#AddFromCmdLine ( q_params )
 	return gitsupport#run#RunDirect( git_exec, 'add '.params, 'env', git_env )
 endfunction
 
+function! gitsupport#commands#RmFromCmdLine ( q_params )
+	let git_exec = gitsupport#config#GitExecutable()
+	let git_env  = gitsupport#config#Env()
+
+	if a:q_params == ''
+		let params = '-- '.expand( '%:S' )
+	else
+		let params = a:q_params
+	endif
+
+	let ret_code = gitsupport#run#RunDirect( git_exec, 'rm '.params, 'env', git_env )
+
+	if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' ) == 1
+		bdelete
+		echo "deleted"
+	endif
+endfunction
+

@@ -97,13 +97,11 @@ run the commands in every subdirectory of the project.
   |:GitHelp| [<args>]                (buf) git help <args>
   |:GitLog| [<args>]                 (buf) git log <args> (supports ranges)
   |:GitMerge| [<args>]               (run) git merge <args>
-  |:GitMove| [<args>]                (run) git mv <args>
   |:GitMv| [<args>]                  (run) git mv <args>
   |:GitPull| [<args>]                (run) git pull <args>
   |:GitPush| [<args>]                (run) git push <args>
   |:GitRemote|                       (buf) git remote
   |:GitRemote| <args>                (run) git remote <args>
-  |:GitRemove| [<args>]              (run) git rm <args>
   |:GitRm| [<args>]                  (run) git rm <args>
   |:GitReset| [<args>]               (run) git reset <args>
   |:GitShow| [<args>]                (buf) git show <args>
@@ -133,7 +131,7 @@ When a command opens a new buffer, several maps are defined for this buffer.
 Hitting <SHIFT-F1> always prints a short help with all available maps.
 
 The default argument for GitAdd, GitBlame, GitCheckout, GitCommitFile, GitRm,
-GitRemove and GitReset is the current buffer.
+and GitReset is the current buffer.
 
 When called without arguments, the commands GitBranch and GitRemote open a
 buffer, otherwise they run the respective Git command with the given
@@ -490,11 +488,10 @@ arguments can not list further files.
 Executes "git merge ...".
 
 ------------------------------------------------------------------------------
-                                                             *:GitMove* *:GitMv*
-  :GitMove [<args>] ~
+                                                                      *:GitMv*
   :GitMv [<args>] ~
 
-Both versions behave the same. Executes "git mv ...".
+Executes "git mv ...".
 
 ------------------------------------------------------------------------------
                                                                     *:GitPull*
@@ -533,17 +530,15 @@ URLs. The second version executes "git remote ...".
  ----------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------
-                                                           *:GitRemove* *:GitRm*
-  :GitRemove [<args>] ~
+                                                                      *:GitRm*
   :GitRm [<args>] ~
 
-Both versions behave the same. Executes "git rm ...". If no arguments are
-given, removes the current buffer.
+Executes "git rm ...". If no arguments are given, removes the current buffer.
 
 Example:
 
-Reset the current file: >
-  :GitRemove
+Remove the current file: >
+  :GitRm
 Is equivalent to: >
   git rm -- <currentfile>
 

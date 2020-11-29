@@ -112,6 +112,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 	else
 		echo "ran successfully:\n".text               | " success
 	endif
+	return v:shell_error
 endfunction
 
 let s:all_jobs = []
