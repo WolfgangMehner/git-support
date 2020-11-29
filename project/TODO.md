@@ -9,8 +9,7 @@
   * optionally: jump across tab pages
 - update buffer after executing a command: `:GitBranch,` `:GitRemote`, `:GitStash`, ...
 - feed output of `git apply` into quickfix
-- remove `:GitAbove`, `:GitBelow`, and `:GitTab` again and ...
-- use modifiers to split the window or open on a new tab
+- use modifiers to split the window or open on a new tab when running `:GitStatus` et al.
 - make the plug-in aware of `netrw`
 
 ## Documentation

@@ -1107,9 +1107,6 @@ elseif s:Enabled
 endif
 
 if s:Enabled
-"	command! -nargs=* -complete=file                                 GitAbove           :call GitS_Split('above',<count>,<q-args>)
-"	command! -nargs=* -complete=file                                 GitBelow           :call GitS_Split('below',<count>,<q-args>)
-"	command! -nargs=* -complete=file -count=1000                     GitTab             :call GitS_Split('tab',<count>,<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
@@ -1198,13 +1195,7 @@ function! s:OpenGitBuffer ( buf_name )
 	endif
 
 	" no -> open a new window
-	if s:SplitMode == '' || s:SplitMode == 'above'
-		aboveleft new
-	elseif s:SplitMode == 'below'
-		belowright new
-	elseif s:SplitMode == 'tab'
-		exe s:SplitAddArg.'tabnew'
-	endif
+	aboveleft new
 
 	" buffer exists elsewhere?
 	if bufnr ( a:buf_name ) != -1
@@ -1337,42 +1328,6 @@ function! GitS_FoldLog ()
 		return head.line.tail
 	endif
 endfunction    " ----------  end of function GitS_FoldLog  ----------
-
-"-------------------------------------------------------------------------------
-" GitS_Split : Open a Git buffer differently.   {{{1
-"
-" Mode:
-"   above - split aboveleft
-"   below - split belowright
-"   tab   - open in new tab
-"-------------------------------------------------------------------------------
-
-let s:SplitMode   = ''
-let s:SplitAddArg = 0
-
-function! GitS_Split ( mode, count, args )
-
-	if a:mode == 'above'
-	elseif a:mode == 'below'
-	elseif a:mode == 'tab'
-		let s:SplitAddArg = a:count == 1000 ? tabpagenr() : a:count
-	else
-		return s:ErrorMsg ( 'Unknown mode "'.a:mode.'".' )
-	endif
-
-	let s:SplitMode = a:mode
-
-	try
-		exe a:args
-	catch /.*/
-		call s:ErrorMsg ( substitute ( v:exception, '^Vim:', '', '' ) )
-	finally
-	endtry
-
-	let s:SplitMode   = ''
-	let s:SplitAddArg = 0
-
-endfunction    " ----------  end of function GitS_Split  ----------
 
 "-------------------------------------------------------------------------------
 " GitS_Run : execute 'git ...'   {{{1
