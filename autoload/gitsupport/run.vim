@@ -163,6 +163,11 @@ function! s:JobWrapup ( job_id )
   endif
 
   unlet g:all_jobs[ a:job_id ]
+
+  " restart syntax highlighting
+  if &syntax != ''
+    setlocal syntax=ON
+  endif
 endfunction
 
 function! s:JobExit ( job, status )
@@ -198,6 +203,11 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   if ! gitsupport#common#ParseOptions( opts, a:000 )
     return
+  endif
+
+  " pause syntax highlighting (for speed)
+  if &syntax != ''
+    setlocal syntax=OFF
   endif
 
   if opts.restore_cursor
