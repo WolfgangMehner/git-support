@@ -151,6 +151,19 @@ let s:all_jobs = []
 
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
+  " options
+  let opts = {
+        \ 'keep': 0,
+        \ }
+
+  if ! gitsupport#common#ParseOptions( opts, a:000 )
+    return
+  endif
+
+  if ! opts.keep
+    call gitsupport#common#BufferWipe()
+  endif
+
 	if a:cmd == ''
 		let cmd = gitsupport#config#GitExecutable()
 	else
@@ -177,7 +190,6 @@ function! gitsupport#run#OpenBuffer( name, ... )
 				\   'reuse_ontab': 1,
 				\   'reuse_other': 0,
 				\   'topic': '',
-				\   'wipe': 0,
 				\ }
 
 	if ! gitsupport#common#ParseOptions( opts, a:000 )
@@ -203,7 +215,6 @@ function! gitsupport#run#OpenBuffer( name, ... )
 		" yes -> go to the window containing the buffer
 		exe bufwinnr( buf_regex ).'wincmd w'
 		call s:RenameBuffer( buf_name )
-		call s:WipeBuffer( opts.wipe )
 		return 0
 	endif
 
@@ -215,7 +226,6 @@ function! gitsupport#run#OpenBuffer( name, ... )
 		" yes -> reuse it
 		silent exe 'edit #'.bufnr( buf_regex )
 		call s:RenameBuffer( buf_name )
-		call s:WipeBuffer( opts.wipe )
 		return 0
 	endif
 
@@ -245,11 +255,5 @@ function! s:RenameBuffer ( name )
 		let buf_name = buf_name.' -'.nr.'-'
 	endif
 	silent exe 'keepalt file '.fnameescape( buf_name )
-endfunction
-
-function! s:WipeBuffer ( do_wipe )
-	if a:do_wipe
-		silent exe '1,$delete _'
-	endif
 endfunction
 

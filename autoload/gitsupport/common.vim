@@ -20,6 +20,10 @@ function! s:ErrorMsg ( ... )
 	echohl None
 endfunction
 
+function! gitsupport#common#BufferWipe (  )
+	silent exe '1,$delete _'
+endfunction
+
 function! gitsupport#common#ParseOptions ( opts, args )
 
 	let opts = a:opts

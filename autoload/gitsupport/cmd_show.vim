@@ -44,20 +44,25 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
 		let last_arg = substitute( last_arg, ':', '.', '' )
 		let last_arg = substitute( last_arg, '/', '.', 'g' )
 
-		call gitsupport#run#OpenBuffer( last_arg, 'wipe', 1 )
+		call gitsupport#run#OpenBuffer( last_arg )
 		call gitsupport#run#RunToBuffer( '', ['show'] + params )
 
-		nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
+		nnoremap          <buffer> sh     :call <SID>HelpBlob()<CR>
+		nnoremap          <buffer> <S-F1> :call <SID>HelpBlob()<CR>
 		nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
 
 		"filetype detect
 		return
 	else
-		call gitsupport#run#OpenBuffer( 'Git - show', 'wipe', 1 )
+		call gitsupport#run#OpenBuffer( 'Git - show' )
 		call gitsupport#run#RunToBuffer( '', ['show'] + params )
 
+		nnoremap          <buffer> sh     :call <SID>Help()<CR>
 		nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
 		nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
+		nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+
+		let b:GitSupport_Param = params
 	endif
 
 	echo obj_type
@@ -76,7 +81,16 @@ endfunction
 function! s:Help ()
 	let text =
 				\  "git show\n\n"
-				\ ."S-F1    : help\n"
+				\ ."sh S-F1 : help\n"
+				\ ."q       : close\n"
+				\ ."u       : update"
+	echo text
+endfunction
+
+function! s:HelpBlob ()
+	let text =
+				\  "git show (blob)\n\n"
+				\ ."sh S-F1 : help\n"
 				\ ."q       : close\n"
 				\ ."u       : update"
 	echo text
@@ -86,3 +100,8 @@ function! s:Quit ()
 	close
 endfunction
 
+function! s:Update ()
+	let params = b:GitSupport_Param
+
+	call gitsupport#run#RunToBuffer( '', ['show'] + params )
+endfunction
