@@ -46,6 +46,62 @@ function! gitsupport#common#ParseOptions ( opts, args )
 	return 1
 endfunction
 
+function! gitsupport#common#ParseShellParseArgs ( line )
+
+	let list = []
+	let curr = ''
+
+	let line = a:line
+
+	while line != ''
+
+		if match ( line, '^\s' ) != -1
+			" non-escaped space -> finishes current argument
+			let line = matchstr ( line, '^\s\+\zs.*' )
+			if curr != ''
+				call add ( list, curr )
+				let curr = ''
+			endif
+		elseif match ( line, "^'" ) != -1
+			" start of a single-quoted string, parse past next single quote
+			let mlist = matchlist ( line, "^'\\([^']*\\)'\\(.*\\)" )
+			if empty ( mlist )
+				throw "ShellParseArgs:Syntax:no matching quote '"
+			endif
+			let curr .= mlist[1]
+			let line  = mlist[2]
+		elseif match ( line, '^"' ) != -1
+			" start of a double-quoted string, parse past next double quote
+			let mlist = matchlist ( line, '^"\(\%([^\"]\|\\.\)*\)"\(.*\)' )
+			if empty ( mlist )
+				throw 'ShellParseArgs:Syntax:no matching quote "'
+			endif
+			let curr .= substitute ( mlist[1], '\\\([\"]\)', '\1', 'g' )
+			let line  = mlist[2]
+		elseif match ( line, '^\\' ) != -1
+			" escape sequence outside of a string, parse one additional character
+			let mlist = matchlist ( line, '^\\\(.\)\(.*\)' )
+			if empty ( mlist )
+				throw 'ShellParseArgs:Syntax:single backspace \'
+			endif
+			let curr .= mlist[1]
+			let line  = mlist[2]
+		else
+			" otherwise parse up to next special char.: space, backslash, quote
+			let mlist = matchlist ( line, '^\([^[:space:]\\''"]\+\)\(.*\)' )
+			let curr .= mlist[1]
+			let line  = mlist[2]
+		endif
+	endwhile
+
+	" add last argument
+	if curr != ''
+		call add ( list, curr )
+	endif
+
+	return list
+endfunction
+
 function! gitsupport#common#Question ( text, ... )
 
 	" options

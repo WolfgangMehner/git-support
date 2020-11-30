@@ -1091,6 +1091,7 @@ if s:Enabled && s:Git_NextGen
 	command! -nargs=*                  GitPush            :call gitsupport#commands#DirectFromCmdLine('push',<q-args>)
 	command! -nargs=* -complete=file   GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
+	command! -nargs=* -complete=file   GitShow            :call gitsupport#cmd_show#FromCmdLine(<q-args>)
 elseif s:Enabled
 	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
 	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
@@ -1104,6 +1105,7 @@ elseif s:Enabled
 	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
 	command! -nargs=* -complete=file                                 GitReset           :call GitS_Reset(<q-args>)
+	command! -nargs=* -complete=file                                 GitShow            :call GitS_Show('update',<q-args>)
 endif
 
 if s:Enabled
@@ -1119,7 +1121,6 @@ if s:Enabled
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitShow            :call GitS_Show('update',<q-args>)
 	command! -nargs=*                                                GitStash           :call GitS_Stash(<q-args>,'')
 	command! -nargs=*                                                GitSlist           :call GitS_Stash('list '.<q-args>,'')
 	command! -nargs=? -complete=file                                 GitStatus          :call GitS_Status('update',<q-args>)
