@@ -20,6 +20,18 @@ function! s:ErrorMsg ( ... )
 	echohl None
 endfunction
 
+function! gitsupport#common#BufferGetPosition (  )
+  let pos_cursor = line('.')
+  let pos_window = line('.') - winline() + 1
+  return [ pos_window, pos_cursor ]
+endfunction
+
+function! gitsupport#common#BufferSetPosition ( position )
+  let pos = a:position
+  silent exe 'normal! '.get( pos, 0, 1 ).'zt'
+  silent exe ':'.get( pos, 1, 1 )
+endfunction
+
 function! gitsupport#common#BufferWipe (  )
 	silent exe '1,$delete _'
 endfunction

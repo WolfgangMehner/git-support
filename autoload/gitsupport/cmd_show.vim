@@ -54,8 +54,8 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
 		"filetype detect
 		return
 	else
-		call gitsupport#run#OpenBuffer( 'Git - show' )
-		call gitsupport#run#RunToBuffer( '', ['show'] + params )
+    call gitsupport#run#OpenBuffer( 'Git - show' )
+    call s:Run( params )
 
 		nnoremap          <buffer> sh     :call <SID>Help()<CR>
 		nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -64,8 +64,6 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
 
 		let b:GitSupport_Param = params
 	endif
-
-	echo obj_type
 endfunction
 
 function! s:AnalyseObject( obj_name )
@@ -100,8 +98,16 @@ function! s:Quit ()
 	close
 endfunction
 
-function! s:Update ()
-	let params = b:GitSupport_Param
-
-	call gitsupport#run#RunToBuffer( '', ['show'] + params )
+function! s:Run ( params )
+  call gitsupport#run#RunToBuffer( '', ['show'] + a:params, 'callback', function( 's:Wrap' ) )
 endfunction
+
+function! s:Update ()
+  call s:Run( b:GitSupport_Param )
+endfunction
+
+function! s:Wrap ()
+  setlocal filetype=gitslog
+  setlocal foldtext=GitS_FoldLog()
+endfunction
+

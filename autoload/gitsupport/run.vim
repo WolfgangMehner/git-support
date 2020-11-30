@@ -32,6 +32,10 @@ function! s:WarningMsg ( ... )
 	echohl None
 endfunction
 
+function! s:SID ()
+  return matchstr( expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$' )
+endfunction
+
 function! s:ChangeDir ( dir )
 	let cmd = 'cd'
 
@@ -121,8 +125,6 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 	return v:shell_error
 endfunction
 
-let s:all_jobs = []
-
 "function! gitsupport#run#Run ( cmd, params, ... )
 "
 "	let job_id = job_start(
@@ -149,37 +151,82 @@ let s:all_jobs = []
 "	return
 "endfunction
 
+let g:all_jobs = {}
+
+function! s:JobWrapup ( job_id )
+  let job_data = g:all_jobs[ a:job_id ]
+  let opts = job_data.opts
+
+  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
+  if job_data.status == 0
+    call opts.callback()
+  endif
+
+  unlet g:all_jobs[ a:job_id ]
+endfunction
+
+function! s:JobExit ( job, status )
+  let job_id = job_info( a:job ).process
+  let job_data = g:all_jobs[ job_id ]
+  let job_data.is_exited = 1
+  let job_data.status    = a:status
+
+  if job_data.is_closed
+    call s:JobWrapup( job_id )
+  endif
+endfunction
+
+function! s:JobClose ( channel )
+  let job = ch_getjob( a:channel )
+  let job_id = job_info( job ).process
+  let job_data = g:all_jobs[ job_id ]
+  let job_data.is_closed = 1
+
+  if job_data.is_exited
+    call s:JobWrapup( job_id )
+  endif
+endfunction
+
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   " options
   let opts = {
         \ 'keep': 0,
+        \ 'callback': function( 's:Empty' ),
+        \ 'restore_cursor': 0,
         \ }
 
   if ! gitsupport#common#ParseOptions( opts, a:000 )
     return
   endif
 
+  if opts.restore_cursor
+    let opts.restore_cursor = gitsupport#common#BufferGetPosition()
+  else
+    let opts.restore_cursor = []
+  endif
   if ! opts.keep
     call gitsupport#common#BufferWipe()
   endif
 
-	if a:cmd == ''
-		let cmd = gitsupport#config#GitExecutable()
-	else
-		let cmd = a:cmd
-	endif
+  if a:cmd == ''
+    let cmd = gitsupport#config#GitExecutable()
+  else
+    let cmd = a:cmd
+  endif
 
-	let job_id = job_start(
-				\ [cmd] + a:params,
-				\ {
-				\   'in_io': 'null',
-				\   'out_io': 'buffer',
-				\   'out_buf': bufnr(),
-				\ } )
+  let job_data = {}
+  let job_data.in_io = 'null'
+  let job_data.out_io = 'buffer'
+  let job_data.out_buf = bufnr()
+  let job_data.exit_cb  = '<SNR>'.s:SID().'_JobExit'
+  let job_data.close_cb = '<SNR>'.s:SID().'_JobClose'
 
-	call insert( s:all_jobs, job_id )
+  let job_obj = job_start( [cmd] + a:params, job_data )
 
+  let job_id = job_info( job_obj ).process
+
+  let g:all_jobs[job_id] = { 'job': job_obj, 'is_closed': 0, 'is_exited': 0, 'opts': opts, }
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )
@@ -255,5 +302,8 @@ function! s:RenameBuffer ( name )
 		let buf_name = buf_name.' -'.nr.'-'
 	endif
 	silent exe 'keepalt file '.fnameescape( buf_name )
+endfunction
+
+function! s:Empty ()
 endfunction
 
