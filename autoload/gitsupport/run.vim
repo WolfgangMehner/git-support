@@ -228,7 +228,7 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
   let job_data = {}
   let job_data.in_io = 'null'
   let job_data.out_io = 'buffer'
-  let job_data.out_buf = bufnr()
+  let job_data.out_buf = bufnr('%')
   let job_data.exit_cb  = '<SNR>'.s:SID().'_JobExit'
   let job_data.close_cb = '<SNR>'.s:SID().'_JobClose'
 
