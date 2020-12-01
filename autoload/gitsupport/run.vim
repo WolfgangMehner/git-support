@@ -74,9 +74,8 @@ function! s:GetEnvStr ( env )
 endfunction
 
 function! gitsupport#run#GitOutput ( params )
-	let git_exec = gitsupport#config#GitExecutable()
-	let git_env  = gitsupport#config#Env()
-	return gitsupport#run#RunDirect( git_exec, a:params, 'env', git_env, 'mode', 'return' )
+  let git_env  = gitsupport#config#Env()
+  return gitsupport#run#RunDirect( '', a:params, 'env', git_env, 'mode', 'return' )
 endfunction
 
 function! gitsupport#run#RunDirect ( cmd, params, ... )
@@ -92,7 +91,12 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 		return
 	endif
 
-	let cmd = s:GetEnvStr( opts.env ) . shellescape( a:cmd )
+  if a:cmd == ''
+    let cmd = gitsupport#config#GitExecutable()
+  else
+    let cmd = a:cmd
+  endif
+  let cmd = s:GetEnvStr( opts.env ) . shellescape( cmd )
 
 	if type( a:params ) == type( [] ) 
 		let cmd .= ' ' . join( a:params, ' ' )

@@ -37,9 +37,8 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
 
     let b:GitSupport_Param = params
   else
-    let git_exec = gitsupport#config#GitExecutable()
-    let git_env  = gitsupport#config#Env()
-    return gitsupport#run#RunDirect( git_exec, ['tag'] + params, 'env', git_env )
+    let git_env = gitsupport#config#Env()
+    return gitsupport#run#RunDirect( '', ['tag'] + params, 'env', git_env )
   endif
 endfunction
 

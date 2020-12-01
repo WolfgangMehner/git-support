@@ -13,14 +13,11 @@
 "-------------------------------------------------------------------------------
 
 function! gitsupport#commands#DirectFromCmdLine ( cmd, q_params )
-	let git_exec = gitsupport#config#GitExecutable()
-	let git_env  = gitsupport#config#Env()
-
-	return gitsupport#run#RunDirect( git_exec, a:cmd.' '.a:q_params, 'env', git_env )
+  let git_env  = gitsupport#config#Env()
+  return gitsupport#run#RunDirect( '', a:cmd.' '.a:q_params, 'env', git_env )
 endfunction
 
 function! gitsupport#commands#AddFromCmdLine ( q_params )
-	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
 
 	if a:q_params == '' && g:Git_AddExpandEmpty == 'yes'
@@ -29,11 +26,10 @@ function! gitsupport#commands#AddFromCmdLine ( q_params )
 		let params = a:q_params
 	endif
 
-	return gitsupport#run#RunDirect( git_exec, 'add '.params, 'env', git_env )
+	return gitsupport#run#RunDirect( '', 'add '.params, 'env', git_env )
 endfunction
 
 function! gitsupport#commands#CheckoutFromCmdLine ( q_params )
-	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
 
 	if a:q_params == '' && g:Git_CheckoutExpandEmpty == 'yes'
@@ -47,11 +43,10 @@ function! gitsupport#commands#CheckoutFromCmdLine ( q_params )
 		let params = a:q_params
 	endif
 
-	return gitsupport#run#RunDirect( git_exec, 'checkout '.params, 'env', git_env )
+	return gitsupport#run#RunDirect( '', 'checkout '.params, 'env', git_env )
 endfunction
 
 function! gitsupport#commands#ResetFromCmdLine ( q_params )
-	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
 
 	if a:q_params == '' && g:Git_ResetExpandEmpty == 'yes'
@@ -60,11 +55,10 @@ function! gitsupport#commands#ResetFromCmdLine ( q_params )
 		let params = a:q_params
 	endif
 
-	return gitsupport#run#RunDirect( git_exec, 'reset '.params, 'env', git_env )
+	return gitsupport#run#RunDirect( '', 'reset '.params, 'env', git_env )
 endfunction
 
 function! gitsupport#commands#RmFromCmdLine ( q_params )
-	let git_exec = gitsupport#config#GitExecutable()
 	let git_env  = gitsupport#config#Env()
 
 	if a:q_params == ''
@@ -73,7 +67,7 @@ function! gitsupport#commands#RmFromCmdLine ( q_params )
 		let params = a:q_params
 	endif
 
-	let ret_code = gitsupport#run#RunDirect( git_exec, 'rm '.params, 'env', git_env )
+	let ret_code = gitsupport#run#RunDirect( '', 'rm '.params, 'env', git_env )
 
 	if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' )
 		bdelete
