@@ -28,11 +28,11 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
     call gitsupport#run#OpenBuffer( 'Git - tag' )
     call s:Run( params )
 
-    nnoremap          <buffer> sh     :call <SID>Help()<CR>
+    command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
     nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
-    nnoremap <silent> <buffer> st     :call <SID>Show("tag")<CR>
+    nnoremap <silent> <buffer> sh     :call <SID>Show("tag")<CR>
     nnoremap <silent> <buffer> cs     :call <SID>Show("commit")<CR>
 
     let b:GitSupport_Param = params

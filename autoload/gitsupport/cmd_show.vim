@@ -47,9 +47,9 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
 		call gitsupport#run#OpenBuffer( last_arg )
 		call gitsupport#run#RunToBuffer( '', ['show'] + params )
 
-		nnoremap          <buffer> sh     :call <SID>HelpBlob()<CR>
-		nnoremap          <buffer> <S-F1> :call <SID>HelpBlob()<CR>
-		nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
+    command! -nargs=0 -buffer  Help   :call <SID>Help()
+    nnoremap          <buffer> <S-F1> :call <SID>HelpBlob()<CR>
+    nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
 
 		"filetype detect
 		return
@@ -57,10 +57,10 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
     call gitsupport#run#OpenBuffer( 'Git - show' )
     call s:Run( params )
 
-		nnoremap          <buffer> sh     :call <SID>Help()<CR>
-		nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
-		nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
-		nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+    command! -nargs=0 -buffer  Help   :call <SID>Help()
+    nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
+    nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
+    nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
 
 		let b:GitSupport_Param = params
 	endif
@@ -79,7 +79,7 @@ endfunction
 function! s:Help ()
 	let text =
 				\  "git show\n\n"
-				\ ."sh S-F1 : help\n"
+				\ ."S-F1    : help\n"
 				\ ."q       : close\n"
 				\ ."u       : update"
 	echo text
@@ -88,7 +88,7 @@ endfunction
 function! s:HelpBlob ()
 	let text =
 				\  "git show (blob)\n\n"
-				\ ."sh S-F1 : help\n"
+				\ ."S-F1    : help\n"
 				\ ."q       : close\n"
 				\ ."u       : update"
 	echo text
