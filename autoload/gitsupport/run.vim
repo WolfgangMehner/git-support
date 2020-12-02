@@ -74,8 +74,7 @@ function! s:GetEnvStr ( env )
 endfunction
 
 function! gitsupport#run#GitOutput ( params )
-  let git_env  = gitsupport#config#Env()
-  return gitsupport#run#RunDirect( '', a:params, 'env', git_env, 'mode', 'return' )
+  return gitsupport#run#RunDirect( '', a:params, 'env_std', 1, 'mode', 'return' )
 endfunction
 
 function! gitsupport#run#RunDirect ( cmd, params, ... )
@@ -92,22 +91,28 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 		return
 	endif
 
-  if a:cmd == ''
-    let cmd = gitsupport#config#GitExecutable()
-  else
-    let cmd = a:cmd
-  endif
-  if opts.env_std
-    let cmd = s:GetEnvStr( gitsupport#config#Env() ) . shellescape( cmd )
-  else
-    let cmd = s:GetEnvStr( opts.env ) . shellescape( cmd )
+  if type( a:params ) == type( [] )
+    let cmd = join( a:params, ' ' )
+  elseif a:params != ''
+    let cmd = a:params
   endif
 
-	if type( a:params ) == type( [] ) 
-		let cmd .= ' ' . join( a:params, ' ' )
-	elseif a:params != ''
-		let cmd .= ' ' . a:params
-	endif
+  if opts.mode == 'confirm' && ! gitsupport#common#Question( 'execute "git '.cmd.'"?' )
+    echo "aborted"
+    return
+  endif
+
+  if a:cmd == ''
+    let cmd = shellescape( gitsupport#config#GitExecutable() ).' '.cmd
+  else
+    let cmd = shellescape( a:cmd ).' '.cmd
+  endif
+
+  if opts.env_std
+    let cmd = s:GetEnvStr( gitsupport#config#Env() ) . cmd
+  else
+    let cmd = s:GetEnvStr( opts.env ) . cmd
+  endif
 
 	let saved_dir = s:SetDir( opts.cwd )
 
