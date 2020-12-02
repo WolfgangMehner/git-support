@@ -32,6 +32,11 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
     nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+
+    nnoremap <expr>   <buffer> ch     <SID>Checkout()
+    nnoremap <expr>   <buffer> cr     <SID>CreateBranch()
+    nnoremap <expr>   <buffer> de     <SID>Delete()
+    nnoremap <expr>   <buffer> me     <SID>Merge()
     nnoremap <silent> <buffer> sh     :call <SID>Show("tag")<CR>
     nnoremap <silent> <buffer> cs     :call <SID>Show("commit")<CR>
 
@@ -44,9 +49,16 @@ endfunction
 function! s:Help ()
   let text =
         \  "git tag\n\n"
-        \ ."sh S-F1 : help\n"
+        \ ."S-F1    : help\n"
         \ ."q       : close\n"
-        \ ."u       : update"
+        \ ."u       : update\n\n"
+        \ ."tag under cursor ...\n"
+        \ ."ch      : checkout\n"
+        \ ."cr      : use as starting point for creating a new branch\n"
+        \ ."de      : delete\n"
+        \ ."me      : merge with current branch\n"
+        \ ."sh      : show the tag\n"
+        \ ."cs      : show the commit\n"
   echo text
 endfunction
 
@@ -60,6 +72,26 @@ endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param )
+endfunction
+
+function! s:Checkout ()
+  let tag_name = s:GetTag()
+  return gitsupport#common#AssembleCmdLine( ':GitCheckout '.tag_name, '' )
+endfunction
+
+function! s:CreateBranch ()
+  let tag_name = s:GetTag()
+  return gitsupport#common#AssembleCmdLine( ':GitBranch ', ' '.tag_name )
+endfunction
+
+function! s:Delete ()
+  let tag_name = s:GetTag()
+  return gitsupport#common#AssembleCmdLine( ':GitTag -d '.tag_name, '' )
+endfunction
+
+function! s:Merge ()
+  let tag_name = s:GetTag()
+  return gitsupport#common#AssembleCmdLine( ':GitMerge '.tag_name, '' )
 endfunction
 
 function! s:Show ( mode )

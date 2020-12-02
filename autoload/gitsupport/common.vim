@@ -20,6 +20,14 @@ function! s:ErrorMsg ( ... )
 	echohl None
 endfunction
 
+function! s:UnicodeLen ( str )
+  return len(split(a:str,'.\zs'))
+endfunction
+
+function! gitsupport#common#AssembleCmdLine ( part1, part2 )
+  return a:part1.a:part2.repeat( "\<Left>", s:UnicodeLen( a:part2 ) )
+endfunction
+
 function! gitsupport#common#BufferGetPosition (  )
   let pos_cursor = line('.')
   let pos_window = line('.') - winline() + 1
