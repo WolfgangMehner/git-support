@@ -83,6 +83,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 	" options
 	let opts = {
 				\   'env': {},
+				\   'env_std': 0,
 				\   'cwd': '',
 				\   'mode': 'print',
 				\ }
@@ -96,7 +97,11 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
   else
     let cmd = a:cmd
   endif
-  let cmd = s:GetEnvStr( opts.env ) . shellescape( cmd )
+  if opts.env_std
+    let cmd = s:GetEnvStr( gitsupport#config#Env() ) . shellescape( cmd )
+  else
+    let cmd = s:GetEnvStr( opts.env ) . shellescape( cmd )
+  endif
 
 	if type( a:params ) == type( [] ) 
 		let cmd .= ' ' . join( a:params, ' ' )

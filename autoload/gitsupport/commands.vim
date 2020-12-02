@@ -13,8 +13,7 @@
 "-------------------------------------------------------------------------------
 
 function! gitsupport#commands#DirectFromCmdLine ( cmd, q_params )
-  let git_env  = gitsupport#config#Env()
-  return gitsupport#run#RunDirect( '', a:cmd.' '.a:q_params, 'env', git_env )
+  return gitsupport#run#RunDirect( '', a:cmd.' '.a:q_params, 'env_std', 1 )
 endfunction
 
 function! gitsupport#commands#AddFromCmdLine ( q_params )
