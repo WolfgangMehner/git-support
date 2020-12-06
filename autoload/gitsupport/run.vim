@@ -170,7 +170,11 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     let cmd = a:cmd
   endif
 
-  call gitsupport#run_vim#JobRun( cmd, a:params, opts )
+  if s:NEOVIM
+    call gitsupport#run_nvim#JobRun( cmd, a:params, opts )
+  else
+    call gitsupport#run_vim#JobRun( cmd, a:params, opts )
+  endif
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )
