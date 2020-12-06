@@ -12,6 +12,8 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
+let s:NEOVIM = has("nvim")
+
 function! s:ErrorMsg ( ... )
 	echohl WarningMsg
 	for line in a:000
@@ -30,10 +32,6 @@ function! s:WarningMsg ( ... )
 	echohl WarningMsg
 	echo join ( a:000, "\n" )
 	echohl None
-endfunction
-
-function! s:SID ()
-  return matchstr( expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$' )
 endfunction
 
 function! s:ChangeDir ( dir )
@@ -139,73 +137,6 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
 	return v:shell_error
 endfunction
 
-"function! gitsupport#run#Run ( cmd, params, ... )
-"
-"	let job_id = job_start(
-"				\ [a:cmd] + a:params,
-"				\ {} )
-"
-"	echo ch_info( job_getchannel( job_id ) )
-"
-"	let text = ''
-"
-"	while job_status( job_id ) ==# 'run'
-"		let line = ch_read( job_id )
-"		let text .= line."\n"
-"	endwhile
-"
-"	while ch_status( job_id ) !=# 'closed'
-"		let line = ch_read( job_id )
-"		let text .= line."\n"
-"	endwhile
-"
-"	"let text = substitute( text, '\n\n*$', '\n', '' )
-"	echo text
-"
-"	return
-"endfunction
-
-let g:all_jobs = {}
-
-function! s:JobWrapup ( job_id )
-  let job_data = g:all_jobs[ a:job_id ]
-  let opts = job_data.opts
-
-  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
-  if job_data.status == 0
-    call opts.callback()
-  endif
-
-  unlet g:all_jobs[ a:job_id ]
-
-  " restart syntax highlighting
-  if &syntax != ''
-    setlocal syntax=ON
-  endif
-endfunction
-
-function! s:JobExit ( job, status )
-  let job_id = job_info( a:job ).process
-  let job_data = g:all_jobs[ job_id ]
-  let job_data.is_exited = 1
-  let job_data.status    = a:status
-
-  if job_data.is_closed
-    call s:JobWrapup( job_id )
-  endif
-endfunction
-
-function! s:JobClose ( channel )
-  let job = ch_getjob( a:channel )
-  let job_id = job_info( job ).process
-  let job_data = g:all_jobs[ job_id ]
-  let job_data.is_closed = 1
-
-  if job_data.is_exited
-    call s:JobWrapup( job_id )
-  endif
-endfunction
-
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   " options
@@ -239,18 +170,7 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     let cmd = a:cmd
   endif
 
-  let job_data = {}
-  let job_data.in_io = 'null'
-  let job_data.out_io = 'buffer'
-  let job_data.out_buf = bufnr('%')
-  let job_data.exit_cb  = '<SNR>'.s:SID().'_JobExit'
-  let job_data.close_cb = '<SNR>'.s:SID().'_JobClose'
-
-  let job_obj = job_start( [cmd] + a:params, job_data )
-
-  let job_id = job_info( job_obj ).process
-
-  let g:all_jobs[job_id] = { 'job': job_obj, 'is_closed': 0, 'is_exited': 0, 'opts': opts, }
+  call gitsupport#run_vim#JobRun( cmd, a:params, opts )
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )
