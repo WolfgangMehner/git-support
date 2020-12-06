@@ -126,6 +126,11 @@ endfunction
 
 function! s:Show ( mode )
   let stash_name = s:GetStash()
+
+  if stash_name == ''
+    return s:ErrorMsg( 'no stash under the cursor' )
+  endif
+
   if a:mode == 'show'
     call gitsupport#cmd_stash#OpenBuffer( [ 'show', stash_name ] )
   elseif a:mode == 'patch'
@@ -142,5 +147,13 @@ function! s:Wrap ()
   setlocal filetype=gitsdiff
   setlocal foldmethod=syntax
 	normal! zR   | " open all folds (closed by the syntax highlighting)
+endfunction
+
+function! s:ErrorMsg ( ... )
+  echohl WarningMsg
+  for line in a:000
+    echomsg line
+  endfor
+  echohl None
 endfunction
 

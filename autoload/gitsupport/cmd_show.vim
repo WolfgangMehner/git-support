@@ -81,7 +81,7 @@ function! s:Help ()
 				\  "git show\n\n"
 				\ ."S-F1    : help\n"
 				\ ."q       : close\n"
-				\ ."u       : update"
+				\ ."u       : update\n"
 	echo text
 endfunction
 
@@ -90,7 +90,7 @@ function! s:HelpBlob ()
 				\  "git show (blob)\n\n"
 				\ ."S-F1    : help\n"
 				\ ."q       : close\n"
-				\ ."u       : update"
+				\ ."u       : update\n"
 	echo text
 endfunction
 

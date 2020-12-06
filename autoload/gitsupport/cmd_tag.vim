@@ -51,7 +51,8 @@ function! s:Help ()
         \  "git tag\n\n"
         \ ."S-F1    : help\n"
         \ ."q       : close\n"
-        \ ."u       : update\n\n"
+        \ ."u       : update\n"
+        \ ."\n"
         \ ."tag under cursor ...\n"
         \ ."ch      : checkout\n"
         \ ."cr      : use as starting point for creating a new branch\n"
@@ -97,6 +98,10 @@ endfunction
 function! s:Show ( mode )
   let tag_name = s:GetTag()
 
+  if tag_name == ''
+    return s:ErrorMsg( 'no tag under the cursor' )
+  endif
+
   if a:mode == 'tag'
     call gitsupport#cmd_show#OpenBuffer( [ tag_name ] )
   elseif a:mode == 'commit'
@@ -110,5 +115,13 @@ function! s:GetTag()
     return ''
   endif
   return matchstr ( getline(t_pos), '^\S\+' )
+endfunction
+
+function! s:ErrorMsg ( ... )
+  echohl WarningMsg
+  for line in a:000
+    echomsg line
+  endfor
+  echohl None
 endfunction
 
