@@ -1,4 +1,4 @@
-*gitsupport.txt*                  Git Support                      Nov 29 2020
+*gitsupport.txt*                  Git Support                      Dec 07 2020
 
 Git Support                                          *git-support* *gitsupport*
 
@@ -285,6 +285,10 @@ The second version executes "git branch ...".
   rn        rename
   su        set as upstream from current branch
   cs        show the commit
+
+  remote under cursor ...
+  rp        prune the remote branches
+  ru        update the remote
  ----------------------------------------------------------------------------
 
 ------------------------------------------------------------------------------

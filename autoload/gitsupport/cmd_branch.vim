@@ -43,6 +43,8 @@ function! gitsupport#cmd_branch#OpenBuffer ( params )
     nnoremap <expr>   <buffer> RN     <SID>Rename(1)
     nnoremap <expr>   <buffer> su     <SID>SetUpstream(1)
     nnoremap <silent> <buffer> sh     :call <SID>Show()<CR>
+    nnoremap <expr>   <buffer> rp     <SID>Remote('prune')
+    nnoremap <expr>   <buffer> ru     <SID>Remote('update')
 
     let b:GitSupport_Param = params
   else
@@ -69,6 +71,10 @@ function! s:Help ()
         \ ."Rn / RN : rename (force via -M)\n"
         \ ."su      : set as upstream from current branch\n"
         \ ."sh      : show the commit\n"
+        \ ."\n"
+        \ ."remote under cursor ...\n"
+        \ ."rp      : prune the remote branches\n"
+        \ ."ru      : update the remote\n"
   echo text
 endfunction
 
@@ -143,6 +149,21 @@ function! s:Show ()
   endif
 
   return gitsupport#cmd_show#OpenBuffer( [ branch_name ] )
+endfunction
+
+function! s:Remote ( mode )
+  let [ branch_name, is_remote ] = s:GetBranch()
+
+  if ! is_remote
+    return s:ErrorMsg( 'no remote branch under the cursor' )
+  endif
+
+  let remote = s:GetRemoteName( branch_name, is_remote )
+  if a:mode == 'prune'
+    return gitsupport#common#AssembleCmdLine( ':GitRemote prune ', ' '.remote )
+  elseif a:mode == 'update'
+    return gitsupport#common#AssembleCmdLine( ':GitRemote update ', ' '.remote )
+  endif
 endfunction
 
 function! s:GetBranch ()

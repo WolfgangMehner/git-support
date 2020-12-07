@@ -121,10 +121,13 @@ RELEASE NOTES
 
 RELEASE NOTES FOR VERSION 0.9.9
 ----------------------------------------------------------------------
+Add this line to your `.vimrc` to use these features: `let g:Git_NextGen = 1`
+
 - Add option `g:Git_AddExpandEmpty`
 - Remove add with a bang `:GitAdd!`, use `:GitAdd -f` instead
 - Remove command `:GitMergeUpstream`, default behavior of `:GitMerge` with no
   arguments
+- Add maps to these buffers: branch
 
 
 RELEASE NOTES FOR OLDER VERSIONS
