@@ -1083,6 +1083,7 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 
 if s:Enabled && s:Git_NextGen
 	command! -nargs=* -complete=file   GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
+	command! -nargs=* -complete=file   GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
 	command! -nargs=*                  GitFetch           :call gitsupport#commands#DirectFromCmdLine('fetch',<q-args>)
 	command! -nargs=*                  GitMerge           :call gitsupport#commands#DirectFromCmdLine('merge',<q-args>)
@@ -1098,6 +1099,7 @@ if s:Enabled && s:Git_NextGen
 	command! -nargs=*                  GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
 elseif s:Enabled
 	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
+	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
@@ -1118,7 +1120,6 @@ endif
 
 if s:Enabled
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
 	command! -nargs=? -complete=file                                 GitCommitFile      :call GitS_Commit('file',<q-args>,'')
 	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
