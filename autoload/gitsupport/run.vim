@@ -49,12 +49,13 @@ function! s:GetCurrentDir (  )
 endfunction
 
 function! s:SetDir ( dir )
-	if a:dir != ''
-		return s:GetCurrentDir()
-		call s:ChangeDir( a:dir )
-	else
-		return ''
-	endif
+  if a:dir != ''
+    let saved_dir = s:GetCurrentDir()
+    call s:ChangeDir( a:dir )
+    return saved_dir
+  else
+    return ''
+  endif
 endfunction
 
 function! s:ResetDir ( saved_dir )
@@ -141,6 +142,9 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   " options
   let opts = {
+        \ 'env': {},
+        \ 'env_std': 0,
+        \ 'cwd': '',
         \ 'keep': 0,
         \ 'callback': function( 's:Empty' ),
         \ 'restore_cursor': 0,
@@ -168,6 +172,10 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     let cmd = gitsupport#config#GitExecutable()
   else
     let cmd = a:cmd
+  endif
+
+  if opts.env_std
+    let opts.env = gitsupport#config#Env()
   endif
 
   if s:NEOVIM

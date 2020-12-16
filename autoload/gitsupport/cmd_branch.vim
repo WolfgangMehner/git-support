@@ -19,10 +19,11 @@ endfunction
 
 function! gitsupport#cmd_branch#OpenBuffer ( params )
   let params = a:params
+  let cwd = gitsupport#services_cwd#Get()
 
   if empty( params )
     call gitsupport#run#OpenBuffer( 'Git - branch' )
-    call s:Run( params )
+    call s:Run( params, cwd )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -47,8 +48,9 @@ function! gitsupport#cmd_branch#OpenBuffer ( params )
     nnoremap <expr>   <buffer> ru     <SID>Remote('update')
 
     let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
   else
-    return gitsupport#run#RunDirect( '', ['branch'] + params, 'env_std', 1 )
+    return gitsupport#run#RunDirect( '', ['branch'] + params, 'env_std', 1, 'cwd', cwd )
   endif
 endfunction
 
@@ -82,12 +84,12 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params, 'callback', function( 's:Wrap' ) )
+function! s:Run ( params, cwd )
+  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params, 'callback', function( 's:Wrap' ), 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
 endfunction
 
 function! s:Wrap ()

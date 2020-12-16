@@ -19,6 +19,10 @@ function! gitsupport#run_nvim#JobRun ( cmd, params, opts )
   let job_data.on_stdout = function( 's:JobOutput' )
   let job_data.on_stderr = function( 's:JobOutput' )
   let job_data.on_exit   = function( 's:JobExit' )
+  if a:opts.cwd != ''
+    let job_data.cwd = a:opts.cwd
+  endif
+  let job_data.env = a:opts.env
 
   let job_id = jobstart( [a:cmd] + a:params, job_data )
 
