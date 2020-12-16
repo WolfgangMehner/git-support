@@ -7,7 +7,7 @@ if exists("b:current_syntax")
 	finish
 endif
 
-syn sync fromstart
+syn sync minlines=50
 syn case match
 
 "-------------------------------------------------------------------------------
