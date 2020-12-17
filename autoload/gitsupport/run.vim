@@ -260,6 +260,45 @@ function! s:RenameBuffer ( name )
 	silent exe 'keepalt file '.fnameescape( buf_name )
 endfunction
 
+function! gitsupport#run#OpenFile ( filename, ... )
+
+  " options
+  let opts = {
+        \ 'line': -1,
+        \ 'column': -1,
+        \ 'open_fold': g:Git_OpenFoldAfterJump == 'yes',
+        \ }
+
+  if ! gitsupport#common#ParseOptions( opts, a:000 )
+    return
+  endif
+
+  let filename = a:filename
+
+  if bufwinnr( '^'.filename.'$' ) == -1
+    " open buffer
+    belowright new
+    exe "edit ".fnameescape( filename )
+  else
+    " jump to window
+    exe bufwinnr( '^'.filename.'$' ).'wincmd w'
+  endif
+
+  if opts.line != -1
+    " jump to line
+    let pos = getpos( '.' )
+    let pos[1] = opts.line
+    if opts.column != -1
+      let pos[2] = opts.column
+    endif
+    call setpos( '.', pos )
+  endif
+
+  if foldlevel('.') && opts.open_fold
+    normal! zv
+  endif
+endfunction
+
 function! s:Empty ()
 endfunction
 

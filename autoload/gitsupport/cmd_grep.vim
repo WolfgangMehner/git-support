@@ -98,8 +98,14 @@ function! s:Jump ( mode )
     return s:ErrorMsg( 'no file under the cursor' )
   endif
 
+  if b:GitSupport_CWD != ''
+    let f_name = resolve( fnamemodify( b:GitSupport_CWD.'/'.f_name, ':p' ) )
+  endif
+
   if a:mode == 'file'
+    call gitsupport#run#OpenFile( f_name )
   elseif a:mode == 'line'
+    call gitsupport#run#OpenFile( f_name, 'line', f_line )
   endif
 endfunction
 

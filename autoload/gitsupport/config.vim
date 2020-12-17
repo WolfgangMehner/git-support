@@ -65,6 +65,7 @@ call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',      'no' )
 call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty', 'no' )
 call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',     'no' )
 call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',    'no' )
+call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',   'yes' )
 
 let s:Git_Env = {}
 	
