@@ -82,7 +82,9 @@ endfunction
 
 function! s:Wrap ()
   let &l:filetype = 'gitsgrep'
-  let &l:foldtext = '<SNR>'.s:SID().'_Grep_FoldText()'
+  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
+  let &l:foldmethod = 'syntax'
+  normal! zR   | " open all folds (closed by the syntax highlighting)
   if s:use_conceal
     let &l:conceallevel  = 2
     let &l:concealcursor = 'nc'
@@ -90,7 +92,7 @@ function! s:Wrap ()
 endfunction
 
 function! s:Jump ( mode )
-  let [ f_name, f_line ] = s:GetFile()
+  let [ f_name, f_line ] = s:GetFile( '.' )
 
   if f_name == ''
     return s:ErrorMsg( 'no file under the cursor' )
@@ -101,11 +103,11 @@ function! s:Jump ( mode )
   endif
 endfunction
 
-function! s:GetFile ()
-  if has( 'conceal' )
-    let mlist = matchlist( getline('.'), '^\(\p\+\)\%x00\(\d\+\)\%x00' )
+function! s:GetFile ( bufferline )
+  if s:use_conceal
+    let mlist = matchlist( getline(a:bufferline), '^\(\p\+\)\%x00\(\d\+\)\%x00' )
   else
-    let mlist = matchlist( getline('.'), '^\([^:]\+\):\%(\(\d\+\):\)\?' )
+    let mlist = matchlist( getline(a:bufferline), '^\([^:]\+\):\%(\(\d\+\):\)\?' )
   endif
 
   if empty( mlist )
@@ -119,6 +121,20 @@ function! s:GetFile ()
     return [ f_name, -1 ]
   else
     return [ f_name, str2nr( f_line ) ]
+  endif
+endfunction
+
+function! s:FoldText ()
+  let [ filename, line_start ] = s:GetFile( v:foldstart )
+  let [ filename, line_end   ] = s:GetFile( v:foldend )
+
+  let head = '+-'.v:folddashes.' '
+  let tail = ' ('.( v:foldend - v:foldstart + 1 ).' lines) '
+
+  if filename != ''
+    return filename.':'.line_start.'-'.line_end.tail
+  else
+    return head.getline( v:foldstart ).tail
   endif
 endfunction
 
