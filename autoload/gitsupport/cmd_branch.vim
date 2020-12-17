@@ -19,7 +19,7 @@ endfunction
 
 function! gitsupport#cmd_branch#OpenBuffer ( params )
   let params = a:params
-  let cwd = gitsupport#services_cwd#Get()
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
   if empty( params )
     call gitsupport#run#OpenBuffer( 'Git - branch' )

@@ -27,14 +27,14 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   let params = a:params
 
   if a:mode == 'top'
-    let [ sh_ret, base ] = gitsupport#services_cwd#GetGitDir()
+    let [ sh_ret, base ] = gitsupport#services_path#GetGitDir()
 
     " could not get top-level?
     if sh_ret != 0 || base == '' | return | endif
 
     let cwd = base
   else
-    let cwd = gitsupport#services_cwd#Get()
+    let cwd = gitsupport#services_path#GetWorkingDir()
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - grep' )

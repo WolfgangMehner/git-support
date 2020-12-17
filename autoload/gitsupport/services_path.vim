@@ -1,6 +1,6 @@
 "-------------------------------------------------------------------------------
 "
-"          File:  services_cwd.vim
+"          File:  services_path.vim
 "
 "   Description:  
 "
@@ -12,7 +12,7 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#services_cwd#Get (  )
+function! gitsupport#services_path#GetWorkingDir (  )
   if &l:filetype ==# 'netrw'
     return b:netrw_curdir
   endif
@@ -20,7 +20,7 @@ function! gitsupport#services_cwd#Get (  )
   return ''
 endfunction
 
-function! gitsupport#services_cwd#GetGitDir (  )
+function! gitsupport#services_path#GetGitDir (  )
   return gitsupport#run#GitOutput( [ 'rev-parse', '--show-toplevel' ] )
 endfunction
 
