@@ -20,3 +20,7 @@ function! gitsupport#services_cwd#Get (  )
   return ''
 endfunction
 
+function! gitsupport#services_cwd#GetGitDir (  )
+  return gitsupport#run#GitOutput( [ 'rev-parse', '--show-toplevel' ] )
+endfunction
+

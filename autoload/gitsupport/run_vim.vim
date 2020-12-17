@@ -21,6 +21,10 @@ function! gitsupport#run_vim#JobRun ( cmd, params, opts )
   let job_data.out_buf = bufnr( '%' )
   let job_data.exit_cb  = function( 's:JobExit' )
   let job_data.close_cb = function( 's:JobClose' )
+  if a:opts.cwd != ''
+    let job_data.cwd = a:opts.cwd
+  endif
+  let job_data.env = a:opts.env
 
   let job_obj = job_start( [a:cmd] + a:params, job_data )
 
