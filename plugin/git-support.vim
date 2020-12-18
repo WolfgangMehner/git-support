@@ -1286,6 +1286,9 @@ endfunction    " ----------  end of function s:UpdateGitBuffer  ----------
 "
 "-------------------------------------------------------------------------------
 " GitS_FoldLog : fold text for 'git diff/log/show/status'   {{{1
+"
+" :WARNING:18.12.2020 12:19:WM: currently used by next gen modules,
+"   waiting for further refactoring
 "-------------------------------------------------------------------------------
 "
 function! GitS_FoldLog ()

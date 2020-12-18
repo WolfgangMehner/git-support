@@ -107,7 +107,9 @@ function! s:Update ()
 endfunction
 
 function! s:Wrap ()
-  setlocal filetype=gitslog
-  setlocal foldtext=GitS_FoldLog()
+  let &l:filetype = 'gitslog'
+  let &l:foldmethod = 'syntax'
+  let &l:foldtext = 'GitS_FoldLog()'
+  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 

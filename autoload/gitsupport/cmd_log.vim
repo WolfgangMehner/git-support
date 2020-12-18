@@ -77,6 +77,9 @@ endfunction
 
 function! s:Wrap ()
   let &l:filetype = 'gitslog'
+  let &l:foldmethod = 'syntax'
+  let &l:foldtext = 'GitS_FoldLog()'
+  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 
 function! s:Show (  )
