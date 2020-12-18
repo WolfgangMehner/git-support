@@ -18,12 +18,12 @@ syn case match
 " - GitGrepFileLines
 
 if has( 'conceal' )
-	syn region GitGrepFileLines     start=/^\z(\p\+\%x00\)/ end=/^\%(\z1\)\@!/ contains=GitGrepPath fold keepend
+	syn region GitGrepFileLines     start=/^\z(\p\+[\x00\x01]\)/ end=/^\%(\z1\)\@!/ contains=GitGrepPath fold keepend
 
-	syn match  GitGrepPath          "^\p\+"     contained nextgroup=GitGrepSep1
-	syn match  GitGrepSep1          "\%x00"     contained nextgroup=GitGrepLineNr conceal cchar=:
-	syn match  GitGrepLineNr        "\d\+"      contained nextgroup=GitGrepSep2
-	syn match  GitGrepSep2          "\%x00"     contained                         conceal cchar=:
+	syn match  GitGrepPath          "^\p\+"      contained nextgroup=GitGrepSep1
+	syn match  GitGrepSep1          "[\x00\x01]" contained nextgroup=GitGrepLineNr conceal cchar=:
+	syn match  GitGrepLineNr        "\d\+"       contained nextgroup=GitGrepSep2
+	syn match  GitGrepSep2          "[\x00\x01]" contained                         conceal cchar=:
 else
 	syn region GitGrepFileLines     start=/^\z([^:]\+:\)/ end=/^\%(\z1\)\@!/ contains=GitGrepPath fold keepend
 
