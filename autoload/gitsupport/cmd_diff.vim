@@ -41,6 +41,13 @@ function! gitsupport#cmd_diff#OpenBuffer ( params )
   nnoremap <silent> <buffer> of     :call <SID>Jump("file")<CR>
   nnoremap <silent> <buffer> oj     :call <SID>Jump("line")<CR>
 
+  nnoremap <silent> <buffer> ac     :call <SID>ChunkAction("add","n")<CR>
+  vnoremap <silent> <buffer> ac     :call <SID>ChunkAction("add","v")<CR>
+  nnoremap <silent> <buffer> cc     :call <SID>ChunkAction("checkout","n")<CR>
+  vnoremap <silent> <buffer> cc     :call <SID>ChunkAction("checkout","v")<CR>
+  nnoremap <silent> <buffer> rc     :call <SID>ChunkAction("reset","n")<CR>
+  vnoremap <silent> <buffer> rc     :call <SID>ChunkAction("reset","v")<CR>
+
   let b:GitSupport_Param = params
   let b:GitSupport_CWD = cwd
   let b:GitSupport_BaseDir = base_dir
@@ -105,6 +112,12 @@ function! s:Jump ( mode )
   endif
 endfunction
 
+function! s:ChunkAction ( action, mode ) range
+  if s:ChunkHandler( a:action, a:mode, a:firstline, a:lastline )
+    call s:Update()
+  endif
+endfunction
+
 function! s:GetFile ( mode )
   " :TODO:17.08.2014 15:01:WM: recognized renamed files
 
@@ -158,6 +171,136 @@ function! s:GetFile ( mode )
   endwhile
 
   return [ file_name, file_line, file_col ]
+endfunction
+
+function! s:GetChunk ( line )
+  " the positions in the buffer
+  let pos_save = getpos( '.' )
+  call cursor( a:line, 1 )
+
+  let header_pos = search( '\m\_^diff ', 'bcnW' )         " the position of the diff header
+  let chunk_pos  = search( '\m\_^@@ ', 'bcnW' )           " the start of the chunk
+  let chunk_end  = search( '\m\_^@@ \|\_^diff ', 'nW' )   " ... the end
+
+  call setpos( '.', pos_save )
+
+  if header_pos == 0 || chunk_pos == 0
+    return [ '', '', 'no valid chunk selected', 0 ]
+  elseif chunk_end == 0
+    " found the other two positions
+    " -> the end of the chunk must be the end of the file
+    let chunk_end = line('$')+1
+  endif
+
+  " get the diff header
+  let diff_head = getline(header_pos)
+
+  while 1
+    let header_pos += 1
+    let line = getline( header_pos )
+
+    if line =~# '\m\_^\%(diff\|@@\) '
+      break
+    endif
+
+    let diff_head .= "\n".line
+  endwhile
+
+  " get the chunk
+  let chunk_head = getline( chunk_pos )
+  let chunk_text = join( getline( chunk_pos+1, chunk_end-1 ), "\n" )
+
+  return [ diff_head, chunk_head, chunk_text, chunk_pos ]
+endfunction
+
+function! s:VisualChunk ( diff_head, chunk_head, chunk_text, reverse, v_start, v_end )
+  " error message from 's:GetChunk'?
+  if a:diff_head == ''
+    return [ a:diff_head, a:chunk_head, a:chunk_text ]
+  endif
+
+  let v_start = a:v_start - 1                   " convert to indices
+  let v_end   = a:v_end   - 1                   " ...
+  let lines = split( a:chunk_text, '\n' )
+
+  if v_start < 0 || v_end >= len( lines )
+    return [ '', '', 'visual selection crosses chunk boundary' ]
+  elseif a:chunk_head =~ '^@@@'
+    return [ '', '', 'can not handle this type of chunk' ]
+  endif
+
+  let n_add_off = 0
+  let n_rm_off  = 0
+
+  for i in range( len(lines)-1, v_end+1, -1 ) + range( v_start-1, 0, -1 )
+    let line = lines[i]
+
+    if line =~ '^-' && ! a:reverse
+      let lines[i] = substitute( line, '^-', ' ', '' )
+      let n_add_off += 1                        " we add one more line
+    elseif line =~ '^+' && ! a:reverse
+      call remove( lines, i )
+      let n_add_off -= 1                        " we add one less line
+    elseif line =~ '^-' && a:reverse
+      call remove( lines, i )
+      let n_rm_off -= 1                         " we remove one less line
+    elseif line =~ '^+' && a:reverse
+      let lines[i] = substitute( line, '^+', ' ', '' )
+      let n_rm_off += 1                         " we remove one more line
+    endif
+  endfor
+
+  let mlist = matchlist( a:chunk_head, '^@@ -\(\d\+\),\(\d\+\) +\(\d\+\),\(\d\+\) @@\s\?\(.*\)' )
+
+  if empty( mlist )
+    return [ '', '', 'can not parse the chunk header' ]
+  else
+    let [ l_rm, n_rm, l_add, n_add ] = mlist[1:4]
+    let n_rm  += n_rm_off
+    let n_add += n_add_off
+    let chunk_head = printf( '@@ -%d,%d +%d,%d @@ %s', l_rm, n_rm, l_add, n_add, mlist[5] )
+  endif
+
+  return [ a:diff_head, chunk_head, join( lines, "\n" ) ]
+endfunction
+
+function! s:ChunkHandler ( action, mode, v_start, v_end )
+  " get the chunk under the cursor/visual selection
+  if a:mode == 'n'
+    let [ diff_head, chunk_head, chunk_text, chunk_pos ] = s:GetChunk( getpos('.')[1] )
+  elseif a:mode == 'v'
+    let reverse = a:action == 'add' ? 0 : 1
+    let [ diff_head, chunk_head, chunk_text, chunk_pos ] = s:GetChunk( a:v_start )
+    let [ diff_head, chunk_head, chunk_text            ] = s:VisualChunk( diff_head, chunk_head, chunk_text, reverse, a:v_start - chunk_pos, a:v_end - chunk_pos )
+  endif
+
+  " error while extracting chunk?
+  if diff_head == ''
+    return s:ErrorMsg( chunk_text )
+  endif
+
+  " apply the patch, depending on the action
+  if a:action == 'add'
+    let params = [ 'apply', '--cached', '--', '-' ]
+  elseif a:action == 'checkout'
+    let params = [ 'apply', '-R', '--', '-' ]
+  elseif a:action == 'reset'
+    let params = [ 'apply', '--cached', '-R', '--', '-' ]
+  endif
+
+  let chunk = diff_head."\n".chunk_head."\n".chunk_text."\n"
+  let [ ret_code, error_msg ] = gitsupport#run#RunDirect( '', params, 'stdin', chunk, 'cwd', b:GitSupport_BaseDir, 'env_std', 1, 'mode', 'return' )
+
+  " check the result
+  if ret_code != 0
+    echo "applying the chunk failed:\n\n".error_msg         | " failure
+  elseif error_msg =~ '^\_s*$'
+    echo "chunk applied successfully"                       | " success
+  else
+    echo "chunk applied successfully:\n".error_msg          | " success
+  endif
+
+  return ret_code == 0
 endfunction
 
 function! s:ErrorMsg ( ... )

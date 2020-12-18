@@ -78,17 +78,18 @@ endfunction
 
 function! gitsupport#run#RunDirect ( cmd, params, ... )
 
-	" options
-	let opts = {
-				\   'env': {},
-				\   'env_std': 0,
-				\   'cwd': '',
-				\   'mode': 'print',
-				\ }
+  " options
+  let opts = {
+        \ 'env': {},
+        \ 'env_std': 0,
+        \ 'cwd': '',
+        \ 'mode': 'print',
+        \ 'stdin': '',
+        \ }
 
-	if ! gitsupport#common#ParseOptions( opts, a:000 )
-		return
-	endif
+  if ! gitsupport#common#ParseOptions( opts, a:000 )
+    return
+  endif
 
   if type( a:params ) == type( [] )
     let cmd = join( a:params, ' ' )
@@ -113,18 +114,22 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
     let cmd = s:GetEnvStr( opts.env ) . cmd
   endif
 
-	let saved_dir = s:SetDir( opts.cwd )
+  let saved_dir = s:SetDir( opts.cwd )
 
-	try
-		let text = system( cmd )
-	catch /.*/
-		call s:WarningMsg (
-					\ "internal error " . v:exception,
-					\ "   occurred at " . v:throwpoint )
-		return [ 255, '' ]
-	finally
-		call s:ResetDir( saved_dir )
-	endtry
+  try
+    if empty( opts.stdin )
+      let text = system( cmd )
+    else
+      let text = system( cmd, opts.stdin )
+    endif
+  catch /.*/
+    call s:WarningMsg (
+          \ "internal error " . v:exception,
+          \ "   occurred at " . v:throwpoint )
+    return [ 255, '' ]
+  finally
+    call s:ResetDir( saved_dir )
+  endtry
 
 	if opts.mode == 'return'
 		return [ v:shell_error, substitute( text, '\_s*$', '', '' ) ]
