@@ -26,21 +26,44 @@ function! s:GetGlobalSetting ( varname, ... )
 	endif
 endfunction
 
+function! s:CheckGitExecutable ( exec )
+  if !executable( a:exec )
+    return [ 0, 'git not executable' ]
+  endif
+
+  let cmd = shellescape( a:exec ).' --version'
+  let version_info = system( cmd )
+
+	if v:shell_error != 0
+    return [ 0, 'could not obtain the git version' ]
+  end
+
+	if version_info =~? 'git version [0-9.]\+'
+		let s:GitVersion = matchstr( version_info, 'git version \zs[0-9.]\+' )
+	else
+    return [ 0, 'could not parse the git version' ]
+	endif
+
+  return [ 1, '' ]
+endfunction
+
 let s:MSWIN = has("win16") || has("win32")   || has("win64")     || has("win95")
 let s:UNIX	= has("unix")  || has("macunix") || has("win32unix")
 let s:NEOVIM = has("nvim")
 
 if s:MSWIN
 	" MS Windows
-	let s:plugin_dir = substitute( expand('<sfile>:p:h:h'), '\\', '/', 'g' )
+	let s:plugin_dir = substitute( expand('<sfile>:p:h:h:h'), '\\', '/', 'g' )
 
 	let s:Git_BinPath = 'C:\Program Files\Git\bin\'
 else
 	" Linux/Unix
-	let s:plugin_dir = expand('<sfile>:p:h:h')
+	let s:plugin_dir = expand('<sfile>:p:h:h:h')
 
 	let s:Git_BinPath = ''
 endif
+
+let s:Git_CmdLineOptionsFile = s:plugin_dir.'/git-support/data/options.txt'
 
 call s:GetGlobalSetting ( 'Git_BinPath' )
 
@@ -68,7 +91,7 @@ call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',    'no' )
 call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',   'yes' )
 
 let s:Git_Env = {}
-	
+
 call s:GetGlobalSetting ( 'Git_Executable' )
 call s:GetGlobalSetting ( 'Git_GitKExecutable' )
 call s:GetGlobalSetting ( 'Git_GitKScript' )
@@ -81,11 +104,69 @@ if ! has_key( s:Git_Env, 'LANG' )
 	endif
 endif
 
+let [ s:GitExec_Enabled, s:GitExec_Reason ] = s:CheckGitExecutable( s:Git_Executable )
+
 function! gitsupport#config#GitExecutable ()
 	return s:Git_Executable
 endfunction
 
 function! gitsupport#config#Env ()
 	return s:Git_Env
+endfunction
+
+function! gitsupport#config#PrintSettings ( verbose )
+  if     s:MSWIN | let sys_name = 'Windows'
+  elseif s:UNIX  | let sys_name = 'UNIX'
+  else           | let sys_name = 'unknown' | endif
+  if    s:NEOVIM | let vim_name = 'nvim'
+  else           | let vim_name = has('gui_running') ? 'gvim' : 'vim' | endif
+
+  if s:GitExec_Enabled | let git_e_status = ' (version '.s:GitVersion.')'
+  else                 | let git_e_status = ' ('.s:GitExec_Reason.')'
+  endif
+"  let gitk_e_status  = s:EnabledGitK     ? '' : ' (not executable)'
+"  let gitk_s_status  = s:FoundGitKScript ? '' : ' (not found)'
+"  let gitbash_status = s:EnabledGitBash  ? '' : ' (not executable)'
+
+  let environment = ''
+  for [ name, value ] in items( s:Git_Env )
+		let environment .= name.'='.value.' '
+  endfor
+  let environment = environment[0:-2]
+
+  let file_options_status = filereadable( s:Git_CmdLineOptionsFile ) ? '' : ' (not readable)'
+
+  let txt = " Git-Support settings\n\n"
+        \ .'     plug-in installation :  '.vim_name.' on '.sys_name."\n"
+        \ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
+"        \ .'          gitk executable :  '.s:Git_GitKExecutable.gitk_e_status."\n"
+"  if ! empty( s:Git_GitKScript )
+"    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
+"  endif
+"  let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
+  if a:verbose >= 1
+    let txt .= '              environment :  '.environment."\n"
+  endif
+  if s:UNIX && a:verbose >= 1
+    let txt .= '            xterm options :  "'.g:Xterm_Options."\"\n"
+  endif
+  if a:verbose >= 1
+    let txt .= "\n"
+          \ .'             expand empty :  add: "'.g:Git_AddExpandEmpty.'"  checkout: "'.g:Git_CheckoutExpandEmpty.'"  diff: "'.g:Git_DiffExpandEmpty.'"  reset: "'.g:Git_ResetExpandEmpty."\"\n"
+          \ .'     open fold after jump :  "'.g:Git_OpenFoldAfterJump."\"\n"
+          \ .'  status staged open diff :  "'.g:Git_StatusStagedOpenDiff."\"\n\n"
+          \ .'    cmd-line options file :  '.s:Git_CmdLineOptionsFile.file_options_status."\n"
+          \ .'            commit editor :  "'.g:Git_Editor."\"\n"
+  endif
+  let txt .=
+        \  "________________________________________________________________________________\n"
+        \ ." Git-Support, Version ".g:GitSupport_Version." / Wolfgang Mehner / wolfgang-mehner@web.de\n\n"
+
+  if a:verbose == 2
+    split GitSupport_Settings.txt
+    put = txt
+  else
+    echo txt
+  endif
 endfunction
 
