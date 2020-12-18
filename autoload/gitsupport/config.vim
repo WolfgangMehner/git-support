@@ -114,6 +114,18 @@ function! gitsupport#config#Env ()
 	return s:Git_Env
 endfunction
 
+let s:Features = {
+      \ 'running_nvim':  s:NEOVIM,
+      \ 'running_mswin': s:MSWIN,
+      \ 'running_unix':  s:UNIX,
+      \
+      \ 'vim_full_job_support': has('patch-8.0.0902'),
+      \ }
+
+function! gitsupport#config#Features ()
+	return s:Features
+endfunction
+
 function! gitsupport#config#PrintSettings ( verbose )
   if     s:MSWIN | let sys_name = 'Windows'
   elseif s:UNIX  | let sys_name = 'UNIX'
@@ -157,6 +169,10 @@ function! gitsupport#config#PrintSettings ( verbose )
           \ .'  status staged open diff :  "'.g:Git_StatusStagedOpenDiff."\"\n\n"
           \ .'    cmd-line options file :  '.s:Git_CmdLineOptionsFile.file_options_status."\n"
           \ .'            commit editor :  "'.g:Git_Editor."\"\n"
+  endif
+  if !s:NEOVIM && a:verbose >= 1
+    let txt .= "\n"
+          \ .'          Vim job support :  '.( s:Features.vim_full_job_support ? 'yes' : 'no' )."\n"
   endif
   let txt .=
         \  "________________________________________________________________________________\n"

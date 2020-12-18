@@ -12,7 +12,7 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-let s:NEOVIM = has("nvim")
+let s:Features = gitsupport#config#Features()
 
 function! s:ErrorMsg ( ... )
 	echohl WarningMsg
@@ -117,7 +117,9 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
   let saved_dir = s:SetDir( opts.cwd )
 
   try
-    if empty( opts.stdin )
+    if opts.mode == 'buffer'
+      put =system( cmd )
+    elseif empty( opts.stdin )
       let text = system( cmd )
     else
       let text = system( cmd, opts.stdin )
@@ -131,16 +133,18 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
     call s:ResetDir( saved_dir )
   endtry
 
-	if opts.mode == 'return'
-		return [ v:shell_error, substitute( text, '\_s*$', '', '' ) ]
-	elseif v:shell_error != 0
-		echo ">" cmd "< failed:\n\n".text             | " failure
-	elseif text =~ '^\_s*$'
-		echo "ran successfully"                       | " success
-	else
-		echo "ran successfully:\n".text               | " success
-	endif
-	return v:shell_error
+  if opts.mode == 'return'
+    return [ v:shell_error, substitute( text, '\_s*$', '', '' ) ]
+  elseif opts.mode == 'buffer'
+    return v:shell_error
+  elseif v:shell_error != 0
+    echo ">" cmd "< failed:\n\n".text             | " failure
+  elseif text =~ '^\_s*$'
+    echo "ran successfully"                       | " success
+  else
+    echo "ran successfully:\n".text               | " success
+  endif
+  return v:shell_error
 endfunction
 
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
@@ -183,10 +187,34 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     let opts.env = gitsupport#config#Env()
   endif
 
-  if s:NEOVIM
+  if s:Features.running_nvim
     call gitsupport#run_nvim#JobRun( cmd, a:params, opts )
-  else
+  elseif s:Features.vim_full_job_support
     call gitsupport#run_vim#JobRun( cmd, a:params, opts )
+  else
+    call gitsupport#run#JobRunNoBackground( cmd, a:params, opts )
+  endif
+endfunction
+
+function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
+  let opts = a:opts
+
+  let starts_empty = line('$') == 1 && getline('$') == ''
+
+  normal! G
+  let ret_code = gitsupport#run#RunDirect( a:cmd, a:params, 'mode', 'buffer', 'cwd', opts.cwd, 'env', opts.env )
+  if starts_empty
+    normal! gg"_dd
+  endif
+
+  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
+  if ret_code == 0
+    call opts.callback()
+  endif
+
+  " restart syntax highlighting
+  if &syntax != ''
+    setlocal syntax=ON
   endif
 endfunction
 
