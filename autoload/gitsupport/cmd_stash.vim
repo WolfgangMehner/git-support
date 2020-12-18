@@ -96,6 +96,12 @@ function! s:Update ()
   call s:Run( b:GitSupport_Param )
 endfunction
 
+function! s:Wrap ()
+  let &l:filetype = 'gitsdiff'
+  let &l:foldmethod = 'syntax'
+  normal! zR   | " open all folds (closed by the syntax highlighting)
+endfunction
+
 function! s:Save ()
   return gitsupport#common#AssembleCmdLine( ':GitStash save "', '"' )
 endfunction
@@ -139,14 +145,8 @@ function! s:Show ( mode )
 endfunction
 
 function! s:GetStash()
-	let line = getline('.')
-	return matchstr( line, '^stash@{\d\+}' )
-endfunction
-
-function! s:Wrap ()
-  setlocal filetype=gitsdiff
-  setlocal foldmethod=syntax
-	normal! zR   | " open all folds (closed by the syntax highlighting)
+  let line = getline('.')
+  return matchstr( line, '^stash@{\d\+}' )
 endfunction
 
 function! s:ErrorMsg ( ... )

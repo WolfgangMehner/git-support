@@ -28,9 +28,9 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
 
   if a:mode == 'top'
     let [ sh_ret, base ] = gitsupport#services_path#GetGitDir()
-
-    " could not get top-level?
-    if sh_ret != 0 || base == '' | return | endif
+    if sh_ret != 0 || base_dir == ''
+      return s:ErrorMsg( 'could not obtain the repo base directory' )
+    endif
 
     let cwd = base
   else
@@ -63,7 +63,7 @@ function! s:Help ()
         \ ."line under cursor ...\n"
         \ ."of      : file under cursor: open file (edit)\n"
         \ ."oj      : file under cursor: open and jump to the corresponding line\n"
-        \ ."<Enter> : file under cursor: open and jump to the corresponding line"
+        \ ."<Enter> : file under cursor: open and jump to the corresponding line\n"
   echo text
 endfunction
 
@@ -82,8 +82,8 @@ endfunction
 
 function! s:Wrap ()
   let &l:filetype = 'gitsgrep'
-  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
   let &l:foldmethod = 'syntax'
+  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
   normal! zR   | " open all folds (closed by the syntax highlighting)
   if s:use_conceal
     let &l:conceallevel  = 2
@@ -92,20 +92,20 @@ function! s:Wrap ()
 endfunction
 
 function! s:Jump ( mode )
-  let [ f_name, f_line ] = s:GetFile( '.' )
+  let [ file_name, file_line ] = s:GetFile( '.' )
 
-  if f_name == ''
+  if file_name == ''
     return s:ErrorMsg( 'no file under the cursor' )
   endif
 
   if b:GitSupport_CWD != ''
-    let f_name = resolve( fnamemodify( b:GitSupport_CWD.'/'.f_name, ':p' ) )
+    let file_name = resolve( fnamemodify( b:GitSupport_CWD.'/'.file_name, ':p' ) )
   endif
 
   if a:mode == 'file'
-    call gitsupport#run#OpenFile( f_name )
+    call gitsupport#run#OpenFile( file_name )
   elseif a:mode == 'line'
-    call gitsupport#run#OpenFile( f_name, 'line', f_line )
+    call gitsupport#run#OpenFile( file_name, 'line', file_line )
   endif
 endfunction
 
@@ -120,13 +120,13 @@ function! s:GetFile ( bufferline )
     return [ '', -1 ]
   endif
 
-  let f_name = mlist[1]
-  let f_line = mlist[2]
+  let file_name = mlist[1]
+  let file_line = mlist[2]
 
-  if f_line == ''
-    return [ f_name, -1 ]
+  if file_line == ''
+    return [ file_name, -1 ]
   else
-    return [ f_name, str2nr( f_line ) ]
+    return [ file_name, str2nr( file_line ) ]
   endif
 endfunction
 
