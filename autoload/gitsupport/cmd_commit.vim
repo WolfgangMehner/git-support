@@ -31,18 +31,20 @@ endfunction
 function! s:CommitDirect ( args )
   let args = a:args
 
-  if index( args, '--dry-run' ) != -1
-    " dry run in separate buffer
-    " TODO
-    return
-  elseif empty( args ) && empty( g:Git_Editor ) && !exists( '$GIT_EDITOR' )
+  if empty( args ) && empty( g:Git_Editor ) && !exists( '$GIT_EDITOR' )
     " empty parameter list
     return s:ErrorMsg ( 'The command :GitCommit currently can not be used this way.',
           \ 'Set $GIT_EDITOR properly, or use the configuration variable "g:Git_Editor".',
           \ 'Alternatively, supply the message using either the -m or -F options, or by',
           \ 'using the special commands :GitCommitFile, :GitCommitMerge, or :GitCommitMsg.' )
+  elseif index( args, '--dry-run' ) != -1
+    return s:DryRun( args )
+  else
+    return s:CommitRun( args )
   endif
+endfunction
 
+function! s:CommitRun ( args )
   " run assuming sensible parameters ...
   " or assuming a correctly set "$GIT_EDITOR", e.g.
   " - xterm -e vim
@@ -108,6 +110,54 @@ endfunction
 
 function! s:CommitWithMessage ( message )
   return gitsupport#run#RunDirect( '', ['commit', '-m', a:message], 'env_std', 1 )
+endfunction
+
+function! s:DryRun ( args )
+  let args = a:args
+  let cwd = gitsupport#services_path#GetWorkingDir()
+
+  call gitsupport#run#OpenBuffer( 'Git - commit --dry-run' )
+  call s:Run( args, cwd, 0 )
+
+  command! -nargs=0 -buffer  Help   :call <SID>Help()
+  nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
+  nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
+  nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+
+  let b:GitSupport_Param = args
+  let b:GitSupport_CWD = cwd
+endfunction
+
+function! s:Help ()
+  let text =
+        \  "git commit (dry-run)\n\n"
+        \ ."S-F1    : help\n"
+        \ ."q       : close\n"
+        \ ."u       : update\n"
+  echo text
+endfunction
+
+function! s:Quit ()
+  close
+endfunction
+
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['commit'] + a:params,
+        \ 'callback', function( 's:Wrap' ),
+        \ 'cwd', a:cwd,
+        \ 'env_std', 1,
+        \ 'restore_cursor', a:restore_cursor )
+endfunction
+
+function! s:Update ()
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
+endfunction
+
+function! s:Wrap ()
+  let &l:filetype = 'gitsstatus'
+  let &l:foldmethod = 'syntax'
+  let &l:foldtext = 'GitS_FoldLog()'
+  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 
 function! s:ErrorMsg ( ... )
