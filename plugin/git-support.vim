@@ -795,21 +795,6 @@ let s:HelpTopics = s:GitCommands + [
 function! GitS_HelpTopicsComplete ( ArgLead, CmdLine, CursorPos )
 	return filter( copy( s:HelpTopics ), 'v:val =~ "\\V\\<'.escape(a:ArgLead,'\').'\\w\\*"' )
 endfunction    " ----------  end of function GitS_HelpTopicsComplete  ----------
-"
-"----------------------------------------------------------------------
-" list of file IDs for :GitEdit   {{{2
-
-let s:EditFileIDs = [
-			\ 'config-global', 'config-local',
-			\ 'description',
-			\ 'hooks',
-			\ 'ignore-global', 'ignore-local', 'ignore-private',
-			\ 'modules',
-			\ ]
-
-function! s:EditFilesComplete ( ArgLead, CmdLine, CursorPos )
-	return filter( copy( s:EditFileIDs ), 'v:val =~ "\\V\\<'.escape(a:ArgLead,'\').'\\w\\*"' )
-endfunction    " ----------  end of function s:EditFilesComplete  ----------
 
 " configuration defaults   {{{2
 " - only defaults which are relevant for Git-Support are listed here
@@ -1086,6 +1071,8 @@ if s:Enabled
   command! -nargs=*                           GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
   command! -nargs=* -complete=file            GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
+
+  command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
 endif
 
 if s:Enabled && s:Git_NextGen
@@ -1128,7 +1115,6 @@ if s:Enabled
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
 	command! -nargs=* -complete=file                                 GitTerm            :call <SID>GitTerm(<q-args>)
-	command! -nargs=1 -complete=customlist,<SID>EditFilesComplete    GitEdit            :call <SID>GitEdit(<q-args>)
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 else
@@ -4092,43 +4078,6 @@ function! s:GitTerm ( arg_list )
 endfunction    " ----------  end of function s:GitTerm  ----------
 
 "-------------------------------------------------------------------------------
-" s:GitEdit : edit a Git config file   {{{1
-"-------------------------------------------------------------------------------
-
-function! s:GitEdit( fileid )
-
-	let filename = ''
-
-	if a:fileid == 'config-global'
-		let filename = expand ( '$HOME/.gitconfig' )
-	elseif a:fileid == 'config-local'
-		let filename = expand ( '$GIT_CONFIG' )
-		if filename == '$GIT_CONFIG'
-			let filename = s:GitRepoDir ( 'git/config' )
-		endif
-	elseif a:fileid == 'description'
-		let filename = s:GitRepoDir ( 'git/description' )
-	elseif a:fileid == 'hooks'
-		let filename = s:GitRepoDir ( 'git/hooks/' )
-	elseif a:fileid == 'ignore-global'
-		let filename = s:GitGetConfig ( 'core.excludesfile' )
-	elseif a:fileid == 'ignore-local'
-		let filename = s:GitRepoDir ( 'top/.gitignore' )
-	elseif a:fileid == 'ignore-private'
-		let filename = s:GitRepoDir ( 'git/info/exclude' )
-	elseif a:fileid == 'modules'
-		let filename = s:GitRepoDir ( 'top/.gitmodules' )
-	endif
-
-	if filename == ''
-		call s:ErrorMsg ( 'No file with ID "'.a:fileid.'".' )
-	else
-		exe 'spl '.fnameescape( filename )
-	endif
-
-endfunction    " ----------  end of function s:GitEdit  ----------
-
-"-------------------------------------------------------------------------------
 " s:PluginHelp : Plug-in help.   {{{1
 "-------------------------------------------------------------------------------
 
@@ -4468,7 +4417,7 @@ function! s:InitMenus()
 	exe ahead.'Edit File<TAB>Git :echo "This is a menu header!"<CR>'
 	exe ahead.'-Sep00-          :'
 
-	for fileid in s:EditFileIDs
+	for fileid in gitsupport#cmd_edit#Options()
 		let filepretty = substitute ( fileid, '-', '\\ ', 'g' )
 		exe shead.'&'.filepretty.'<TAB>:GitEdit   :GitEdit '.fileid.'<CR>'
 	endfor

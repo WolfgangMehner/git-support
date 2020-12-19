@@ -141,6 +141,35 @@ function! gitsupport#config#Features ()
 	return s:Features
 endfunction
 
+let s:Config_DefaultValues = {
+      \ 'help.format'          : 'man',
+      \ 'status.relativePaths' : 'true'
+      \ }
+
+function! gitsupport#config#GitConfig ( option, scope )
+  if a:scope == '' || a:scope == 'local'
+    let scope_arg = []
+  elseif a:scope == 'global'
+    let scope_arg = [ '--global' ]
+  elseif a:scope == 'system'
+    let scope_arg = [ '--system' ]
+  else
+    return s:ErrorMsg( 'unknown scope: '.a:scope )
+  endif
+
+  let [ ret_code, text ] = gitsupport#run#GitOutput( [ 'config', '--get' ] + scope_arg + [ a:option ] )
+
+  " from the help:
+  "   the section or key is invalid (ret=1)
+  if ret_code == 1 || text == ''
+    if has_key( s:Config_DefaultValues, a:option )
+      return [ 0, s:Config_DefaultValues[ a:option ] ]
+    endif
+  endif
+
+  return [ ret_code, text ]
+endfunction
+
 function! gitsupport#config#PrintSettings ( verbose )
   if     s:MSWIN | let sys_name = 'Windows'
   elseif s:UNIX  | let sys_name = 'UNIX'
@@ -199,5 +228,13 @@ function! gitsupport#config#PrintSettings ( verbose )
   else
     echo txt
   endif
+endfunction
+
+function! s:ErrorMsg ( ... )
+  echohl WarningMsg
+  for line in a:000
+    echomsg line
+  endfor
+  echohl None
 endfunction
 
