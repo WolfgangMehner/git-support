@@ -26,9 +26,17 @@ function! s:GetGlobalSetting ( varname, ... )
 	endif
 endfunction
 
+function! s:CheckExecutable ( exec )
+  if executable( a:exec )
+    return [ 1, '' ]
+  else
+    return [ 0, 'not executable' ]
+  endif
+endfunction
+
 function! s:CheckGitExecutable ( exec )
   if !executable( a:exec )
-    return [ 0, 'git not executable' ]
+    return [ 0, 'not executable' ]
   endif
 
   let cmd = shellescape( a:exec ).' --version'
@@ -81,7 +89,7 @@ else
 	let s:Git_GitKExecutable = s:Git_BinPath.'gitk'     " GitK executable
 	let s:Git_GitKScript     = ''                       " GitK script (do not specify separate script by default)
 
-	let s:Git_GitBashExecutable = ''                    " do not use GitBash
+	let s:Git_GitBashExecutable = 'xterm'
 endif
 
 call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',      'no' )
@@ -89,6 +97,7 @@ call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty', 'no' )
 call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',     'no' )
 call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',    'no' )
 call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',   'yes' )
+call s:ApplyDefaultSetting( 'Git_Editor',              '' )
 
 let s:Git_Env = {}
 
@@ -105,13 +114,18 @@ if ! has_key( s:Git_Env, 'LANG' )
 endif
 
 let [ s:GitExec_Enabled, s:GitExec_Reason ] = s:CheckGitExecutable( s:Git_Executable )
+let [ s:GitBash_Enabled, s:GitBash_Reason ] = s:CheckExecutable( s:Git_GitBashExecutable )
 
 function! gitsupport#config#GitExecutable ()
-	return s:Git_Executable
+  return s:Git_Executable
+endfunction
+
+function! gitsupport#config#GitBashExecutable ()
+  return s:Git_GitBashExecutable
 endfunction
 
 function! gitsupport#config#Env ()
-	return s:Git_Env
+	return copy( s:Git_Env )
 endfunction
 
 let s:Features = {
@@ -138,7 +152,7 @@ function! gitsupport#config#PrintSettings ( verbose )
   endif
 "  let gitk_e_status  = s:EnabledGitK     ? '' : ' (not executable)'
 "  let gitk_s_status  = s:FoundGitKScript ? '' : ' (not found)'
-"  let gitbash_status = s:EnabledGitBash  ? '' : ' (not executable)'
+  let gitbash_status = s:GitBash_Enabled  ? '' : ' ('.s:GitBash_Reason.')'
 
   let environment = ''
   for [ name, value ] in items( s:Git_Env )
@@ -155,7 +169,7 @@ function! gitsupport#config#PrintSettings ( verbose )
 "  if ! empty( s:Git_GitKScript )
 "    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
 "  endif
-"  let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
+  let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
   if a:verbose >= 1
     let txt .= '              environment :  '.environment."\n"
   endif

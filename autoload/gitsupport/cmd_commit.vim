@@ -35,13 +35,7 @@ function! s:CommitDirect ( args )
     " dry run in separate buffer
     " TODO
     return
-  elseif ! empty( args ) || exists( '$GIT_EDITOR' ) || g:Git_Editor != ''
-    " run assuming sensible parameters ...
-    " or assuming a correctly set "$GIT_EDITOR", e.g.
-    " - xterm -e vim
-    " - gvim -f
-    " TODO
-  elseif empty( args )
+  elseif empty( args ) && empty( g:Git_Editor ) && !exists( '$GIT_EDITOR' )
     " empty parameter list
     return s:ErrorMsg ( 'The command :GitCommit currently can not be used this way.',
           \ 'Set $GIT_EDITOR properly, or use the configuration variable "g:Git_Editor".',
@@ -49,7 +43,29 @@ function! s:CommitDirect ( args )
           \ 'using the special commands :GitCommitFile, :GitCommitMerge, or :GitCommitMsg.' )
   endif
 
-  return
+  " run assuming sensible parameters ...
+  " or assuming a correctly set "$GIT_EDITOR", e.g.
+  " - xterm -e vim
+  " - gvim -f
+  let env = gitsupport#config#Env()
+
+  if g:Git_Editor != ''
+    if g:Git_Editor == 'vim'
+      let bash_exec = gitsupport#config#GitBashExecutable()
+
+      if bash_exec =~# '\cxterm'
+        let env.GIT_EDITOR = bash_exec.' '.g:Xterm_Options.' -title "git commit" -e vim '
+      else
+        let env.GIT_EDITOR = bash_exec.' '.g:Xterm_Options.' -e vim '
+      endif
+    elseif g:Git_Editor == 'gvim'
+      let env.GIT_EDITOR = 'gvim -f'
+    else
+      return s:ErrorMsg( 'invalid setting for g:Git_Editor: "'.g:Git_Editor.'"' )
+    endif
+  endif
+
+  return gitsupport#run#RunDirect( '', ['commit'] + args, 'env', env )
 endfunction
 
 function! s:CommitWithMergeConflict ()
