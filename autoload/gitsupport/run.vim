@@ -92,7 +92,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
   endif
 
   if type( a:params ) == type( [] )
-    let cmd = join( a:params, ' ' )
+    let cmd = join( map( copy( a:params ), "shellescape(v:val)" ), ' ' )
   elseif a:params != ''
     let cmd = a:params
   endif
