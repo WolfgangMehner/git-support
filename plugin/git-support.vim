@@ -1086,6 +1086,10 @@ if s:Enabled && s:Git_NextGen
 	command! -nargs=* -complete=file -range=-1  GitBlame  :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file   GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
+	command! -nargs=* -complete=file   GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
+	command! -nargs=? -complete=file   GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
+	command! -nargs=0                  GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
+	command! -nargs=+                  GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
 	command! -nargs=* -complete=file   GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>)
 	command! -nargs=*                  GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
 	command! -nargs=+ -complete=file   GitGrep            :call gitsupport#cmd_grep#FromCmdLine('cwd',<q-args>)
@@ -1110,6 +1114,10 @@ elseif s:Enabled
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
+	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
+	command! -nargs=? -complete=file                                 GitCommitFile      :call GitS_Commit('file',<q-args>,'')
+	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
+	command! -nargs=+                                                GitCommitMsg       :call GitS_Commit('msg',<q-args>,'')
 	command! -nargs=* -complete=file                                 GitDiff            :call GitS_Diff('update',<q-args>)
 	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=+ -complete=file                                 GitGrep            :call <SID>Grep('update',<q-args>)
@@ -1135,10 +1143,6 @@ elseif s:Enabled
 endif
 
 if s:Enabled
-	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
-	command! -nargs=? -complete=file                                 GitCommitFile      :call GitS_Commit('file',<q-args>,'')
-	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
-	command! -nargs=+                                                GitCommitMsg       :call GitS_Commit('msg',<q-args>,'')
 	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=? -complete=file                                 GitStatus          :call GitS_Status('update',<q-args>)
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
