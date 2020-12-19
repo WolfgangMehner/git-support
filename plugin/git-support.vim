@@ -927,7 +927,6 @@ let s:FoundGitKScript  = 1
 let s:GitKScriptReason = ""
 "
 let s:GitVersion    = ""            " Git Version
-let s:GitHelpFormat = ""            " 'man' or 'html'
 "
 " git bash
 if s:MSWIN
@@ -1036,16 +1035,6 @@ if s:Enabled
 	endif
 endif
 
-" check Git help.format   {{{2
-"
-if s:Enabled
-	let s:GitHelpFormat = s:GitGetConfig( 'help.format' )
-	"
-	if s:GitHelpFormat == 'web'
-		let s:GitHelpFormat = 'html'
-	endif
-endif
-"
 " standard help text   {{{2
 "
 let s:HelpTxtStd  = "S-F1    : help\n"
@@ -1073,6 +1062,7 @@ if s:Enabled
   command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
+  command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete          GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
 endif
 
 if s:Enabled && s:Git_NextGen
@@ -1110,7 +1100,6 @@ if s:Enabled && ! s:Git_NextGen
 endif
 
 if s:Enabled
-	command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete   GitHelp            :call <SID>Help('update',<q-args>)
 	command! -nargs=? -complete=file                                 GitStatus          :call GitS_Status('update',<q-args>)
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
@@ -2377,83 +2366,12 @@ endfunction    " ----------  end of function s:Grep  ----------
 "-------------------------------------------------------------------------------
 
 function! s:Help( action, ... )
-
-	let helpcmd = ''
-	"
 	if a:action == 'disabled'
 		return s:ImportantMsg ( s:DisabledMessage, s:DisabledReason )
-	elseif a:action == 'help'
-		echo s:HelpTxtStdNoUpdate
-" 		let txt  = s:HelpTxtStdNoUpdate."\n\n"
-" 		let txt .= "c       : show contents and jump to section\n"
-" 		echo txt
-		return
-	elseif a:action == 'quit'
-		close
-		return
-	elseif a:action == 'update'
-		if a:0 == 0
-			" noop
-		else
-			let helpcmd = a:1
-		endif
-" 	elseif a:action == 'toc'
-" 		for i in range( 1, len(b:GitSupport_TOC) )
-" 			echo i.' - '.b:GitSupport_TOC[i-1][1]
-" 		endfor
-" 		return
 	else
 		echoerr 'Unknown action "'.a:action.'".'
 		return
 	endif
-
-	if s:GitHelpFormat == 'html'
-		return s:StandardRun ( 'help', helpcmd, '' )
-	endif
-
-	let ts_save = &g:tabstop
-
-	if s:OpenGitBuffer ( 'Git - help' )
-		"
-		let b:GitSupport_HelpFlag = 1
-		"
-		setlocal filetype=man
-		"
-		exe 'nnoremap          <buffer> <S-F1> :call <SID>Help("help")<CR>'
-		exe 'nnoremap <silent> <buffer> q      :call <SID>Help("quit")<CR>'
-		"
-		"exe 'nnoremap <silent> <buffer> c      :call <SID>Help("toc")<CR>'
-	endif
-	"
-	let cmd = s:Git_Executable.' help '.helpcmd
-	"
-	if s:UNIX && winwidth( winnr() ) > 0
-		let cmd = 'MANWIDTH='.winwidth( winnr() ).' '.cmd
-	endif
-
-	call s:UpdateGitBuffer ( cmd )
-
-	let &g:tabstop = ts_save
-
-	" :TODO:19.01.2014 18:26:WM: own toc or via ctags?
-" 	let b:GitSupport_TOC = []
-" 	"
-" 	let cpos = getpos ('.')
-" 	call setpos ( '.', [ bufnr('%'),1,1,1 ] )
-" 	"
-"  	while 1
-"  		let pos = search ( '^\w', 'W' )
-"  		"
-"  		if pos == 0 | break | endif
-" 		if pos == 1 || pos == line('$') | continue | endif
-"  		"
-"  		let item = matchstr ( getline(pos), '^[0-9A-Za-z \t]\+' )
-"  		"
-" 		call add ( b:GitSupport_TOC, [ pos, item ] )
-"  		"
-"  	endwhile
-" 	"
-" 	call setpos ('.',cpos)
 endfunction    " ----------  end of function s:Help  ----------
 
 "-------------------------------------------------------------------------------

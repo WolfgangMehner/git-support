@@ -134,6 +134,9 @@ let s:Features = {
       \ 'running_mswin': s:MSWIN,
       \ 'running_unix':  s:UNIX,
       \
+      \ 'is_executable_git':  s:GitExec_Enabled,
+      \ 'is_executable_bash': s:GitBash_Enabled,
+      \
       \ 'vim_full_job_support': has('patch-8.0.0902'),
       \ }
 
