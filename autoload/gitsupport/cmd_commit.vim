@@ -67,7 +67,7 @@ function! s:CommitRun ( args )
     endif
   endif
 
-  return gitsupport#run#RunDirect( '', ['commit'] + args, 'env', env )
+  return gitsupport#run#RunDirect( '', ['commit'] + a:args, 'env', env )
 endfunction
 
 function! s:CommitWithMergeConflict ()
