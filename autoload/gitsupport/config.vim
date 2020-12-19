@@ -173,6 +173,11 @@ function! gitsupport#config#GitConfig ( option, scope )
   return [ ret_code, text ]
 endfunction
 
+function! gitsupport#config#PrintGitDisabled ()
+  return s:ImportantMsg( printf(
+        \ "Git-Support not working:\nthe git executable \"%s\" is not working correctly\n(%s)", s:Git_Executable, s:GitExec_Reason ) )
+endfunction
+
 function! gitsupport#config#PrintSettings ( verbose )
   if     s:MSWIN | let sys_name = 'Windows'
   elseif s:UNIX  | let sys_name = 'UNIX'
@@ -238,6 +243,12 @@ function! s:ErrorMsg ( ... )
   for line in a:000
     echomsg line
   endfor
+  echohl None
+endfunction
+
+function! s:ImportantMsg ( ... )
+  echohl Search
+  echo join( a:000, "\n" )
   echohl None
 endfunction
 

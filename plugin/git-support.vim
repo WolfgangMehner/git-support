@@ -1107,10 +1107,10 @@ if s:Enabled
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 else
-	command  -nargs=*                -bang                           Git                :call <SID>Help('disabled')
-	command! -nargs=*                                                GitRun             :call <SID>Help('disabled')
-	command! -nargs=*                                                GitBuf             :call <SID>Help('disabled')
-	command! -nargs=*                                                GitHelp            :call <SID>Help('disabled')
+  command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
+  command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
+  command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
+  command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 endif
@@ -2360,19 +2360,6 @@ function! s:Grep( action, ... )
 
 	call s:UpdateGitBuffer ( cmd, update_only )
 endfunction    " ----------  end of function s:Grep  ----------
-
-"-------------------------------------------------------------------------------
-" s:Help : execute 'git help'   {{{1
-"-------------------------------------------------------------------------------
-
-function! s:Help( action, ... )
-	if a:action == 'disabled'
-		return s:ImportantMsg ( s:DisabledMessage, s:DisabledReason )
-	else
-		echoerr 'Unknown action "'.a:action.'".'
-		return
-	endif
-endfunction    " ----------  end of function s:Help  ----------
 
 "-------------------------------------------------------------------------------
 " s:Log : execute 'git log ...'   {{{1
