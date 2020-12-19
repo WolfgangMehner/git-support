@@ -43,60 +43,52 @@ function! s:Quit ()
 endfunction
 
 function! gitsupport#commands#AddFromCmdLine ( q_params )
-	let git_env  = gitsupport#config#Env()
+  if a:q_params == '' && g:Git_AddExpandEmpty == 'yes'
+    let params = '-- '.expand( '%:S' )
+  else
+    let params = a:q_params
+  endif
 
-	if a:q_params == '' && g:Git_AddExpandEmpty == 'yes'
-		let params = '-- '.expand( '%:S' )
-	else
-		let params = a:q_params
-	endif
-
-	return gitsupport#run#RunDirect( '', 'add '.params, 'env', git_env )
+  return gitsupport#run#RunDirect( '', 'add '.params, 'env_std', 1 )
 endfunction
 
 function! gitsupport#commands#CheckoutFromCmdLine ( q_params )
-	let git_env  = gitsupport#config#Env()
+  if a:q_params == '' && g:Git_CheckoutExpandEmpty == 'yes'
+    if ! gitsupport#common#Question( 'Check out current file?', 'highlight', 'warning' )
+      echo "aborted"
+      return
+    endif
 
-	if a:q_params == '' && g:Git_CheckoutExpandEmpty == 'yes'
-		if ! gitsupport#common#Question( 'Check out current file?', 'highlight', 'warning' )
-			echo "aborted"
-			return
-		endif
+    let params = '-- '.expand( '%:S' )
+  else
+    let params = a:q_params
+  endif
 
-		let params = '-- '.expand( '%:S' )
-	else
-		let params = a:q_params
-	endif
-
-	return gitsupport#run#RunDirect( '', 'checkout '.params, 'env', git_env )
+  return gitsupport#run#RunDirect( '', 'checkout '.params, 'env_std', 1 )
 endfunction
 
 function! gitsupport#commands#ResetFromCmdLine ( q_params )
-	let git_env  = gitsupport#config#Env()
+  if a:q_params == '' && g:Git_ResetExpandEmpty == 'yes'
+    let params = '-- '.expand( '%:S' )
+  else
+    let params = a:q_params
+  endif
 
-	if a:q_params == '' && g:Git_ResetExpandEmpty == 'yes'
-		let params = '-- '.expand( '%:S' )
-	else
-		let params = a:q_params
-	endif
-
-	return gitsupport#run#RunDirect( '', 'reset '.params, 'env', git_env )
+  return gitsupport#run#RunDirect( '', 'reset '.params, 'env_std', 1 )
 endfunction
 
 function! gitsupport#commands#RmFromCmdLine ( q_params )
-	let git_env  = gitsupport#config#Env()
+  if a:q_params == ''
+    let params = '-- '.expand( '%:S' )
+  else
+    let params = a:q_params
+  endif
 
-	if a:q_params == ''
-		let params = '-- '.expand( '%:S' )
-	else
-		let params = a:q_params
-	endif
+  let ret_code = gitsupport#run#RunDirect( '', 'rm '.params, 'env_std', 1 )
 
-	let ret_code = gitsupport#run#RunDirect( '', 'rm '.params, 'env', git_env )
-
-	if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' )
-		bdelete
-		echo "deleted"
-	endif
+  if ret_code == 0 && empty ( a:q_params ) && gitsupport#common#Question( 'Delete the current buffer as well?' )
+    bdelete
+    echo "deleted"
+  endif
 endfunction
 
