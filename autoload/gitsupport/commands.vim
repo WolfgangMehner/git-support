@@ -12,8 +12,34 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#commands#DirectFromCmdLine ( cmd, q_params )
-  return gitsupport#run#RunDirect( '', a:cmd.' '.a:q_params, 'env_std', 1 )
+function! gitsupport#commands#FromCmdLine ( mode, cmd )
+  if a:mode == 'direct'
+    return gitsupport#run#RunDirect( '', a:cmd, 'env_std', 1 )
+  elseif a:mode == 'buffer'
+    return s:BufferFromCmdLine( a:cmd )
+  endif
+endfunction
+
+function! s:BufferFromCmdLine ( args )
+  let args = gitsupport#common#ParseShellParseArgs( a:args )
+  call gitsupport#run#OpenBuffer( 'Git - '..args[0] )
+  call gitsupport#run#RunToBuffer( '', args, 'env_std', 1 )
+
+  command! -nargs=0 -buffer  Help   :call <SID>Help()
+  nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
+  nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
+endfunction
+
+function! s:Help ()
+	let text =
+				\  "git buffer\n\n"
+				\ ."S-F1    : help\n"
+				\ ."q       : close\n"
+	echo text
+endfunction
+
+function! s:Quit ()
+	close
 endfunction
 
 function! gitsupport#commands#AddFromCmdLine ( q_params )
