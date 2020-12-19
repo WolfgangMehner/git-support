@@ -92,12 +92,13 @@ else
 	let s:Git_GitBashExecutable = 'xterm'
 endif
 
-call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',      'no' )
-call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty', 'no' )
-call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',     'no' )
-call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',    'no' )
-call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',   'yes' )
-call s:ApplyDefaultSetting( 'Git_Editor',              '' )
+call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',       'no' )
+call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty',  'no' )
+call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',      'no' )
+call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',     'no' )
+call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',    'yes' )
+call s:ApplyDefaultSetting( 'Git_StatusStagedOpenDiff', 'cached' )
+call s:ApplyDefaultSetting( 'Git_Editor',               '' )
 
 let s:Git_Env = {}
 

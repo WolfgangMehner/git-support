@@ -870,9 +870,7 @@ endif
 let s:Git_NextGen = 0
 call s:GetGlobalSetting ( 'Git_NextGen' )
 
-if s:Git_NextGen
-	let git_exec = gitsupport#config#GitExecutable()
-endif
+call gitsupport#config#GitExecutable()
 
 let s:Git_LoadMenus      = 'yes'    " load the menus?
 let s:Git_RootMenu       = '&Git'   " name of the root menu
@@ -924,13 +922,6 @@ call s:GetGlobalSetting ( 'Git_GitKScript' )
 call s:GetGlobalSetting ( 'Git_LoadMenus' )
 call s:GetGlobalSetting ( 'Git_RootMenu' )
 call s:GetGlobalSetting ( 'Git_CustomMenu' )
-"
-call s:ApplyDefaultSetting ( 'Git_CheckoutExpandEmpty',  'no' )
-call s:ApplyDefaultSetting ( 'Git_DiffExpandEmpty',      'no' )
-call s:ApplyDefaultSetting ( 'Git_ResetExpandEmpty',     'no' )
-call s:ApplyDefaultSetting ( 'Git_OpenFoldAfterJump',    'yes' )
-call s:ApplyDefaultSetting ( 'Git_StatusStagedOpenDiff', 'cached' )
-call s:ApplyDefaultSetting ( 'Git_Editor',               '' )
 
 let s:Enabled         = 1           " Git enabled?
 let s:DisabledMessage = "Git-Support not working:"
@@ -1081,27 +1072,30 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 
 " custom commands   {{{2
 
+if s:Enabled
+  command! -nargs=* -complete=file            GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
+  command! -nargs=* -complete=file            GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
+  command! -nargs=* -complete=file            GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
+  command! -nargs=? -complete=file            GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
+  command! -nargs=0                           GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
+  command! -nargs=+                           GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
+  command! -nargs=*                           GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
+  command! -nargs=*                           GitMerge           :call gitsupport#commands#FromCmdLine('direct','merge '.<q-args>)
+  command! -nargs=* -complete=file            GitMv              :call gitsupport#commands#FromCmdLine('direct','mv '.<q-args>)
+  command! -nargs=*                           GitPull            :call gitsupport#commands#FromCmdLine('direct','pull '.<q-args>)
+  command! -nargs=*                           GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
+  command! -nargs=* -complete=file            GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
+  command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
+endif
+
 if s:Enabled && s:Git_NextGen
-	command! -nargs=* -complete=file   GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
 	command! -nargs=* -complete=file -range=-1  GitBlame  :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file   GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
-	command! -nargs=* -complete=file   GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
-	command! -nargs=* -complete=file   GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
-	command! -nargs=? -complete=file   GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
-	command! -nargs=0                  GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
-	command! -nargs=+                  GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
 	command! -nargs=* -complete=file   GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>)
-	command! -nargs=*                  GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
 	command! -nargs=+ -complete=file   GitGrep            :call gitsupport#cmd_grep#FromCmdLine('cwd',<q-args>)
 	command! -nargs=+ -complete=file   GitGrepTop         :call gitsupport#cmd_grep#FromCmdLine('top',<q-args>)
 	command! -nargs=* -complete=file -range=-1  GitLog    :call gitsupport#cmd_log#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=*                  GitMerge           :call gitsupport#commands#FromCmdLine('direct','merge '.<q-args>)
-	command! -nargs=* -complete=file   GitMv              :call gitsupport#commands#FromCmdLine('direct','mv '.<q-args>)
-	command! -nargs=*                  GitPull            :call gitsupport#commands#FromCmdLine('direct','pull '.<q-args>)
-	command! -nargs=*                  GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
 	command! -nargs=* -complete=file   GitRemote          :call gitsupport#cmd_remote#FromCmdLine(<q-args>)
-	command! -nargs=* -complete=file   GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
-	command! -nargs=* -complete=file   GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitShow            :call gitsupport#cmd_show#FromCmdLine(<q-args>)
 	command! -nargs=*                  GitStash           :call gitsupport#cmd_stash#FromCmdLine(<q-args>)
 	command! -nargs=*                  GitSlist           :call gitsupport#cmd_stash#FromCmdLine('list '.<q-args>)
@@ -1109,30 +1103,16 @@ if s:Enabled && s:Git_NextGen
 	command  -nargs=* -complete=file -bang      Git       :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
 	command! -nargs=* -complete=file            GitRun    :call gitsupport#commands#FromCmdLine('direct',<q-args>)
 	command! -nargs=* -complete=file            GitBuf    :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
-elseif s:Enabled
-	command! -nargs=* -complete=file -bang                           GitAdd             :call GitS_Add(<q-args>,'<bang>'=='!'?'ef':'e')
+endif
+
+if s:Enabled && ! s:Git_NextGen
 	command! -nargs=* -complete=file -range=-1                       GitBlame           :call <SID>Blame('update',<q-args>,<line1>,<line2>,<count>)
 	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitCheckout        :call GitS_Checkout(<q-args>,'c')
-	command! -nargs=* -complete=file                                 GitCommit          :call GitS_Commit('direct',<q-args>,'')
-	command! -nargs=? -complete=file                                 GitCommitFile      :call GitS_Commit('file',<q-args>,'')
-	command! -nargs=0                                                GitCommitMerge     :call GitS_Commit('merge','','')
-	command! -nargs=+                                                GitCommitMsg       :call GitS_Commit('msg',<q-args>,'')
 	command! -nargs=* -complete=file                                 GitDiff            :call GitS_Diff('update',<q-args>)
-	command! -nargs=*                                                GitFetch           :call GitS_Fetch(<q-args>)
 	command! -nargs=+ -complete=file                                 GitGrep            :call <SID>Grep('update',<q-args>)
 	command! -nargs=+ -complete=file                                 GitGrepTop         :call <SID>Grep('top',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=*                                                GitMerge           :call GitS_Merge('direct',<q-args>,'')
-	command! -nargs=*                                                GitMergeUpstream   :call GitS_Merge('upstream',<q-args>,'')
-	command! -nargs=* -complete=file                                 GitMove            :call GitS_Move(<q-args>)
-	command! -nargs=* -complete=file                                 GitMv              :call GitS_Move(<q-args>)
-	command! -nargs=*                                                GitPull            :call GitS_Pull(<q-args>)
-	command! -nargs=*                                                GitPush            :call GitS_Push(<q-args>)
 	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitRemove          :call GitS_Remove(<q-args>,'e')
-	command! -nargs=* -complete=file                                 GitRm              :call GitS_Remove(<q-args>,'e')
-	command! -nargs=* -complete=file                                 GitReset           :call GitS_Reset(<q-args>)
 	command! -nargs=* -complete=file                                 GitShow            :call GitS_Show('update',<q-args>)
 	command! -nargs=*                                                GitStash           :call GitS_Stash(<q-args>,'')
 	command! -nargs=*                                                GitSlist           :call GitS_Stash('list '.<q-args>,'')
@@ -1151,7 +1131,6 @@ if s:Enabled
 	command! -nargs=1 -complete=customlist,<SID>EditFilesComplete    GitEdit            :call <SID>GitEdit(<q-args>)
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
-	"
 else
 	command  -nargs=*                -bang                           Git                :call <SID>Help('disabled')
 	command! -nargs=*                                                GitRun             :call <SID>Help('disabled')
