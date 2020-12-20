@@ -1038,6 +1038,7 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 if s:Enabled
   command! -nargs=* -complete=file            GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
   command! -nargs=* -complete=file -range=-1  GitBlame           :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
+  command! -nargs=* -complete=file            GitBranch          :call gitsupport#cmd_branch#FromdLine(<q-args>)
   command! -nargs=* -complete=file            GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
   command! -nargs=? -complete=file            GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
@@ -1050,6 +1051,7 @@ if s:Enabled
   command! -nargs=* -complete=file            GitMv              :call gitsupport#commands#FromCmdLine('direct','mv '.<q-args>)
   command! -nargs=*                           GitPull            :call gitsupport#commands#FromCmdLine('direct','pull '.<q-args>)
   command! -nargs=*                           GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
+  command! -nargs=* -complete=file            GitRemote          :call gitsupport#cmd_remote#FromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitShow            :call gitsupport#cmd_show#FromCmdLine(<q-args>)
@@ -1062,20 +1064,16 @@ if s:Enabled
 endif
 
 if s:Enabled && s:Git_NextGen
-	command! -nargs=* -complete=file   GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
 	command! -nargs=* -complete=file   GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>)
 	command! -nargs=* -complete=file -range=-1  GitLog    :call gitsupport#cmd_log#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=* -complete=file   GitRemote          :call gitsupport#cmd_remote#FromCmdLine(<q-args>)
 	command  -nargs=* -complete=file -bang      Git       :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
 	command! -nargs=* -complete=file            GitRun    :call gitsupport#commands#FromCmdLine('direct',<q-args>)
 	command! -nargs=* -complete=file            GitBuf    :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
 endif
 
 if s:Enabled && ! s:Git_NextGen
-	command! -nargs=* -complete=file                                 GitBranch          :call GitS_Branch(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitDiff            :call GitS_Diff('update',<q-args>)
 	command! -nargs=* -complete=file -range=-1                       GitLog             :call <SID>Log('update',<q-args>,<line1>,<line2>,<count>)
-	command! -nargs=* -complete=file                                 GitRemote          :call GitS_Remote(<q-args>,'')
 	command  -nargs=* -complete=file -bang                           Git                :call GitS_Run(<q-args>,'<bang>'=='!'?'b':'')
 	command! -nargs=* -complete=file                                 GitRun             :call GitS_Run(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitBuf             :call GitS_Run(<q-args>,'b')
@@ -1387,175 +1385,6 @@ function! GitS_Add( param, flags )
 	endif
 	"
 endfunction    " ----------  end of function GitS_Add  ----------
-"
-"-------------------------------------------------------------------------------
-" GitS_Branch : execute 'git branch ...'   {{{1
-"
-" Flags: -> s:StandardRun
-"-------------------------------------------------------------------------------
-"
-function! GitS_Branch( param, flags )
-	"
-	if empty ( a:param )
-		call GitS_BranchList ( 'update' )
-	else
-		return s:StandardRun ( 'branch', a:param, a:flags, 'c' )
-	endif
-	"
-endfunction    " ----------  end of function GitS_Branch  ----------
-"
-"-------------------------------------------------------------------------------
-" GitS_BranchList : execute 'git branch' (list branches)   {{{1
-"-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
-" s:BranchList_GetBranch : Get the branch under the cursor.   {{{2
-"
-" Parameters:
-"   -
-" Returns:
-"   [ <branch-name>, <flag> ] - data (list: string, string)
-"
-" The entries are as follows:
-"   branch name - name of the branch under the cursor (string)
-"   flag        - contains: "r" if remote branch (string)
-"
-" If only the name of the branch could be obtained, returns:
-"   [ <branch-name>, '' ]
-" If no branch could be found:
-"   [ '', '' ]
-"-------------------------------------------------------------------------------
-"
-function! s:BranchList_GetBranch()
-	"
-	let line = getline('.')
-	let mlist = matchlist ( line, '^[[:space:]*]*\(remotes/\)\?\(\S\+\)' )
-	"
-	if empty ( mlist )
-		return [ '', '' ]
-	else
-		let branch = mlist[2]
-		let flag   = empty( mlist[1] ) ? '' : 'r'
-		return [ branch, flag ]
-	endif
-	"
-endfunction    " ----------  end of function s:BranchList_GetBranch  ----------
-" }}}2
-"-------------------------------------------------------------------------------
-"
-function! GitS_BranchList( action )
-	"
-	if a:action == 'help'
-		let txt  = s:HelpTxtStd."\n\n"
-		let txt .= "branch under cursor ...\n"
-		let txt .= "ch      : checkout\n"
-		let txt .= "cr      : use as starting point for creating a new branch\n"
-		let txt .= "Ch / CH : create new branch and check it out\n"
-		let txt .= "de      : delete\n"
-		let txt .= "De / DE : delete (via -D)\n"
-		let txt .= "me      : merge with current branch\n"
-		let txt .= "re      : rebase\n"
-		let txt .= "rn      : rename\n"
-		let txt .= "su      : set as upstream from current branch\n"
-		let txt .= "cs      : show the commit\n"
-		echo txt
-		return
-	elseif a:action == 'quit'
-		close
-		return
-	elseif a:action == 'update'
-		" noop
-	elseif -1 != index ( [ 'checkout', 'create', 'create-checkout', 'delete', 'delete-force', 'merge', 'rebase', 'rename', 'set-upstream', 'show' ], a:action )
-		"
-		let [ b_name, b_flag ] = s:BranchList_GetBranch ()
-		"
-		if b_name == ''
-			return s:ErrorMsg ( 'No branch under the cursor.' )
-		endif
-		"
-		if a:action == 'checkout'
-			call GitS_Checkout( shellescape(b_name), 'c' )
-		elseif a:action == 'create'
-			let suggestion = ''
-			if b_flag =~ 'r' && b_name !~ '/HEAD$'
-				let suggestion = substitute ( b_name, '^[^/]\+/', '', '' )
-			endif
-
-			return s:AssembleCmdLine ( ':GitBranch '.suggestion, ' '.b_name )
-		elseif a:action == 'create-checkout'
-			let suggestion = ''
-			if b_flag =~ 'r' && b_name !~ '/HEAD$'
-				let suggestion = substitute ( b_name, '^[^/]\+/', '', '' )
-			endif
-
-			return s:AssembleCmdLine ( ':GitCheckout -b '.suggestion, ' '.b_name )
-		elseif a:action == 'delete'
-			if b_flag =~ 'r'
-				call GitS_Branch( '-rd '.shellescape(b_name), 'c' )
-			else
-				call GitS_Branch( '-d '.shellescape(b_name), 'c' )
-			endif
-		elseif a:action == 'delete-force'
-			if b_flag =~ 'r'
-				call GitS_Branch( '-rD '.shellescape(b_name), 'c' )
-			else
-				call GitS_Branch( '-D '.shellescape(b_name), 'c' )
-			endif
-		elseif a:action == 'merge'
-			call GitS_Merge( 'direct', shellescape(b_name), 'c' )
-		elseif a:action == 'rebase'
-			call GitS_Run( 'rebase '.shellescape(b_name), 'c')
-		elseif a:action == 'rename'
-			return ':GitBranch -m '.b_name.' '
-		elseif a:action == 'set-upstream'
-			" get short name of current HEAD
-			let b_current = s:StandardRun ( 'symbolic-ref', '-q HEAD', 't' )[1]
-			let b_current = s:StandardRun ( 'for-each-ref', " --format='%(refname:short)' ".shellescape( b_current ), 't' )[1]
-
-			if s:HasBranchSetUpstreamTo
-				return s:AssembleCmdLine ( ':GitBranch --set-upstream-to='.b_name.' '.b_current, '' )
-			else
-				return s:AssembleCmdLine ( ':GitBranch --set-upstream '.b_current, ' '.b_name )
-			endif
-		elseif a:action == 'show'
-			call GitS_Show( 'update', shellescape(b_name), '' )
-		endif
-		"
-		return
-	else
-		echoerr 'Unknown action "'.a:action.'".'
-		return
-	endif
-	"
-	if s:OpenGitBuffer ( 'Git - branch' )
-		"
-		let b:GitSupport_BranchFlag = 1
-		"
-		setlocal filetype=gitsbranch
-		"
-		exe 'nnoremap          <buffer> <S-F1> :call GitS_BranchList("help")<CR>'
-		exe 'nnoremap <silent> <buffer> q      :call GitS_BranchList("quit")<CR>'
-		exe 'nnoremap <silent> <buffer> u      :call GitS_BranchList("update")<CR>'
-		"
-		exe 'nnoremap <silent> <buffer> ch     :call GitS_BranchList("checkout")<CR>'
-		exe 'nnoremap <expr>   <buffer> cr     GitS_BranchList("create")'
-		exe 'nnoremap <expr>   <buffer> Ch     GitS_BranchList("create-checkout")'
-		exe 'nnoremap <expr>   <buffer> CH     GitS_BranchList("create-checkout")'
-		exe 'nnoremap <silent> <buffer> de     :call GitS_BranchList("delete")<CR>'
-		exe 'nnoremap <silent> <buffer> De     :call GitS_BranchList("delete-force")<CR>'
-		exe 'nnoremap <silent> <buffer> DE     :call GitS_BranchList("delete-force")<CR>'
-		exe 'nnoremap <silent> <buffer> me     :call GitS_BranchList("merge")<CR>'
-		exe 'nnoremap <silent> <buffer> re     :call GitS_BranchList("rebase")<CR>'
-		exe 'nnoremap <expr>   <buffer> rn     GitS_BranchList("rename")'
-		exe 'nnoremap <expr>   <buffer> su     GitS_BranchList("set-upstream")'
-		exe 'nnoremap <silent> <buffer> cs     :call GitS_BranchList("show")<CR>'
-	endif
-	"
-	let cmd = s:Git_Executable.' branch -avv'
-	"
-	call s:UpdateGitBuffer ( cmd, 1 )
-	"
-endfunction    " ----------  end of function GitS_BranchList  ----------
 "
 "-------------------------------------------------------------------------------
 " GitS_Checkout : execute 'git checkout ...'   {{{1
@@ -2143,137 +1972,6 @@ function! GitS_Merge( mode, param, flags )
 	endif
 	"
 endfunction    " ----------  end of function GitS_Merge  ----------
-"
-"-------------------------------------------------------------------------------
-" GitS_Remote : execute 'git remote ...'   {{{1
-"
-" Flags: -> s:StandardRun
-"-------------------------------------------------------------------------------
-"
-function! GitS_Remote( param, flags )
-	"
-	if empty ( a:param )
-		call GitS_RemoteList ( 'update' )
-	else
-		return s:StandardRun ( 'remote', a:param, a:flags, 'c' )
-	endif
-	"
-endfunction    " ----------  end of function GitS_Remote  ----------
-"
-"-------------------------------------------------------------------------------
-" GitS_RemoteList : execute 'git remote' (list remotes)   {{{1
-"-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
-" s:RemoteList_GetRemote : Get the remote and URL under the cursor.   {{{2
-"
-" Parameters:
-"   -
-" Returns:
-"   [ <remote-name>, <url> ] - data (list: string, string)
-"
-" The entries are as follows:
-"   remote name - name of the remote under the cursor (string)
-"   url         - its URL (string)
-"
-" If only the name of the remote could be obtained, returns:
-"   [ <remote-name>, '' ]
-" If no remote could be found:
-"   [ '', '' ]
-"-------------------------------------------------------------------------------
-"
-function! s:RemoteList_GetRemote()
-	"
-	let line = getline('.')
-	let mlist = matchlist ( line, '^\s*\(\S\+\)\s\+\(.\+\)\s\+(\w\+)$' )
-	"
-	if empty ( mlist )
-		return [ '', '' ]
-	else
-		return mlist[1:2]
-	endif
-	"
-endfunction    " ----------  end of function s:RemoteList_GetRemote  ----------
-" }}}2
-"-------------------------------------------------------------------------------
-"
-function! GitS_RemoteList( action )
-	"
-	if a:action == 'help'
-		let txt  = s:HelpTxtStd."\n\n"
-		let txt .= "remote under cursor ...\n"
-		let txt .= "fe      : fetch\n"
-		let txt .= "ph      : push\n"
-		let txt .= "pl      : pull\n"
-		let txt .= "rm      : remove\n"
-		let txt .= "rn      : rename\n"
-		let txt .= "su      : set-url\n"
-		let txt .= "sh      : show\n"
-		echo txt
-		return
-	elseif a:action == 'quit'
-		close
-		return
-	elseif a:action == 'update'
-		" noop
-	elseif -1 != index ( [ 'fetch', 'push', 'pull', 'remove', 'rename', 'set-url', 'show' ], a:action )
-		"
-		let [ r_name, r_url ] = s:RemoteList_GetRemote ()
-		"
-		if r_name == ''
-			return s:ErrorMsg ( 'No remote under the cursor.' )
-		endif
-		"
-		if a:action == 'fetch'
-			return ':GitFetch '.r_name.' '
-		elseif a:action == 'push'
-			return ':GitPush '.r_name.' '
-		elseif a:action == 'pull'
-			return ':GitPull '.r_name.' '
-		elseif a:action == 'remove'
-			call GitS_Remote( 'rm '.shellescape(r_name), 'c' )
-		elseif a:action == 'rename'
-			return ':GitRemote rename '.r_name.' '
-		elseif a:action == 'set-url'
-			if empty ( r_url )
-				return ':GitRemote set-url '.r_name.' '
-			else
-				return ':GitRemote set-url '.r_name.' '.shellescape( r_url )
-			endif
-		elseif a:action == 'show'
-			call GitS_Remote( 'show '.shellescape(r_name), '' )
-		endif
-		"
-		return
-	else
-		echoerr 'Unknown action "'.a:action.'".'
-		return
-	endif
-	"
-	if s:OpenGitBuffer ( 'Git - remote' )
-		"
-		let b:GitSupport_RemoteFlag = 1
-		"
-		"setlocal filetype=
-		"
-		exe 'nnoremap          <buffer> <S-F1> :call GitS_RemoteList("help")<CR>'
-		exe 'nnoremap <silent> <buffer> q      :call GitS_RemoteList("quit")<CR>'
-		exe 'nnoremap <silent> <buffer> u      :call GitS_RemoteList("update")<CR>'
-		"
-		exe 'nnoremap <expr>   <buffer> fe     GitS_RemoteList("fetch")'
-		exe 'nnoremap <expr>   <buffer> ph     GitS_RemoteList("push")'
-		exe 'nnoremap <expr>   <buffer> pl     GitS_RemoteList("pull")'
-		exe 'nnoremap <silent> <buffer> rm     :call GitS_RemoteList("remove")<CR>'
-		exe 'nnoremap <expr>   <buffer> rn     GitS_RemoteList("rename")'
-		exe 'nnoremap <expr>   <buffer> su     GitS_RemoteList("set-url")'
-		exe 'nnoremap <silent> <buffer> sh     :call GitS_RemoteList("show")<CR>'
-	endif
-	"
-	let cmd = s:Git_Executable.' remote -v'
-	"
-	call s:UpdateGitBuffer ( cmd, 1 )
-	"
-endfunction    " ----------  end of function GitS_RemoteList  ----------
 "
 "-------------------------------------------------------------------------------
 " GitS_Remove : execute 'git rm ...'   {{{1
