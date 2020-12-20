@@ -29,7 +29,7 @@ endfunction
 
 
 function! gitsupport#data#LoadData ( filename )
-  let filename = s:plugin_dir..'/git-support/data/'..a:filename..'.json'
+  let filename = s:plugin_dir.'/git-support/data/'.a:filename.'.json'
   let [ ret_code, data ] = s:LoadJson( filename )
 
   if ret_code == 0
