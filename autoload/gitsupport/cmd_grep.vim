@@ -40,6 +40,15 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   call gitsupport#run#OpenBuffer( 'Git - grep' )
   call s:Run( params, cwd )
 
+  let &l:filetype = 'gitsgrep'
+  let &l:foldmethod = 'syntax'
+  let &l:foldlevel = 1
+  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
+  if s:use_conceal
+    let &l:conceallevel  = 2
+    let &l:concealcursor = 'nc'
+  end
+
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -73,22 +82,11 @@ endfunction
 
 function! s:Run ( params, cwd )
   let add_args = s:use_conceal ? ['-z'] : []
-  call gitsupport#run#RunToBuffer( '', ['grep'] + add_args + a:params, 'callback', function( 's:Wrap' ), 'cwd', a:cwd )
+  call gitsupport#run#RunToBuffer( '', ['grep'] + add_args + a:params, 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
-endfunction
-
-function! s:Wrap ()
-  let &l:filetype = 'gitsgrep'
-  let &l:foldmethod = 'syntax'
-  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
-  normal! zR   | " open all folds (closed by the syntax highlighting)
-  if s:use_conceal
-    let &l:conceallevel  = 2
-    let &l:concealcursor = 'nc'
-  end
 endfunction
 
 function! s:Jump ( mode )

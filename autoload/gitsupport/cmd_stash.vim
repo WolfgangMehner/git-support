@@ -44,6 +44,10 @@ function! gitsupport#cmd_stash#OpenBuffer ( params )
     call gitsupport#run#OpenBuffer( 'Git - stash show' )
     call s:Run( params )
 
+    let &l:filetype = 'gitsdiff'
+    let &l:foldmethod = 'syntax'
+    let &l:foldlevel = 2
+
     command! -nargs=0 -buffer  Help   :call <SID>HelpShow()
     nnoremap          <buffer> <S-F1> :call <SID>HelpShow()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -89,17 +93,11 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['stash'] + a:params, 'callback', function( 's:Wrap' ) )
+  call gitsupport#run#RunToBuffer( '', ['stash'] + a:params )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param )
-endfunction
-
-function! s:Wrap ()
-  let &l:filetype = 'gitsdiff'
-  let &l:foldmethod = 'syntax'
-  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 
 function! s:Save ()

@@ -33,6 +33,11 @@ function! gitsupport#cmd_diff#OpenBuffer ( params )
   call gitsupport#run#OpenBuffer( 'Git - diff' )
   call s:Run( params, cwd )
 
+  let &l:filetype = 'gitsdiff'
+  let &l:foldmethod = 'syntax'
+  let &l:foldlevel = 2
+  let &l:foldtext = 'GitS_FoldLog()'
+
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -80,18 +85,12 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['diff'] + a:params, 'callback', function( 's:Wrap' ), 'cwd', a:cwd )
+  call gitsupport#run#RunToBuffer( '', ['diff'] + a:params,
+        \ 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
-endfunction
-
-function! s:Wrap ()
-  let &l:filetype = 'gitsdiff'
-  let &l:foldmethod = 'syntax'
-  let &l:foldtext = 'GitS_FoldLog()'
-  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 
 function! s:Jump ( mode )

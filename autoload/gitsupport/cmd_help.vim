@@ -37,6 +37,11 @@ function! gitsupport#cmd_help#OpenBuffer ( topic )
     call gitsupport#run#OpenBuffer( 'Git - help', 'topic', a:topic )
     call s:Run( a:topic )
 
+    " :WORKAROUND:05.04.2016 21:05:WM: setting the filetype changes the global tabstop
+    let ts_save = &g:tabstop
+    let &l:filetype = 'man'
+    let &g:tabstop = ts_save
+
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -62,14 +67,7 @@ function! s:Run ( topic )
   if s:Features.running_unix && winwidth(winnr()) > 0
     let env.MANWIDTH = ''.winwidth(winnr())
   endif
-  call gitsupport#run#RunToBuffer( '', ['help', a:topic], 'callback', function( 's:Wrap' ), 'env', env )
-endfunction
-
-function! s:Wrap ()
-  " :WORKAROUND:05.04.2016 21:05:WM: setting the filetype changes the global tabstop
-  let ts_save = &g:tabstop
-  let &l:filetype = 'man'
-  let &g:tabstop = ts_save
+  call gitsupport#run#RunToBuffer( '', ['help', a:topic], 'env', env )
 endfunction
 
 function! gitsupport#cmd_help#Complete ( ArgLead, CmdLine, CursorPos )

@@ -57,6 +57,11 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
     call gitsupport#run#OpenBuffer( 'Git - show' )
     call s:Run( params )
 
+    let &l:filetype = 'gitslog'
+    let &l:foldmethod = 'syntax'
+    let &l:foldlevel = 3
+    let &l:foldtext = 'GitS_FoldLog()'
+
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -99,17 +104,10 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['show'] + a:params, 'callback', function( 's:Wrap' ) )
+  call gitsupport#run#RunToBuffer( '', ['show'] + a:params )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param )
-endfunction
-
-function! s:Wrap ()
-  let &l:filetype = 'gitslog'
-  let &l:foldmethod = 'syntax'
-  let &l:foldtext = 'GitS_FoldLog()'
-  normal! zR   | " open all folds (closed by the syntax highlighting)
 endfunction
 

@@ -25,6 +25,8 @@ function! gitsupport#cmd_branch#OpenBuffer ( params )
     call gitsupport#run#OpenBuffer( 'Git - branch' )
     call s:Run( params, cwd )
 
+    setlocal filetype=gitsbranch
+
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -85,15 +87,11 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params, 'callback', function( 's:Wrap' ), 'cwd', a:cwd )
+  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params, 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
-endfunction
-
-function! s:Wrap ()
-  setlocal filetype=gitsbranch
 endfunction
 
 function! s:Checkout ()

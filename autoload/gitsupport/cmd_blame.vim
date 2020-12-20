@@ -36,6 +36,8 @@ function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
   call gitsupport#run#OpenBuffer( 'Git - blame' )
   call s:Run( params, cwd )
 
+  let &l:filetype = 'gitsblame'
+
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
@@ -70,15 +72,11 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['blame'] + a:params, 'callback', function( 's:Wrap' ), 'cwd', a:cwd )
+  call gitsupport#run#RunToBuffer( '', ['blame'] + a:params, 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
-endfunction
-
-function! s:Wrap ()
-  let &l:filetype = 'gitsblame'
 endfunction
 
 function! s:Jump ( mode )
