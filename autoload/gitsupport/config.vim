@@ -137,6 +137,7 @@ let s:Features = {
       \ 'is_executable_git':  s:GitExec_Enabled,
       \ 'is_executable_bash': s:GitBash_Enabled,
       \
+      \ 'vim_has_json_decode':  has('patch-7.4.1304'),
       \ 'vim_full_job_support': has('patch-8.0.0902'),
       \ }
 

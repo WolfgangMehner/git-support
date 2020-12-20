@@ -785,22 +785,11 @@ let s:GitCommands = [
 			\ 'upload-pack',       'var',                      'verify-pack',       'verify-tag',         'web--browse',
 			\ 'whatchanged',       'write-tree',
 			\ ]
-"
-let s:HelpTopics = s:GitCommands + [
-			\ 'attributes', 'cli',               'core-tutorial', 'cvs-migration', 'diffcore',
-			\ 'gitk',       'glossary',          'hooks',         'ignore',        'modules',
-			\ 'namespaces', 'repository-layout', 'tutorial',      'tutorial-2',    'workflows'
-			\ ]
-"
-function! GitS_HelpTopicsComplete ( ArgLead, CmdLine, CursorPos )
-	return filter( copy( s:HelpTopics ), 'v:val =~ "\\V\\<'.escape(a:ArgLead,'\').'\\w\\*"' )
-endfunction    " ----------  end of function GitS_HelpTopicsComplete  ----------
 
 " configuration defaults   {{{2
 " - only defaults which are relevant for Git-Support are listed here
 "
 let s:Config_DefaultValues = {
-			\ 'help.format'          : 'man',
 			\ 'status.relativePaths' : 'true'
 			\ }
 
@@ -1062,7 +1051,7 @@ if s:Enabled
   command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
-  command! -nargs=* -complete=customlist,GitS_HelpTopicsComplete          GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
 endif
 
 if s:Enabled && s:Git_NextGen

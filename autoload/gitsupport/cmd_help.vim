@@ -22,6 +22,10 @@ if s:Features.is_executable_git
   end
 endif
 
+let help_data = gitsupport#data#LoadData( 'basic' )
+let s:HelpTopics = get( help_data, 'commands', [] )
+      \          + get( help_data, 'additional_help_topics', [] )
+
 function! gitsupport#cmd_help#ShowHelp ( topic )
   return gitsupport#cmd_help#OpenBuffer( a:topic )
 endfunction
@@ -69,7 +73,7 @@ function! s:Wrap ()
 endfunction
 
 function! gitsupport#cmd_help#Complete ( ArgLead, CmdLine, CursorPos )
-  return []   " TODO
+  return filter( copy( s:HelpTopics ), 'v:val =~ "\\V\\<'.escape(a:ArgLead,'\').'\\w\\*"' )
 endfunction
 
 function! s:ErrorMsg ( ... )
