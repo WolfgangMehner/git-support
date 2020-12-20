@@ -163,11 +163,6 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     return
   endif
 
-  " pause syntax highlighting (for speed)
-  if &syntax != ''
-    setlocal syntax=OFF
-  endif
-
   if opts.restore_cursor
     let opts.restore_cursor = gitsupport#common#BufferGetPosition()
   else
@@ -196,6 +191,17 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
   endif
 endfunction
 
+function! gitsupport#run#JobWrapup ( job_data )
+  let status = a:job_data.status
+  let buf_nr = a:job_data.buf_nr
+  let opts = a:job_data.opts
+
+  if buf_nr == bufnr('%')
+    call gitsupport#common#BufferSetPosition( opts.restore_cursor )
+  endif
+  call opts.callback( buf_nr, status )
+endfunction
+
 function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
   let opts = a:opts
 
@@ -208,14 +214,7 @@ function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
   endif
 
   call gitsupport#common#BufferSetPosition( opts.restore_cursor )
-  if ret_code == 0
-    call opts.callback()
-  endif
-
-  " restart syntax highlighting
-  if &syntax != ''
-    setlocal syntax=ON
-  endif
+  call opts.callback( bufnr('%'), ret_code )
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )
@@ -332,6 +331,6 @@ function! gitsupport#run#OpenFile ( filename, ... )
   endif
 endfunction
 
-function! s:Empty ()
+function! s:Empty ( ... )
 endfunction
 

@@ -32,24 +32,14 @@ function! gitsupport#run_vim#JobRun ( cmd, params, opts )
 
   let job_id = job_info( job_obj ).process
 
-  let g:all_jobs[job_id] = { 'job': job_obj, 'is_closed': 0, 'is_exited': 0, 'opts': a:opts, }
+  let g:all_jobs[job_id] = { 'job': job_obj, 'is_closed': 0, 'is_exited': 0, 'buf_nr': bufnr('%'), 'opts': a:opts, }
 endfunction
 
 function! s:JobWrapup ( job_id )
   let job_data = g:all_jobs[ a:job_id ]
-  let opts = job_data.opts
-
-  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
-  if job_data.status == 0
-    call opts.callback()
-  endif
+  call gitsupport#run#JobWrapup( job_data )
 
   unlet g:all_jobs[ a:job_id ]
-
-  " restart syntax highlighting
-  if &syntax != ''
-    setlocal syntax=ON
-  endif
 endfunction
 
 function! s:JobExit ( job, status )

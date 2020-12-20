@@ -27,25 +27,15 @@ function! gitsupport#run_nvim#JobRun ( cmd, params, opts )
   let job_id = jobstart( [a:cmd] + a:params, job_data )
 
   if job_id > 0
-    let g:all_jobs[job_id] = { 'job': job_id, 'buf': bufnr('%'), 'line_accu': '', 'opts': a:opts, }
+    let g:all_jobs[job_id] = { 'job': job_id, 'buf': bufnr('%'), 'line_accu': '', 'buf_nr': bufnr('%'), 'opts': a:opts, }
   endif
 endfunction
 
 function! s:JobWrapup ( job_id )
   let job_data = g:all_jobs[ a:job_id ]
-  let opts = job_data.opts
-
-  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
-  if job_data.status == 0
-    call opts.callback()
-  endif
+  call gitsupport#run#JobWrapup( job_data )
 
   unlet g:all_jobs[ a:job_id ]
-
-  " restart syntax highlighting
-  if &syntax != ''
-    setlocal syntax=ON
-  endif
 endfunction
 
 function! s:JobOutput ( job_id, data, event )
