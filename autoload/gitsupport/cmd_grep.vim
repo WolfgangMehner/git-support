@@ -38,7 +38,7 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - grep' )
-  call s:Run( params, cwd )
+  call s:Run( params, cwd, 0 )
 
   let &l:filetype = 'gitsgrep'
   let &l:foldmethod = 'syntax'
@@ -80,13 +80,15 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params, cwd )
+function! s:Run ( params, cwd, restore_cursor )
   let add_args = s:use_conceal ? ['-z'] : []
-  call gitsupport#run#RunToBuffer( '', ['grep'] + add_args + a:params, 'cwd', a:cwd )
+  call gitsupport#run#RunToBuffer( '', ['grep'] + add_args + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Jump ( mode )

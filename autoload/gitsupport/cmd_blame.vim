@@ -34,7 +34,7 @@ function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - blame' )
-  call s:Run( params, cwd )
+  call s:Run( params, cwd, 0 )
 
   let &l:filetype = 'gitsblame'
 
@@ -71,12 +71,14 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['blame'] + a:params, 'cwd', a:cwd )
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['blame'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Jump ( mode )

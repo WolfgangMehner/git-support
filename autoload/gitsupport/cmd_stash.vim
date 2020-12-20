@@ -19,11 +19,12 @@ endfunction
 
 function! gitsupport#cmd_stash#OpenBuffer ( params )
   let params = a:params
+  let cwd = gitsupport#services_path#GetWorkingDir()
   let subcmd = get ( params, 0, '' )
 
   if subcmd == 'list'
     call gitsupport#run#OpenBuffer( 'Git - stash list' )
-    call s:Run( params )
+    call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -40,9 +41,10 @@ function! gitsupport#cmd_stash#OpenBuffer ( params )
     nnoremap <silent> <buffer> sp     :call <SID>Show("patch")<CR>
 
     let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
   elseif subcmd == 'show'
     call gitsupport#run#OpenBuffer( 'Git - stash show' )
-    call s:Run( params )
+    call s:Run( params, cwd, 0 )
 
     let &l:filetype = 'gitsdiff'
     let &l:foldmethod = 'syntax'
@@ -54,6 +56,7 @@ function! gitsupport#cmd_stash#OpenBuffer ( params )
     nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
 
     let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
   else
     return gitsupport#run#RunDirect( '', ['stash'] + params, 'env_std', 1 )
   endif
@@ -92,12 +95,14 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['stash'] + a:params )
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['stash'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Save ()

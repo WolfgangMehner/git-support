@@ -19,6 +19,7 @@ endfunction
 
 function! gitsupport#cmd_tag#OpenBuffer ( params )
   let params = a:params
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
   if empty ( params )
         \ || index ( params, '-l' ) != -1
@@ -26,7 +27,7 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
         \ || index ( params, '--contains' ) != -1
         \ || match ( params, '^-n\d\?' ) != -1
     call gitsupport#run#OpenBuffer( 'Git - tag' )
-    call s:Run( params )
+    call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -41,6 +42,7 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
     nnoremap <silent> <buffer> cs     :call <SID>Show("commit")<CR>
 
     let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
   else
     return gitsupport#run#RunDirect( '', ['tag'] + params, 'env_std', 1 )
   endif
@@ -67,12 +69,14 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['tag'] + a:params )
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['tag'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Checkout ()

@@ -23,7 +23,7 @@ function! gitsupport#cmd_branch#OpenBuffer ( params )
 
   if empty( params )
     call gitsupport#run#OpenBuffer( 'Git - branch' )
-    call s:Run( params, cwd )
+    call s:Run( params, cwd, 0 )
 
     setlocal filetype=gitsbranch
 
@@ -86,12 +86,14 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params, 'cwd', a:cwd )
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['branch', '-avv'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Checkout ()

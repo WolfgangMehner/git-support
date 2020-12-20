@@ -19,10 +19,11 @@ endfunction
 
 function! gitsupport#cmd_remote#OpenBuffer ( params )
   let params = a:params
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
   if empty( params )
     call gitsupport#run#OpenBuffer( 'Git - remote' )
-    call s:Run( params )
+    call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -38,6 +39,7 @@ function! gitsupport#cmd_remote#OpenBuffer ( params )
     nnoremap <silent> <buffer> sh     :call <SID>Show()<CR>
 
     let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
   else
     return gitsupport#run#RunDirect( '', ['remote'] + params, 'env_std', 1 )
   endif
@@ -65,12 +67,14 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['remote', '-v'] + a:params )
+function! s:Run ( params, cwd, restore_cursor )
+  call gitsupport#run#RunToBuffer( '', ['remote', '-v'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
 endfunction
 
 function! s:Fetch ()
