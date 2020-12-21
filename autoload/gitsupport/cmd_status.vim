@@ -44,8 +44,9 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
 
   nnoremap <silent> <buffer> i      :call <SID>Option('ignored')<CR>
 
-"  nnoremap <silent> <buffer> of     :call <SID>Jump("file")<CR>
-"  nnoremap <silent> <buffer> oj     :call <SID>Jump("line")<CR>
+  nnoremap <silent> <buffer> of     :call <SID>Jump()<CR>
+  nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
+  nnoremap <silent> <buffer> D      :call <SID>DeleteFromDisk()<CR>
 
   let b:GitSupport_Param = params
   let b:GitSupport_Options = options
@@ -62,12 +63,13 @@ function! s:Help ()
         \ ."\n"
         \ ."toggle ...\n"
         \ ."i       : show ignored files\n"
-"        \ ."\n"
-"        \ ."file under cursor ...\n"
-"        \ ."of      : open file (edit)\n"
-"        \ ."\n"
-"        \ ."for settings see:\n"
-"        \ ."  :help g:Git_DiffExpandEmpty"
+        \ ."\n"
+        \ ."file under cursor ...\n"
+        \ ."of / oj : open file (edit)\n"
+        \ ."D       : delete from file system (only untracked files)\n"
+        \ ."\n"
+        \ ."for settings see:\n"
+        \ ."  :help g:Git_StatusStagedOpenDiff\n"
   echo text
 endfunction
 
@@ -84,23 +86,71 @@ function! s:Option ( name )
   call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
 endfunction
 
+function! s:Jump ()
+  let file_record = s:GetFileRecord()
+
+  if empty( file_record )
+    return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let file_name = file_record.filename
+  if b:GitSupport_BaseDir != ''
+    let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
+  endif
+  call gitsupport#run#OpenFile( file_name )
+endfunction
+
+function! s:DeleteFromDisk ()
+  if !exists( '*delete' )
+    return s:ErrorMsg ( 'Can not delete files from harddisk.' )
+  endif
+
+  let file_record = s:GetFileRecord()
+
+  if empty( file_record )
+    return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let file_name = file_record.filename
+  if b:GitSupport_BaseDir != ''
+    let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
+  endif
+
+  if gitsupport#common#Question( 'delete file "'.file_name.'" from harddisk?', 'highlight', 'warning' )
+    if delete ( file_name ) == 0
+      call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
+    endif
+  endif
+endfunction
+
+function! s:GetFileRecord ()
+  let line_nr = line('.')
+  return get( b:GitSupport_LineIndex, line_nr, {} )
+endfunction
+
 let s:H2 = '  '
 let s:H8 = '        '
 
-let s:HeadersIndex = [
+let s:Sections = {
+      \ 'stg': { 'name': 'staged' },
+      \ 'ust': { 'name': 'unstaged' },
+      \ 'utr': { 'name': 'untracked' },
+      \ 'ign': { 'name': 'ignored' },
+      \ }
+let s:Sections.stg.headers = [
       \ 'Changes to be committed:',
       \ s:H2.'(use map "r" or ":GitReset HEAD <file>" to unstage)',
       \ ]
-let s:HeadersWorkingTree = [
+let s:Sections.ust.headers = [
       \ 'Changes not staged for commit:',
       \ s:H2.'(use map "a" or ":GitAdd <file>" to update what will be committed)',
       \ s:H2.'(use map "c" or ":GitCheckout -- <file>" to discard changes in working directory)',
       \ ]
-let s:HeadersUntracked = [
+let s:Sections.utr.headers = [
       \ 'Untracked files:',
       \ s:H2.'(use map "a" or ":GitAdd <file>" to include in what will be committed)',
       \ ]
-let s:HeadersIgnored = [
+let s:Sections.ign.headers = [
       \ 'Ignored files:',
       \ s:H2.'(use map "a" or ":GitAdd -f <file>" to include in what will be committed)',
       \ ]
@@ -136,15 +186,15 @@ function! s:Run ( options, cwd, restore_cursor )
 
   call setline( 1, [ 'On branch TODO', '' ] )
 
-  let list_index        = s:ProcessSection( s:IsStaged( list_status ),    's' )
-  let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'w' )
-  let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'u' )
-  let list_ignored      = s:ProcessSection( s:IsIgnored( list_status ),   'i' )
+  let list_index        = s:ProcessSection( s:IsStaged( list_status ),    'stg' )
+  let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'ust' )
+  let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'utr' )
+  let list_ignored      = s:ProcessSection( s:IsIgnored( list_status ),   'ign' )
 
-  call s:PrintSection( list_index,        s:HeadersIndex )
-  call s:PrintSection( list_working_tree, s:HeadersWorkingTree )
-  call s:PrintSection( list_untracked,    s:HeadersUntracked )
-  call s:PrintSection( list_ignored,      s:HeadersIgnored )
+  call s:PrintSection( list_index,        s:Sections.stg.headers )
+  call s:PrintSection( list_working_tree, s:Sections.ust.headers )
+  call s:PrintSection( list_untracked,    s:Sections.utr.headers )
+  call s:PrintSection( list_ignored,      s:Sections.ign.headers )
   call s:AddFold( 1, line('$') )
 
   let b:GitSupport_LineIndex = {}
@@ -158,8 +208,8 @@ function! s:Run ( options, cwd, restore_cursor )
   let &l:foldlevel = 2          " open folds closed by manual creation
 endfunction
 
-function! s:ProcessSection ( list_status, type )
-  let use_second_column = a:type == 'w'
+function! s:ProcessSection ( list_status, section )
+  let use_second_column = a:section == 'ust'
   let list_section = []
 
   for val in a:list_status
@@ -171,7 +221,7 @@ function! s:ProcessSection ( list_status, type )
     let record = {
           \ 'filename': filename,
           \ 'status': status,
-          \ 'type': a:type,
+          \ 'section': a:section,
           \ }
 
     call insert( list_section, record )
