@@ -48,6 +48,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> c      :call <SID>FileAction("checkout")<CR>
   nnoremap <silent> <buffer> ch     :call <SID>FileAction("checkout-head")<CR>
   nnoremap <silent> <buffer> r      :call <SID>FileAction("reset")<CR>
+  nnoremap <silent> <buffer> od     :call <SID>ShowDiff("default")<CR>
   nnoremap <silent> <buffer> ol     :call <SID>ShowLog()<CR>
   nnoremap <silent> <buffer> of     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
@@ -73,6 +74,7 @@ function! s:Help ()
         \ ."a       : add\n"
         \ ."c       : checkout\n"
         \ ."ch      : checkout HEAD\n"
+        \ ."od      : open diff\n"
         \ ."of / oj : open file (edit)\n"
         \ ."ol      : open log\n"
         \ ."r       : reset\n"
@@ -110,11 +112,58 @@ function! s:Jump ()
   call gitsupport#run#OpenFile( file_name )
 endfunction
 
+function! s:ShowDiff ( mode )
+  let file_record = s:GetFileRecord()
+
+  if empty( file_record )
+    return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let section = file_record.section
+  let section_meta = s:Sections[ section ]
+  if !s:ListHas( section_meta.actions, [ 'diff' ] )
+    return s:ErrorMsg( 'can not perform action "diff" in section '.section_meta.name )
+  endif
+
+  let file_name_new = file_record.filename
+  let file_name_old = file_record.filename_alt
+
+  let args = []
+
+  if section == 'stg'
+    if g:Git_StatusStagedOpenDiff == 'cached'
+      let args = [ '--cached' ]
+    elseif g:Git_StatusStagedOpenDiff == 'head'
+      let args = [ 'HEAD' ]
+    else
+      let args = []
+    endif
+
+    if file_name_new == file_name_old
+      let args += [ '--', file_name_old ]
+    else
+      let args = [ '--find-renames' ] + args + [ '--', file_name_old, file_name_new ]
+    endif
+  elseif section == 'ust'
+    let args = [ '--', file_name_old ]
+  else
+    return 0
+  endif
+
+  return gitsupport#cmd_diff#OpenBuffer( args, b:GitSupport_BaseDir )
+endfunction
+
 function! s:ShowLog ()
   let file_record = s:GetFileRecord()
 
   if empty( file_record )
     return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let section = file_record.section
+  let section_meta = s:Sections[ section ]
+  if !s:ListHas( section_meta.actions, [ 'log' ] )
+    return s:ErrorMsg( 'can not perform action "log" in section '.section_meta.name )
   endif
 
   let file_name = file_record.filename_alt
@@ -245,6 +294,12 @@ function! s:DeleteFromDisk ()
     return s:ErrorMsg( 'no file under the cursor' )
   endif
 
+  let section = file_record.section
+  let section_meta = s:Sections[ section ]
+  if !s:ListHas( section_meta.actions, [ 'delete' ] )
+    return s:ErrorMsg( 'can not perform action "delete" in section '.section_meta.name )
+  endif
+
   let file_name = file_record.filename
   if b:GitSupport_BaseDir != ''
     let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
@@ -271,10 +326,10 @@ let s:Sections = {
       \ 'utr': { 'name': 'untracked' },
       \ 'ign': { 'name': 'ignored' },
       \ }
-let s:Sections.stg.actions = [ 'reset', 'checkout-head', ]
-let s:Sections.ust.actions = [ 'add', 'checkout', 'checkout-head', ]
-let s:Sections.utr.actions = [ 'add', ]
-let s:Sections.ign.actions = [ 'add', ]
+let s:Sections.stg.actions = [ 'reset', 'checkout-head',           'diff', 'log', ]
+let s:Sections.ust.actions = [ 'add', 'checkout', 'checkout-head', 'diff', 'log', ]
+let s:Sections.utr.actions = [ 'add', 'delete', ]
+let s:Sections.ign.actions = [ 'add', 'delete', ]
 
 let s:Sections.stg.headers = [
       \ 'Changes to be committed:',

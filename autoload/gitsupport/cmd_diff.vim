@@ -14,12 +14,12 @@
 
 function! gitsupport#cmd_diff#FromCmdLine ( q_params )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_diff#OpenBuffer( args )
+  return gitsupport#cmd_diff#OpenBuffer( args, '' )
 endfunction
 
-function! gitsupport#cmd_diff#OpenBuffer ( params )
+function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint )
   let params = a:params
-  let cwd = gitsupport#services_path#GetWorkingDir()
+  let cwd = gitsupport#services_path#GetWorkingDir( a:dir_hint )
 
   let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir()
   if sh_ret != 0 || base_dir == ''
@@ -76,7 +76,7 @@ function! s:Help ()
         \ ." ->       in visual mode, these maps only apply the selected lines\n"
         \ ."\n"
         \ ."for settings see:\n"
-        \ ."  :help g:Git_DiffExpandEmpty"
+        \ ."  :help g:Git_DiffExpandEmpty\n"
   echo text
 endfunction
 
