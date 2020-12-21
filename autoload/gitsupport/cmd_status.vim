@@ -42,8 +42,12 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
   nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
 
-  nnoremap <silent> <buffer> i      :call <SID>Option('ignored')<CR>
+  nnoremap <silent> <buffer> i      :call <SID>Option("ignored")<CR>
 
+  nnoremap <silent> <buffer> a      :call <SID>FileAction("add")<CR>
+  nnoremap <silent> <buffer> c      :call <SID>FileAction("checkout")<CR>
+  nnoremap <silent> <buffer> ch     :call <SID>FileAction("checkout-head")<CR>
+  nnoremap <silent> <buffer> r      :call <SID>FileAction("reset")<CR>
   nnoremap <silent> <buffer> of     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> D      :call <SID>DeleteFromDisk()<CR>
@@ -65,7 +69,11 @@ function! s:Help ()
         \ ."i       : show ignored files\n"
         \ ."\n"
         \ ."file under cursor ...\n"
+        \ ."a       : add\n"
+        \ ."c       : checkout\n"
+        \ ."ch      : checkout HEAD\n"
         \ ."of / oj : open file (edit)\n"
+        \ ."r       : reset\n"
         \ ."D       : delete from file system (only untracked files)\n"
         \ ."\n"
         \ ."for settings see:\n"
@@ -98,6 +106,119 @@ function! s:Jump ()
     let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
   endif
   call gitsupport#run#OpenFile( file_name )
+endfunction
+
+function! s:FileAction ( action )
+  let file_record = s:GetFileRecord()
+
+  if empty( file_record )
+    return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let section = s:Sections[ file_record.section ]
+  if !s:ListHas( section.actions, [ a:action ] )
+    return s:ErrorMsg( 'can not perform action "'.a:action.'" in section '.section.name )
+  endif
+
+  let file_name = file_record.filename
+  if b:GitSupport_BaseDir != ''
+    let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
+  endif
+
+  if a:action == 'add'
+    let success = s:FileActionAdd( file_name, file_record )
+  elseif a:action == 'checkout'
+    let success = s:FileActionCheckout( file_name, file_record )
+  elseif a:action == 'checkout-head'
+    let success = s:FileActionCheckoutHead( file_name, file_record )
+  elseif a:action == 'reset'
+    let success = s:FileActionReset( file_name, file_record )
+  else
+    let success = 0
+  endif
+
+  if success
+    call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
+  endif
+endfunction
+
+function! s:FileActionAdd ( file_name, file_record )
+  let filename = a:file_record.filename
+  let section = a:file_record.section
+  let status = a:file_record.status
+  let highl = 'normal'
+
+  if section == 'ust' && status ==? 'M'
+    let qst  = 'add file'
+    let args = [ 'add' ]
+  elseif section == 'ust' && status ==? 'D'
+    let qst  = 'remove file'
+    let args = [ 'rm' ]
+  elseif section == 'utr'
+    let qst  = 'add untracked file'
+    let args = [ 'add' ]
+  elseif section == 'ign'
+    let qst  = 'add ignored file'
+    let args = [ 'add' ]
+    let highl = 'warning'
+  else
+    return 0
+  endif
+
+  if gitsupport#common#Question( qst.' "'.filename.'"?', 'highlight', highl )
+    return gitsupport#run#RunDirect( '', args + [ '--', filename ],
+          \ 'cwd', b:GitSupport_BaseDir
+          \ ) == 0
+  else
+    return 0
+  endif
+endfunction
+
+function! s:FileActionCheckout ( file_name, file_record )
+  let filename = a:file_record.filename
+  let section = a:file_record.section
+  let status = a:file_record.status
+
+  if section == 'ust' && status =~? '[MD]'
+    if gitsupport#common#Question( 'checkout "'.filename.'"?', 'highlight', 'warning' )
+      return gitsupport#run#RunDirect( '', [ 'checkout', '--', filename ],
+            \ 'cwd', b:GitSupport_BaseDir
+            \ ) == 0
+    endif
+  endif
+  return 0
+endfunction
+
+function! s:FileActionCheckoutHead ( file_name, file_record )
+  let filename = a:file_record.filename
+  let section = a:file_record.section
+  let status = a:file_record.status
+
+  if ( section == 'stg' || section == 'ust' ) && status =~? '[MAD]'
+    if gitsupport#common#Question( 'checkout "'.filename.' and change both the index and working tree copy"?', 'highlight', 'warning' )
+      return gitsupport#run#RunDirect( '', [ 'checkout', 'HEAD', '--', filename ],
+            \ 'cwd', b:GitSupport_BaseDir
+            \ ) == 0
+    endif
+  endif
+  return 0
+endfunction
+
+function! s:FileActionReset ( file_name, file_record )
+  let filename = a:file_record.filename
+  let section = a:file_record.section
+  let status = a:file_record.status
+
+  if section == 'stg' && status =~? '[MADC]'
+    if gitsupport#common#Question( 'reset "'.filename.'"?', 'highlight', 'normal' )
+      return gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
+            \ 'cwd', b:GitSupport_BaseDir
+            \ ) == 0
+    endif
+  elseif section == 'stg' && status ==? 'R'
+    " TODO
+  endif
+  return 0
 endfunction
 
 function! s:DeleteFromDisk ()
@@ -137,6 +258,11 @@ let s:Sections = {
       \ 'utr': { 'name': 'untracked' },
       \ 'ign': { 'name': 'ignored' },
       \ }
+let s:Sections.stg.actions = [ 'reset', 'checkout-head', ]
+let s:Sections.ust.actions = [ 'add', 'checkout', 'checkout-head', ]
+let s:Sections.utr.actions = [ 'add', ]
+let s:Sections.ign.actions = [ 'add', ]
+
 let s:Sections.stg.headers = [
       \ 'Changes to be committed:',
       \ s:H2.'(use map "r" or ":GitReset HEAD <file>" to unstage)',
@@ -224,7 +350,7 @@ function! s:ProcessSection ( list_status, section )
           \ 'section': a:section,
           \ }
 
-    call insert( list_section, record )
+    call add( list_section, record )
   endfor
 
   return list_section
