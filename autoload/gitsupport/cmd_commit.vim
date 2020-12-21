@@ -121,7 +121,7 @@ function! s:DryRun ( args )
 
   let &l:filetype = 'gitsstatus'
   let &l:foldmethod = 'syntax'
-  let &l:foldlevel = 3
+  let &l:foldlevel = s:ListHas( args, [ '-v', '--verbose' ] ) ? 2 : 1
   let &l:foldtext = 'GitS_FoldLog()'
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
@@ -163,5 +163,14 @@ function! s:ErrorMsg ( ... )
     echomsg line
   endfor
   echohl None
+endfunction
+
+function! s:ListHas ( list, items )
+  for item in a:items
+    if index( a:list, item ) >= 0
+      return 1
+    endif
+  endfor
+  return 0
 endfunction
 

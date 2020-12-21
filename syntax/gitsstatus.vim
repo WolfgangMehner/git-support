@@ -11,7 +11,7 @@ endif
 runtime! syntax/gitsdiff.vim
 unlet b:current_syntax
 
-syn sync fromstart
+syn sync minlines=50
 syn case match
 
 "-------------------------------------------------------------------------------
@@ -33,38 +33,38 @@ syn case match
 syn region GitStatusHashRegion  start=/^#/ end=/^#\@!/ contains=GitStagedRegion,GitModifiedRegion,GitUntrackedRegion,GitIgnoredRegion,GitUnmergedRegion fold
 syn region GitStatusBareRegion  start=/^[^#]\%1l/ end=/^\%(diff\)\@=/ contains=GitStagedRegionB,GitModifiedRegionB,GitUntrackedRegionB,GitIgnoredRegionB,GitUnmergedRegionB fold
 
-syn region GitStagedRegion      start=/^# Changes to be committed:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitStagedFile fold  contained
+syn region GitStagedRegion      start=/^# Changes to be committed:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained
 syn match  GitStagedFile        "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitStagedRegionB     start=/^Changes to be committed:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitStagedFileB fold  contained
+syn region GitStagedRegionB     start=/^Changes to be committed:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitStagedFileB  contained
 syn match  GitStagedFileB       "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
 " the header for uncommitted changes changed somewhere along the way:
 " - the first alternative is the old version
 " - for the new, "bare" version, we only need the new one
-syn region GitModifiedRegion    start=/^# Changed but not updated:/       end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile fold  contained
-syn region GitModifiedRegion    start=/^# Changes not staged for commit:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile fold  contained
+syn region GitModifiedRegion    start=/^# Changed but not updated:/       end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained
+syn region GitModifiedRegion    start=/^# Changes not staged for commit:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained
 syn match  GitModifiedFile      "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitModifiedRegionB   start=/^Changes not staged for commit:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitModifiedFileB fold  contained
+syn region GitModifiedRegionB   start=/^Changes not staged for commit:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitModifiedFileB  contained
 syn match  GitModifiedFileB     "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitUntrackedRegion   start=/^# Untracked files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile fold  contained
+syn region GitUntrackedRegion   start=/^# Untracked files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile  contained
 syn match  GitUntrackedFile     "^#\s\+\zs[^([:space:]].*$" contained
 
-syn region GitUntrackedRegionB  start=/^Untracked files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitUntrackedFileB fold  contained
+syn region GitUntrackedRegionB  start=/^Untracked files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitUntrackedFileB  contained
 syn match  GitUntrackedFileB    "^\s\+\zs[^([:space:]].*$" contained
 
-syn region GitIgnoredRegion     start=/^# Ignored files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile fold  contained
+syn region GitIgnoredRegion     start=/^# Ignored files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile  contained
 syn match  GitIgnoredFile       "^#\s\+\zs[^([:space:]].*$" contained
 
-syn region GitIgnoredRegionB    start=/^Ignored files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitIgnoredFileB fold  contained
+syn region GitIgnoredRegionB    start=/^Ignored files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitIgnoredFileB  contained
 syn match  GitIgnoredFileB      "^\s\+\zs[^([:space:]].*$" contained
 
-syn region GitUnmergedRegion    start=/^# Unmerged paths:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile fold  contained
+syn region GitUnmergedRegion    start=/^# Unmerged paths:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile  contained
 syn match  GitUnmergedFile      "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitUnmergedRegionB   start=/^Unmerged paths:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitUnmergedFileB fold  contained
+syn region GitUnmergedRegionB   start=/^Unmerged paths:/ end=/^\%(\w\)\@=/ contains=GitStatusHeaderB,GitStatusCommentB,GitUnmergedFileB  contained
 syn match  GitUnmergedFileB     "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
 syn match  GitStatusHeader      "^# \zs.\+:$"        contained
