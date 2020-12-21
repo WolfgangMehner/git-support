@@ -12,8 +12,12 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#services_path#GetWorkingDir (  )
-  if &l:filetype ==# 'netrw'
+function! gitsupport#services_path#GetWorkingDir ( ... )
+  let dir_hint = get( a:000, 0, '' )
+
+  if dir_hint != ''
+    return dir_hint
+  elseif &l:filetype ==# 'netrw'
     return b:netrw_curdir
   endif
 

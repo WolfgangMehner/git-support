@@ -48,6 +48,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> c      :call <SID>FileAction("checkout")<CR>
   nnoremap <silent> <buffer> ch     :call <SID>FileAction("checkout-head")<CR>
   nnoremap <silent> <buffer> r      :call <SID>FileAction("reset")<CR>
+  nnoremap <silent> <buffer> ol     :call <SID>ShowLog()<CR>
   nnoremap <silent> <buffer> of     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> D      :call <SID>DeleteFromDisk()<CR>
@@ -73,6 +74,7 @@ function! s:Help ()
         \ ."c       : checkout\n"
         \ ."ch      : checkout HEAD\n"
         \ ."of / oj : open file (edit)\n"
+        \ ."ol      : open log\n"
         \ ."r       : reset\n"
         \ ."D       : delete from file system (only untracked files)\n"
         \ ."\n"
@@ -106,6 +108,17 @@ function! s:Jump ()
     let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
   endif
   call gitsupport#run#OpenFile( file_name )
+endfunction
+
+function! s:ShowLog ()
+  let file_record = s:GetFileRecord()
+
+  if empty( file_record )
+    return s:ErrorMsg( 'no file under the cursor' )
+  endif
+
+  let file_name = file_record.filename_alt
+  return gitsupport#cmd_log#OpenBuffer( [ '--stat', '--follow', '--', file_name ], [], b:GitSupport_BaseDir )
 endfunction
 
 function! s:FileAction ( action )
@@ -346,6 +359,7 @@ function! s:ProcessSection ( list_status, section )
 
     let record = {
           \ 'filename': filename,
+          \ 'filename_alt': filename,
           \ 'status': status,
           \ 'section': a:section,
           \ }

@@ -19,12 +19,12 @@ function! gitsupport#cmd_log#FromCmdLine ( q_params, line1, line2, count )
   else
     let range_info = []
   endif
-  return gitsupport#cmd_log#OpenBuffer( args, range_info )
+  return gitsupport#cmd_log#OpenBuffer( args, range_info, '' )
 endfunction
 
-function! gitsupport#cmd_log#OpenBuffer ( params, range_info )
+function! gitsupport#cmd_log#OpenBuffer ( params, range_info, dir_hint )
   let params = a:params
-  let cwd = gitsupport#services_path#GetWorkingDir()
+  let cwd = gitsupport#services_path#GetWorkingDir( a:dir_hint )
 
   if len( a:range_info ) == 2
     let params = [ '-L', a:range_info[0].','.a:range_info[1].':'.expand('%') ] + params
