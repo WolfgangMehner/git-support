@@ -21,7 +21,9 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
-  let options = {}
+  let options = {
+        \ 'ignored': s:ListHas( params, [ '--ignored' ] ),
+        \ }
 
   let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir()
   if sh_ret != 0 || base_dir == ''
@@ -40,6 +42,8 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
   nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
 
+  nnoremap <silent> <buffer> i      :call <SID>Option('ignored')<CR>
+
 "  nnoremap <silent> <buffer> of     :call <SID>Jump("file")<CR>
 "  nnoremap <silent> <buffer> oj     :call <SID>Jump("line")<CR>
 
@@ -55,6 +59,9 @@ function! s:Help ()
         \ ."S-F1    : help\n"
         \ ."q       : close\n"
         \ ."u       : update\n"
+        \ ."\n"
+        \ ."toggle ...\n"
+        \ ."i       : show ignored files\n"
 "        \ ."\n"
 "        \ ."file under cursor ...\n"
 "        \ ."of      : open file (edit)\n"
@@ -69,6 +76,11 @@ function! s:Quit ()
 endfunction
 
 function! s:Update ()
+  call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
+endfunction
+
+function! s:Option ( name )
+  let b:GitSupport_Options[a:name] = 1 - b:GitSupport_Options[a:name]
   call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
 endfunction
 
@@ -108,6 +120,10 @@ let s:status_strings = {
 function! s:Run ( options, cwd, restore_cursor )
   let params = [ '--porcelain' ]
 
+  if a:options.ignored
+    let params += [ '--ignored' ]
+  endif
+
   if a:restore_cursor
     let restore_pos = gitsupport#common#BufferGetPosition()
   else
@@ -138,6 +154,8 @@ function! s:Run ( options, cwd, restore_cursor )
   call s:BuildIndex( b:GitSupport_LineIndex, list_ignored )
 
   call gitsupport#common#BufferSetPosition( restore_pos )
+
+  let &l:foldlevel = 2          " open folds closed by manual creation
 endfunction
 
 function! s:ProcessSection ( list_status, type )
@@ -221,5 +239,14 @@ function! s:ErrorMsg ( ... )
     echomsg line
   endfor
   echohl None
+endfunction
+
+function! s:ListHas ( list, items )
+  for item in a:items
+    if index( a:list, item ) >= 0
+      return 1
+    endif
+  endfor
+  return 0
 endfunction
 
