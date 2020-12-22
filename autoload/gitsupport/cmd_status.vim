@@ -144,7 +144,7 @@ function! s:ShowDiff ( mode )
     else
       let args = [ '--find-renames' ] + args + [ '--', file_name_old, file_name_new ]
     endif
-  elseif section == 'ustg'
+  elseif section == 'ustg' || section == 'mrg'
     let args = [ '--', file_name_new ]
   else
     return 0
@@ -216,6 +216,9 @@ function! s:FileActionAdd ( file_name, file_record )
   elseif section == 'ustg' && status ==? 'D'
     let qst  = 'Remove file'
     let args = [ 'rm' ]
+  elseif section == 'mrg'
+    let qst  = 'Mark resolution for file'
+    let args = [ 'add' ]
   elseif section == 'utrk'
     let qst  = 'Add untracked file'
     let args = [ 'add' ]
@@ -279,6 +282,12 @@ function! s:FileActionReset ( file_name, file_record )
     endif
   elseif section == 'stg' && status ==? 'R'
     " TODO
+  elseif section == 'mrg'
+    if gitsupport#common#Question( 'Reset conflicted file "'.filename.'"?', 'highlight', 'normal' )
+      return gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
+            \ 'cwd', b:GitSupport_BaseDir
+            \ ) == 0
+    endif
   endif
   return 0
 endfunction
@@ -323,11 +332,13 @@ let s:H8 = '        '
 let s:Sections = {
       \ 'stg':  { 'name': 'staged' },
       \ 'ustg': { 'name': 'unstaged' },
+      \ 'mrg':  { 'name': 'conflict' },
       \ 'utrk': { 'name': 'untracked' },
       \ 'ign':  { 'name': 'ignored' },
       \ }
 let s:Sections.stg.actions  = [ 'reset', 'checkout-head',           'diff', 'log', ]
 let s:Sections.ustg.actions = [ 'add', 'checkout', 'checkout-head', 'diff', 'log', ]
+let s:Sections.mrg.actions  = [ 'add', 'reset',                     'diff', 'log', ]
 let s:Sections.utrk.actions = [ 'add', 'delete', ]
 let s:Sections.ign.actions  = [ 'add', 'delete', ]
 
@@ -339,6 +350,10 @@ let s:Sections.ustg.headers = [
       \ 'Changes not staged for commit:',
       \ s:H2.'(use map "a" or ":GitAdd <file>" to update what will be committed)',
       \ s:H2.'(use map "c" or ":GitCheckout -- <file>" to discard changes in working directory)',
+      \ ]
+let s:Sections.mrg.headers = [
+      \ 'Unmerged paths:',
+      \ s:H2.'(use map "a" or ":GitAdd <file>" to mark resolution)',
       \ ]
 let s:Sections.utrk.headers = [
       \ 'Untracked files:',
@@ -382,11 +397,13 @@ function! s:Run ( options, cwd, restore_cursor )
 
   let list_index        = s:ProcessSection( s:IsStaged( list_status ),    'stg' )
   let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'ustg' )
+  let list_conflict     = s:ProcessSection( s:IsConflict( list_status ),  'mrg' )
   let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'utrk' )
   let list_ignored      = s:ProcessSection( s:IsIgnored( list_status ),   'ign' )
 
   call s:PrintSection( list_index,        s:Sections.stg.headers )
   call s:PrintSection( list_working_tree, s:Sections.ustg.headers )
+  call s:PrintSection( list_conflict,     s:Sections.mrg.headers )
   call s:PrintSection( list_untracked,    s:Sections.utrk.headers )
   call s:PrintSection( list_ignored,      s:Sections.ign.headers )
   call s:AddFold( 1, line('$') )
@@ -394,6 +411,7 @@ function! s:Run ( options, cwd, restore_cursor )
   let b:GitSupport_LineIndex = {}
   call s:BuildIndex( b:GitSupport_LineIndex, list_index )
   call s:BuildIndex( b:GitSupport_LineIndex, list_working_tree )
+  call s:BuildIndex( b:GitSupport_LineIndex, list_conflict )
   call s:BuildIndex( b:GitSupport_LineIndex, list_untracked )
   call s:BuildIndex( b:GitSupport_LineIndex, list_ignored )
 
@@ -464,6 +482,10 @@ endfunction
 
 function! s:IsNotStaged ( list_status )
   return filter( copy( a:list_status ), 'v:val =~ "^.[MD]"' )
+endfunction
+
+function! s:IsConflict ( list_status )
+  return filter( copy( a:list_status ), 'v:val =~ "^\\(U.\\|.U\\|AA\\|DD\\)"' )
 endfunction
 
 function! s:IsUntracked ( list_status )
