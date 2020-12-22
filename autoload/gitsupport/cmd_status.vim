@@ -140,12 +140,12 @@ function! s:ShowDiff ( mode )
     endif
 
     if file_name_new == file_name_old
-      let args += [ '--', file_name_old ]
+      let args += [ '--', file_name_new ]
     else
       let args = [ '--find-renames' ] + args + [ '--', file_name_old, file_name_new ]
     endif
-  elseif section == 'ust'
-    let args = [ '--', file_name_old ]
+  elseif section == 'ustg'
+    let args = [ '--', file_name_new ]
   else
     return 0
   endif
@@ -210,18 +210,18 @@ function! s:FileActionAdd ( file_name, file_record )
   let status = a:file_record.status
   let highl = 'normal'
 
-  if section == 'ust' && status ==? 'M'
-    let qst  = 'add file'
+  if section == 'ustg' && status ==? 'M'
+    let qst  = 'Add file'
     let args = [ 'add' ]
-  elseif section == 'ust' && status ==? 'D'
-    let qst  = 'remove file'
+  elseif section == 'ustg' && status ==? 'D'
+    let qst  = 'Remove file'
     let args = [ 'rm' ]
-  elseif section == 'utr'
-    let qst  = 'add untracked file'
+  elseif section == 'utrk'
+    let qst  = 'Add untracked file'
     let args = [ 'add' ]
   elseif section == 'ign'
-    let qst  = 'add ignored file'
-    let args = [ 'add' ]
+    let qst  = 'Add ignored file'
+    let args = [ 'add', '-f' ]
     let highl = 'warning'
   else
     return 0
@@ -241,8 +241,8 @@ function! s:FileActionCheckout ( file_name, file_record )
   let section = a:file_record.section
   let status = a:file_record.status
 
-  if section == 'ust' && status =~? '[MD]'
-    if gitsupport#common#Question( 'checkout "'.filename.'"?', 'highlight', 'warning' )
+  if section == 'ustg' && status =~? '[MD]'
+    if gitsupport#common#Question( 'Checkout file "'.filename.'"?', 'highlight', 'warning' )
       return gitsupport#run#RunDirect( '', [ 'checkout', '--', filename ],
             \ 'cwd', b:GitSupport_BaseDir
             \ ) == 0
@@ -256,8 +256,8 @@ function! s:FileActionCheckoutHead ( file_name, file_record )
   let section = a:file_record.section
   let status = a:file_record.status
 
-  if ( section == 'stg' || section == 'ust' ) && status =~? '[MAD]'
-    if gitsupport#common#Question( 'checkout "'.filename.' and change both the index and working tree copy"?', 'highlight', 'warning' )
+  if ( section == 'stg' || section == 'ustg' ) && status =~? '[MAD]'
+    if gitsupport#common#Question( 'Checkout file "'.filename.' and change both the index and working tree copy"?', 'highlight', 'warning' )
       return gitsupport#run#RunDirect( '', [ 'checkout', 'HEAD', '--', filename ],
             \ 'cwd', b:GitSupport_BaseDir
             \ ) == 0
@@ -272,7 +272,7 @@ function! s:FileActionReset ( file_name, file_record )
   let status = a:file_record.status
 
   if section == 'stg' && status =~? '[MADC]'
-    if gitsupport#common#Question( 'reset "'.filename.'"?', 'highlight', 'normal' )
+    if gitsupport#common#Question( 'Reset file "'.filename.'"?', 'highlight', 'normal' )
       return gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
             \ 'cwd', b:GitSupport_BaseDir
             \ ) == 0
@@ -305,7 +305,7 @@ function! s:DeleteFromDisk ()
     let file_name = resolve( fnamemodify( b:GitSupport_BaseDir.'/'.file_name, ':p' ) )
   endif
 
-  if gitsupport#common#Question( 'delete file "'.file_name.'" from harddisk?', 'highlight', 'warning' )
+  if gitsupport#common#Question( 'Delete file "'.file_name.'" from harddisk?', 'highlight', 'warning' )
     if delete ( file_name ) == 0
       call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
     endif
@@ -321,26 +321,26 @@ let s:H2 = '  '
 let s:H8 = '        '
 
 let s:Sections = {
-      \ 'stg': { 'name': 'staged' },
-      \ 'ust': { 'name': 'unstaged' },
-      \ 'utr': { 'name': 'untracked' },
-      \ 'ign': { 'name': 'ignored' },
+      \ 'stg':  { 'name': 'staged' },
+      \ 'ustg': { 'name': 'unstaged' },
+      \ 'utrk': { 'name': 'untracked' },
+      \ 'ign':  { 'name': 'ignored' },
       \ }
-let s:Sections.stg.actions = [ 'reset', 'checkout-head',           'diff', 'log', ]
-let s:Sections.ust.actions = [ 'add', 'checkout', 'checkout-head', 'diff', 'log', ]
-let s:Sections.utr.actions = [ 'add', 'delete', ]
-let s:Sections.ign.actions = [ 'add', 'delete', ]
+let s:Sections.stg.actions  = [ 'reset', 'checkout-head',           'diff', 'log', ]
+let s:Sections.ustg.actions = [ 'add', 'checkout', 'checkout-head', 'diff', 'log', ]
+let s:Sections.utrk.actions = [ 'add', 'delete', ]
+let s:Sections.ign.actions  = [ 'add', 'delete', ]
 
 let s:Sections.stg.headers = [
       \ 'Changes to be committed:',
       \ s:H2.'(use map "r" or ":GitReset HEAD <file>" to unstage)',
       \ ]
-let s:Sections.ust.headers = [
+let s:Sections.ustg.headers = [
       \ 'Changes not staged for commit:',
       \ s:H2.'(use map "a" or ":GitAdd <file>" to update what will be committed)',
       \ s:H2.'(use map "c" or ":GitCheckout -- <file>" to discard changes in working directory)',
       \ ]
-let s:Sections.utr.headers = [
+let s:Sections.utrk.headers = [
       \ 'Untracked files:',
       \ s:H2.'(use map "a" or ":GitAdd <file>" to include in what will be committed)',
       \ ]
@@ -381,13 +381,13 @@ function! s:Run ( options, cwd, restore_cursor )
   call setline( 1, [ 'On branch TODO', '' ] )
 
   let list_index        = s:ProcessSection( s:IsStaged( list_status ),    'stg' )
-  let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'ust' )
-  let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'utr' )
+  let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'ustg' )
+  let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'utrk' )
   let list_ignored      = s:ProcessSection( s:IsIgnored( list_status ),   'ign' )
 
   call s:PrintSection( list_index,        s:Sections.stg.headers )
-  call s:PrintSection( list_working_tree, s:Sections.ust.headers )
-  call s:PrintSection( list_untracked,    s:Sections.utr.headers )
+  call s:PrintSection( list_working_tree, s:Sections.ustg.headers )
+  call s:PrintSection( list_untracked,    s:Sections.utrk.headers )
   call s:PrintSection( list_ignored,      s:Sections.ign.headers )
   call s:AddFold( 1, line('$') )
 
@@ -403,7 +403,7 @@ function! s:Run ( options, cwd, restore_cursor )
 endfunction
 
 function! s:ProcessSection ( list_status, section )
-  let use_second_column = a:section == 'ust'
+  let use_second_column = a:section == 'ustg'
   let list_section = []
 
   for val in a:list_status
