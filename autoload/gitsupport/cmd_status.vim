@@ -281,7 +281,19 @@ function! s:FileActionReset ( file_name, file_record )
             \ ) == 0
     endif
   elseif section == 'stg' && status ==? 'R'
-    " TODO
+    let filename_old = a:file_record.filename_alt
+    if gitsupport#common#Question( 'Reset the old file "'.filename_old.'"?' )
+      call gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename_old ],
+            \ 'cwd', b:GitSupport_BaseDir ) == 0
+    endif
+    if gitsupport#common#Question( 'Reset the new file "'.filename.'"?' )
+      call gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
+            \ 'cwd', b:GitSupport_BaseDir ) == 0
+    endif
+    if gitsupport#common#Question( 'Undo the rename?' )
+      call rename( filename, filename_old )
+    endif
+    return 1
   elseif section == 'mrg'
     if gitsupport#common#Question( 'Reset conflicted file "'.filename.'"?', 'highlight', 'normal' )
       return gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
