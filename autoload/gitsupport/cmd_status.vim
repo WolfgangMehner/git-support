@@ -421,14 +421,13 @@ function! s:Run ( options, cwd, restore_cursor )
 endfunction
 
 function! s:ProcessSection ( list_status, section )
-  let use_second_column = a:section == 'ustg'
+  let is_staged   = a:section == 'stg'
+  let is_unstaged = a:section == 'ustg'
+  let is_conflict = a:section == 'mrg'
   let list_section = []
 
   for val in a:list_status
     let [ status, status_alt, filename ] = s:SplitHeader( val )
-    if use_second_column
-      let status = status_alt
-    endif
 
     let record = {
           \ 'filename': filename,
@@ -437,6 +436,21 @@ function! s:ProcessSection ( list_status, section )
           \ 'section': a:section,
           \ }
 
+    if is_staged
+      if status == 'R'
+        let mlist = matchlist( f_name, '^\(.*\) -> \(.*\)$' )
+        if !empty( mlist )
+          record.filename     = mlist[2]
+          record.filename_alt = mlist[1]
+        endif
+      endif
+    elseif is_unstaged
+      let status = status_alt
+    elseif is_conflict
+      let record.status  = 'U'
+      let record.status1 = status
+      let record.status2 = status_alt
+    endif
     call add( list_section, record )
   endfor
 
