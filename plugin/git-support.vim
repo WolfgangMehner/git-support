@@ -1038,7 +1038,7 @@ let s:HelpTxtStdNoUpdate .= "q       : close"
 if s:Enabled
   command! -nargs=* -complete=file            GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
   command! -nargs=* -complete=file -range=-1  GitBlame           :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
-  command! -nargs=* -complete=file            GitBranch          :call gitsupport#cmd_branch#FromdLine(<q-args>)
+  command! -nargs=* -complete=file            GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
   command! -nargs=? -complete=file            GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
