@@ -1,4 +1,4 @@
-*gitsupport.txt*                  Git Support                      Dec 07 2020
+*gitsupport.txt*                  Git Support                      Dec 23 2020
 
 Git Support                                          *git-support* *gitsupport*
 
@@ -718,7 +718,7 @@ Windows: If called without arguments, starts the git bash in interactive mode.
 Runs git in a terminal window. Useful for interactive commands, for example: >
   :GitTerm diff --color-words %
 <
-Requires |+terminal|.
+Requires |+terminal| or |nvim|.
 
 ------------------------------------------------------------------------------
                                                                     *:GitEdit*

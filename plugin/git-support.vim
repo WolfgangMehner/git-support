@@ -1059,6 +1059,8 @@ if s:Enabled
   command! -nargs=*                           GitSlist           :call gitsupport#cmd_stash#FromCmdLine('list '.<q-args>)
   command! -nargs=*                           GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
 
+  command! -nargs=* -complete=file            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
+
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
   command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
 endif
@@ -1083,7 +1085,6 @@ if s:Enabled
 	command! -nargs=? -complete=file                                 GitStatus          :call GitS_Status('update',<q-args>)
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
-	command! -nargs=* -complete=file                                 GitTerm            :call <SID>GitTerm(<q-args>)
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 else

@@ -116,6 +116,14 @@ endif
 
 let [ s:GitExec_Enabled, s:GitExec_Reason ] = s:CheckGitExecutable( s:Git_Executable )
 let [ s:GitBash_Enabled, s:GitBash_Reason ] = s:CheckExecutable( s:Git_GitBashExecutable )
+let [ s:GitTerm_Enabled, s:GitTerm_Reason ] = [ 1, '' ]
+if s:MSWIN
+  let s:GitTerm_Enabled = 0
+  let s:GitTerm_Reason = 'not yet available under Windows'
+elseif !s:NEOVIM && !has( 'terminal' )
+  let s:GitTerm_Enabled = 0
+  let s:GitTerm_Reason = '+terminal feature not available'
+endif
 
 function! gitsupport#config#GitExecutable ()
   return s:Git_Executable
@@ -136,6 +144,7 @@ let s:Features = {
       \
       \ 'is_executable_git':  s:GitExec_Enabled,
       \ 'is_executable_bash': s:GitBash_Enabled,
+      \ 'is_avaiable_term':   s:GitTerm_Enabled,
       \
       \ 'vim_has_json_decode':  has('patch-7.4.1304'),
       \ 'vim_full_job_support': has('patch-8.0.0902'),
@@ -192,6 +201,7 @@ function! gitsupport#config#PrintSettings ( verbose )
 "  let gitk_e_status  = s:EnabledGitK     ? '' : ' (not executable)'
 "  let gitk_s_status  = s:FoundGitKScript ? '' : ' (not found)'
   let gitbash_status = s:GitBash_Enabled  ? '' : ' ('.s:GitBash_Reason.')'
+  let gitterm_status = s:GitTerm_Enabled  ? 'yes' : 'no (s:GitTerm_Reason)'
 
   let environment = ''
   for [ name, value ] in items( s:Git_Env )
@@ -209,6 +219,7 @@ function! gitsupport#config#PrintSettings ( verbose )
 "    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
 "  endif
   let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
+  let txt .= '         terminal support :  '.gitterm_status."\n"
   if a:verbose >= 1
     let txt .= '              environment :  '.environment."\n"
   endif
