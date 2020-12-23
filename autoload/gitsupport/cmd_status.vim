@@ -49,6 +49,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> ch     :call <SID>FileAction("checkout-head")<CR>
   nnoremap <silent> <buffer> r      :call <SID>FileAction("reset")<CR>
   nnoremap <silent> <buffer> od     :call <SID>ShowDiff("default")<CR>
+  nnoremap <silent> <buffer> ow     :call <SID>ShowDiff("word")<CR>
   nnoremap <silent> <buffer> ol     :call <SID>ShowLog()<CR>
   nnoremap <silent> <buffer> of     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
@@ -150,7 +151,11 @@ function! s:ShowDiff ( mode )
     return 0
   endif
 
-  return gitsupport#cmd_diff#OpenBuffer( args, b:GitSupport_BaseDir )
+  if a:mode == 'default'
+    return gitsupport#cmd_diff#OpenBuffer( args, b:GitSupport_BaseDir )
+  elseif a:mode == 'word'
+    return gitsupport#cmd_term#Run( [ 'diff', '--word-diff=color' ] + args, b:GitSupport_BaseDir )
+  endif
 endfunction
 
 function! s:ShowLog ()
