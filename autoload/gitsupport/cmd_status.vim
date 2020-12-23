@@ -462,7 +462,7 @@ function! s:ProcessSection ( list_status, section )
         endif
       endif
     elseif is_unstaged
-      let status = status_alt
+      let record.status = status_alt
     elseif is_conflict
       let record.status  = 'U'
       let record.status1 = status
