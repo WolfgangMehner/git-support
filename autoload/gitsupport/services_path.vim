@@ -17,6 +17,8 @@ function! gitsupport#services_path#GetWorkingDir ( ... )
 
   if dir_hint != ''
     return dir_hint
+  elseif exists( 'b:GitSupport_CWD' )
+    return b:GitSupport_CWD
   elseif &l:filetype ==# 'netrw'
     return b:netrw_curdir
   endif
