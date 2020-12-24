@@ -13,49 +13,50 @@
 "-------------------------------------------------------------------------------
 
 let s:RevisionNames = {
-			\ ':'   : 'STAGED',
-			\ ':0:' : 'STAGED',
-			\ ':1:' : 'COMMON_ANCESTOR',
-			\ ':2:' : 'TARGET_BRANCH',
-			\ ':3:' : 'SOURCE_BRANCH',
-			\ }
+      \ ':'   : 'STAGED',
+      \ ':0:' : 'STAGED',
+      \ ':1:' : 'COMMON_ANCESTOR',
+      \ ':2:' : 'TARGET_BRANCH',
+      \ ':3:' : 'SOURCE_BRANCH',
+      \ }
 
 function! gitsupport#cmd_show#FromCmdLine ( q_params )
-	let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-	return gitsupport#cmd_show#OpenBuffer ( args )
+  let args = gitsupport#common#ParseShellParseArgs( a:q_params )
+  return gitsupport#cmd_show#OpenBuffer ( args )
 endfunction
 
 function! gitsupport#cmd_show#OpenBuffer ( params )
-	let params = a:params
+  let params = a:params
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
-	if empty( params )
-		let [ last_arg, obj_type ] = [ 'HEAD', 'commit' ]
-	else
-		let [ last_arg, obj_type ] = s:AnalyseObject ( params[-1] )
-	endif
+  if empty( params )
+    let [ last_arg, obj_type ] = [ 'HEAD', 'commit' ]
+  else
+    let [ last_arg, obj_type ] = s:AnalyseObject ( params[-1], cwd )
+  endif
 
-	" BLOB: treat separately
-	if obj_type == 'blob'
-		if last_arg =~ '\_^:[0123]:\|\_^:[^/]'
-			let obj_src = s:RevisionNames[ matchstr( last_arg, '\_^:[0123]:\|\_^:' ) ]
-			let last_arg = substitute( last_arg, '\_^:[0123]:\|\_^:', obj_src.'.', '' )
-		endif
+  " BLOB: treat separately
+  if obj_type == 'blob'
+    if last_arg =~ '\_^:[0123]:\|\_^:[^/]'
+      let obj_src = s:RevisionNames[ matchstr( last_arg, '\_^:[0123]:\|\_^:' ) ]
+      let last_arg = substitute( last_arg, '\_^:[0123]:\|\_^:', obj_src.'.', '' )
+    endif
 
-		let last_arg = substitute( last_arg, ':', '.', '' )
-		let last_arg = substitute( last_arg, '/', '.', 'g' )
+    let last_arg = substitute( last_arg, ':', '.', '' )
+    let last_arg = substitute( last_arg, '/', '.', 'g' )
 
-		call gitsupport#run#OpenBuffer( last_arg )
-		call gitsupport#run#RunToBuffer( '', ['show'] + params )
+    call gitsupport#run#OpenBuffer( last_arg )
+    call gitsupport#run#RunToBuffer( '', ['show'] + params, 'cwd', cwd )
 
-    command! -nargs=0 -buffer  Help   :call <SID>Help()
+    command! -nargs=0 -buffer  Help   :call <SID>HelpBlob()
     nnoremap          <buffer> <S-F1> :call <SID>HelpBlob()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
 
-		"filetype detect
-		return
-	else
+    "filetype detect
+    return
+  else
     call gitsupport#run#OpenBuffer( 'Git - show' )
-    call s:Run( params )
+    call s:Run( params, cwd )
 
     let &l:filetype = 'gitslog'
     let &l:foldmethod = 'syntax'
@@ -67,47 +68,51 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
     nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
 
-		let b:GitSupport_Param = params
-	endif
+    let b:GitSupport_Param = params
+    let b:GitSupport_CWD = cwd
+  endif
 endfunction
 
-function! s:AnalyseObject( obj_name )
-	let [ ret_code, obj_type ] = gitsupport#run#GitOutput( [ 'cat-file', "-t", shellescape( a:obj_name ) ] )
+function! s:AnalyseObject( obj_name, cwd )
+  let [ ret_code, obj_type ] = gitsupport#run#RunDirect( '', [ 'cat-file', "-t", shellescape( a:obj_name ) ],
+        \ 'cwd', a:cwd,
+        \ 'env_std', 1,
+        \ 'mode', 'return' )
 
-	if ret_code == 0
-		return [ a:obj_name, obj_type ]
-	else
-		return [ '', '' ]
-	endif
+  if ret_code == 0
+    return [ a:obj_name, obj_type ]
+  else
+    return [ '', '' ]
+  endif
 endfunction
 
 function! s:Help ()
-	let text =
-				\  "git show\n\n"
-				\ ."S-F1    : help\n"
-				\ ."q       : close\n"
-				\ ."u       : update\n"
-	echo text
+  let text =
+        \  "git show\n\n"
+        \ ."S-F1    : help\n"
+        \ ."q       : close\n"
+        \ ."u       : update\n"
+  echo text
 endfunction
 
 function! s:HelpBlob ()
-	let text =
-				\  "git show (blob)\n\n"
-				\ ."S-F1    : help\n"
-				\ ."q       : close\n"
-				\ ."u       : update\n"
-	echo text
+  let text =
+        \  "git show (blob)\n\n"
+        \ ."S-F1    : help\n"
+        \ ."q       : close\n"
+  echo text
 endfunction
 
 function! s:Quit ()
-	close
+  close
 endfunction
 
-function! s:Run ( params )
-  call gitsupport#run#RunToBuffer( '', ['show'] + a:params )
+function! s:Run ( params, cwd )
+  call gitsupport#run#RunToBuffer( '', ['show'] + a:params,
+        \ 'cwd', a:cwd )
 endfunction
 
 function! s:Update ()
-  call s:Run( b:GitSupport_Param )
+  call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
 endfunction
 
