@@ -423,6 +423,7 @@ function! s:Run ( options, cwd, restore_cursor )
   call s:PrintSection( list_conflict,     s:Sections.mrg.headers )
   call s:PrintSection( list_untracked,    s:Sections.utrk.headers )
   call s:PrintSection( list_ignored,      s:Sections.ign.headers )
+  call s:PrintNothingToCommit( list_index, list_working_tree, list_conflict, list_untracked )
   call s:AddFold( 1, line('$') )
 
   let b:GitSupport_LineIndex = {}
@@ -536,6 +537,18 @@ function! s:PrintSection ( list_section, headers )
     call setline( line_nr, [''] )
     call s:AddFold( line_first, line_nr )
   endif
+endfunction
+
+function! s:PrintNothingToCommit ( ... )
+  for list_section in a:000
+    if !empty( list_section )
+      return 0
+    endif
+  endfor
+
+  let line_nr = line('$')+1
+  call setline( line_nr, [ 'nothing to commit, working directory clean', '' ] )
+  return 1
 endfunction
 
 function! s:GetStatusString ( status )
