@@ -55,6 +55,10 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
   nnoremap <silent> <buffer> oj     :call <SID>Jump()<CR>
   nnoremap <silent> <buffer> D      :call <SID>DeleteFromDisk()<CR>
 
+  nnoremap <expr>   <buffer> ap     <SID>Patch("add")
+  nnoremap <expr>   <buffer> cp     <SID>Patch("checkout")
+  nnoremap <expr>   <buffer> rp     <SID>Patch("reset")
+
   let b:GitSupport_Param = params
   let b:GitSupport_Options = options
   let b:GitSupport_CWD = cwd
@@ -72,13 +76,14 @@ function! s:Help ()
         \ ."i       : show ignored files\n"
         \ ."\n"
         \ ."file under cursor ...\n"
-        \ ."a       : add\n"
-        \ ."c       : checkout\n"
+        \ ."a / ap  : add / add --patch\n"
+        \ ."c / cp  : checkout / checkout --patch\n"
         \ ."ch      : checkout HEAD\n"
         \ ."od      : open diff\n"
         \ ."of / oj : open file (edit)\n"
         \ ."ol      : open log\n"
         \ ."r       : reset\n"
+        \ ."r / rp  : reset / reset --patch\n"
         \ ."D       : delete from file system (only untracked files)\n"
         \ ."\n"
         \ ."for settings see:\n"
@@ -336,6 +341,15 @@ function! s:DeleteFromDisk ()
       call s:Run( b:GitSupport_Options, b:GitSupport_CWD, 1 )
     endif
   endif
+endfunction
+
+function! s:Patch ( operation )
+  let file_record = s:GetFileRecord()
+  let file_name   = ''
+  if has_key( file_record, 'filename' )
+    let file_name = shellescape( file_record.filename )
+  endif
+  return gitsupport#common#AssembleCmdLine( ':GitTerm '.a:operation.' -p -- '.file_name, '' )
 endfunction
 
 function! s:GetFileRecord ()

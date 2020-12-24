@@ -649,7 +649,6 @@ Git command.
   toggle ...
   i         show ignored files
   s         short output
-  v         verbose output
 
   file under cursor ...
   a         add
@@ -667,7 +666,7 @@ Git command.
   D         delete from file system (only untracked files)
  ----------------------------------------------------------------------------
 
-(^1) requires working "git bash"
+(^1) requires working |:GitTerm|
 
 Settings:
 - |g:Git_StatusStagedOpenDiff|
