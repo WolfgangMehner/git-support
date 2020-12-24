@@ -25,6 +25,7 @@ endfunction
 
 function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   let params = a:params
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
   if a:mode == 'top'
     let [ sh_ret, base ] = gitsupport#services_path#GetGitDir( 'top', cwd )
@@ -33,8 +34,6 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
     endif
 
     let cwd = base
-  else
-    let cwd = gitsupport#services_path#GetWorkingDir()
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - grep' )
