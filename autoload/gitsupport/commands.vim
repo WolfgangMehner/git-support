@@ -22,8 +22,10 @@ endfunction
 
 function! s:BufferFromCmdLine ( args )
   let args = gitsupport#common#ParseShellParseArgs( a:args )
+  let cwd = gitsupport#services_path#GetWorkingDir()
+
   call gitsupport#run#OpenBuffer( 'Git - '.get( args, 0, 'git' ) )
-  call gitsupport#run#RunToBuffer( '', args, 'env_std', 1 )
+  call gitsupport#run#RunToBuffer( '', args, 'cwd', cwd, 'env_std', 1 )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
