@@ -211,139 +211,6 @@ function! s:GetGlobalSetting ( varname, ... )
 endfunction
 
 "-------------------------------------------------------------------------------
-" s:GitCmdLineArgs : Split command-line parameters into a list.   {{{2
-"
-" Parameters:
-"   args - the arguments in one string (string)
-" Returns:
-"   [ <arg1>, <arg2>, ... ] - the split arguments (list of strings)
-"
-" In case of an error, a list with one empty string is returned:
-"   [ '' ]
-"-------------------------------------------------------------------------------
-"
-function! s:GitCmdLineArgs ( args )
-	"
-	let [ sh_err, text ] = s:StandardRun ( 'rev-parse', '-- '.a:args, 't' )
-	"
-	if sh_err == 0
-		return split ( text, '\n' )
-	else
-		call s:ErrorMsg ( "Can not parse the command line arguments:\n\n".text )
-		return [ '' ]
-	endif
-	"
-endfunction    " ----------  end of function s:GitCmdLineArgs  ----------
-"
-"-------------------------------------------------------------------------------
-" s:GitGetConfig : Get an option.   {{{2
-"
-" Parameters:
-"   option - name of the option (string)
-"   source - where to get the option from (string, optional)
-" Returns:
-"   value - the value of the option (string)
-"
-" The possible sources are:
-"   'local'  - current repository
-"   'global' - global settings
-"   'system' - system settings
-"-------------------------------------------------------------------------------
-"
-function! s:GitGetConfig ( option, ... )
-	"
-	let args = ''
-	"
-	if a:0 > 0
-		if a:1 == ''
-			" noop
-		elseif a:1 == 'local'
-			" noop
-		elseif a:1 == 'global'
-			let args = '--global '
-		elseif a:1 == 'system'
-			let args = '--system '
-		else
-			call s:ErrorMsg ( "Unknown option: ".a:1 )
-			return ''
-		endif
-	endif
-	"
-	let args .= '--get '.a:option
-	"
-	let [ sh_err, text ] = s:StandardRun ( 'config', args, 't' )
-	"
-	" from the help:
-	"   the section or key is invalid (ret=1)
-	if sh_err == 1 || text == ''
-		if has_key ( s:Config_DefaultValues, a:option )
-			return s:Config_DefaultValues[ a:option ]
-		else
-			return ''
-		endif
-	elseif sh_err == 0
-		return text
-	else
-		call s:ErrorMsg ( "Can not query the option: ".text )
-		return ''
-	endif
-	"
-endfunction    " ----------  end of function s:GitGetConfig  ----------
-"
-"-------------------------------------------------------------------------------
-" s:GitRepoDir : Get the base directory of a repository.   {{{2
-"
-" Parameters:
-"   file - get another path than the top-level directory (string, optional)
-" Returns:
-"   path - the name of the base directory (string)
-"
-" The possible options for 'file' are:
-"   'top'        - the top-level directory (default)
-"   'top/<file>  - a file in the top-level directory <top-level>/<file>
-"   'git/<file>' - a file in the git directory <top-level>/.git/<file>,
-"                    respects $GIT_DIR
-"-------------------------------------------------------------------------------
-"
-function! s:GitRepoDir ( ... )
-	"
-	let get_cmd = 'rev-parse'
-	let get_arg = '--show-toplevel'
-	let postfix = ''
-	"
-	let dir = 'top'
-	"
-	if a:0 == 0 || a:1 == '' || a:1 == 'top'
-		let [ sh_err, text ] = s:StandardRun ( 'rev-parse', '--show-toplevel', 't' )
-	elseif a:1 =~ '^top/'
-		let dir = a:1
-		let [ sh_err, text ] = s:StandardRun ( 'rev-parse', '--show-toplevel', 't' )
-		"
-		if sh_err == 0
-			let text = substitute ( a:1, 'top', escape( text, '\&' ), '' )
-		endif
-	elseif a:1 =~ '^git/'
-		let dir = a:1
-		let [ sh_err, text ] = s:StandardRun ( 'rev-parse', '--git-dir', 't' )
-		"
-		if sh_err == 0
-			let text = substitute ( a:1, 'git', escape( text, '\&' ), '' )
-		endif
-	else
-		call s:ErrorMsg ( "Unknown option: ".a:1 )
-		return ''
-	endif
-	"
-	if sh_err == 0
-		return fnamemodify ( text, ':p' )
-	else
-		call s:ErrorMsg ( "Can not query the directory \"".dir."\":","",text )
-		return ''
-	endif
-	"
-endfunction    " ----------  end of function s:GitRepoDir  ----------
-"
-"-------------------------------------------------------------------------------
 " s:ImportantMsg : Print an important message.   {{{2
 "
 " Parameters:
@@ -387,49 +254,6 @@ function! s:Redraw ( cmd_term, cmd_gui )
 	endif
 endfunction    " ----------  end of function s:Redraw  ----------
 
-"-------------------------------------------------------------------------------
-" s:OpenFile : Open a file or jump to its window.   {{{2
-"
-" Parameters:
-"   filename - the name of the file (string)
-"   line     - line number (integer, optional)
-"   column   - column version number (integer, optional)
-" Returns:
-"   -
-"
-" If the file is already open, jump to its window. Otherwise open a window
-" showing the file. If the line number is given, jump to this line in the
-" buffer. If the column number is given, jump to the column.
-"-------------------------------------------------------------------------------
-"
-function! s:OpenFile ( filename, ... )
-	"
-	let filename = resolve ( fnamemodify ( a:filename, ':p' ) )
-	"
-	if bufwinnr ( '^'.filename.'$' ) == -1
-		" open buffer
-		belowright new
-		exe "edit ".fnameescape( filename )
-	else
-		" jump to window
-		exe bufwinnr( '^'.filename.'$' ).'wincmd w'
-	endif
-	"
-	if a:0 >= 1
-		" jump to line
-		let pos = getpos( '.' )
-		let pos[1] = a:1   " line
-		if a:0 >= 2
-			let pos[2] = a:2   " col
-		endif
-		call setpos( '.', pos )
-	endif
-	"
-	if foldlevel('.') && g:Git_OpenFoldAfterJump == 'yes'
-		normal! zv
-	endif
-endfunction    " ----------  end of function s:OpenFile  ----------
-"
 "-------------------------------------------------------------------------------
 " s:Question : Ask the user a question.   {{{2
 "
@@ -480,71 +304,6 @@ function! s:Question ( text, ... )
 	"
 	return ret
 endfunction    " ----------  end of function s:Question  ----------
-
-"-------------------------------------------------------------------------------
-" s:ShellParseArgs : Turn cmd.-line arguments into a list.   {{{2
-"
-" Parameters:
-"   line - the command-line arguments to parse (string)
-" Returns:
-"   list - the arguments as a list (list)
-"-------------------------------------------------------------------------------
-
-function! s:ShellParseArgs ( line )
-
-	let list = []
-	let curr = ''
-
-	let line = a:line
-
-	while line != ''
-
-		if match ( line, '^\s' ) != -1
-			" non-escaped space -> finishes current argument
-			let line = matchstr ( line, '^\s\+\zs.*' )
-			if curr != ''
-				call add ( list, curr )
-				let curr = ''
-			endif
-		elseif match ( line, "^'" ) != -1
-			" start of a single-quoted string, parse past next single quote
-			let mlist = matchlist ( line, "^'\\([^']*\\)'\\(.*\\)" )
-			if empty ( mlist )
-				throw "ShellParseArgs:Syntax:no matching quote '"
-			endif
-			let curr .= mlist[1]
-			let line  = mlist[2]
-		elseif match ( line, '^"' ) != -1
-			" start of a double-quoted string, parse past next double quote
-			let mlist = matchlist ( line, '^"\(\%([^\"]\|\\.\)*\)"\(.*\)' )
-			if empty ( mlist )
-				throw 'ShellParseArgs:Syntax:no matching quote "'
-			endif
-			let curr .= substitute ( mlist[1], '\\\([\"]\)', '\1', 'g' )
-			let line  = mlist[2]
-		elseif match ( line, '^\\' ) != -1
-			" escape sequence outside of a string, parse one additional character
-			let mlist = matchlist ( line, '^\\\(.\)\(.*\)' )
-			if empty ( mlist )
-				throw 'ShellParseArgs:Syntax:single backspace \'
-			endif
-			let curr .= mlist[1]
-			let line  = mlist[2]
-		else
-			" otherwise parse up to next special char.: space, backslash, quote
-			let mlist = matchlist ( line, '^\([^[:space:]\\''"]\+\)\(.*\)' )
-			let curr .= mlist[1]
-			let line  = mlist[2]
-		endif
-	endwhile
-
-	" add last argument
-	if curr != ''
-		call add ( list, curr )
-	endif
-
-	return list
-endfunction    " ----------  end of function s:ShellParseArgs  ----------
 
 "-------------------------------------------------------------------------------
 " s:SID : Return the <SID>.   {{{2
@@ -785,13 +544,6 @@ let s:GitCommands = [
 			\ 'upload-pack',       'var',                      'verify-pack',       'verify-tag',         'web--browse',
 			\ 'whatchanged',       'write-tree',
 			\ ]
-
-" configuration defaults   {{{2
-" - only defaults which are relevant for Git-Support are listed here
-"
-let s:Config_DefaultValues = {
-			\ 'status.relativePaths' : 'true'
-			\ }
 
 "-------------------------------------------------------------------------------
 " == Platform specific items ==   {{{2
