@@ -394,7 +394,7 @@ let s:status_strings = {
       \ }
 
 function! s:Run ( options, cwd, restore_cursor )
-  let params = [ '--porcelain' ]
+  let params = [ '--porcelain', '--branch' ]
 
   if a:options.ignored
     let params += [ '--ignored' ]
@@ -410,14 +410,14 @@ function! s:Run ( options, cwd, restore_cursor )
   let [ ret_code, status ] = gitsupport#run#RunDirect( '', ['status'] + params, 'cwd', a:cwd, 'mode', 'return' )
   let list_status = split( status, '\m[\n\r]\+' )
 
-  call setline( 1, [ 'On branch TODO', '' ] )
-
+  let branch_info       = s:ProcessBranchInfo( list_status )
   let list_index        = s:ProcessSection( s:IsStaged( list_status ),    'stg' )
   let list_working_tree = s:ProcessSection( s:IsNotStaged( list_status ), 'ustg' )
   let list_conflict     = s:ProcessSection( s:IsConflict( list_status ),  'mrg' )
   let list_untracked    = s:ProcessSection( s:IsUntracked( list_status ), 'utrk' )
   let list_ignored      = s:ProcessSection( s:IsIgnored( list_status ),   'ign' )
 
+  call s:PrintBranch( branch_info )
   call s:PrintSection( list_index,        s:Sections.stg.headers )
   call s:PrintSection( list_working_tree, s:Sections.ustg.headers )
   call s:PrintSection( list_conflict,     s:Sections.mrg.headers )
@@ -435,6 +435,45 @@ function! s:Run ( options, cwd, restore_cursor )
   call gitsupport#common#BufferSetPosition( restore_pos )
 
   let &l:foldlevel = 2          " open folds closed by manual creation
+endfunction
+
+function! s:ProcessBranchInfo ( list_status )
+  let branch_line = matchstr( a:list_status, '^##' )
+  let branch_info = {}
+
+  if match( branch_line, '\.\.\..*\[' ) >= 0
+    let branch_data = matchlist( branch_line, '^## \(.*\)\.\.\.\(.*\) \[\(.*\)\]' )
+    let branch_info.name = branch_data[1]
+    let branch_info.upstream = branch_data[2]
+    let branch_info.trackig_info = branch_data[3]
+  elseif match( branch_line, '\.\.\.' ) >= 0
+    let branch_data = matchlist( branch_line, '^## \(.*\)\.\.\.\(.*\)' )
+    let branch_info.name = branch_data[1]
+    let branch_info.upstream = branch_data[2]
+  else
+    let branch_data = matchlist( branch_line, '^## \(.*\)' )
+    let branch_info.name = branch_data[1]
+  endif
+
+  return branch_info
+endfunction
+
+function! s:PrintBranch ( branch_info )
+  let lines = []
+  let lines += [ 'On branch '.( a:branch_info.name ) ]
+
+  let upstream = get( a:branch_info, 'upstream', '' )
+  if upstream != ''
+    let trackig_info = get( a:branch_info, 'trackig_info', '' )
+    if trackig_info == ''
+      let trackig_info = ' [up-to-date]'
+    else
+      let trackig_info = ' ['.trackig_info.']'
+    endif
+    let lines += [ 'Tracking '.upstream.trackig_info ]
+  endif
+
+  call setline( 1, lines + [ '' ] )
 endfunction
 
 function! s:ProcessSection ( list_status, section )
