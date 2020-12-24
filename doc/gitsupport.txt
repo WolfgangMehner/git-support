@@ -968,17 +968,17 @@ This highlighting is also used for ":GitStash list", ":GitShow <commit>" and
 4.6  STATUS                                            *gitsupport-syn-status*
 ------------------------------------------------------------------------------
 
-Various items are hightlighted, like the headlines of each section and the
+Various items are highlighted, like the headlines of each section and the
 files (in green and red). Adds a fold for each section "Changes to be
 committed:", "Changes not staged for commit:", ...
 
   Category                Short Description
  ----------------------------------------------------------------------------
   GitStatusHeader         the header of each section
-                            (lines like "# Changes not staged for commit:")
+                            (lines like "Changes not staged for commit:")
                           -> uses GitHeading
   GitStatusComment        additional help inserted into the output
-                            (lines like "#  (use 'git add <file>...' to ...)")
+                            (lines like "  (use 'git add <file>...' to ...)")
                           -> uses GitComment
   GitStagedFile           files listed as "to be committed"
                           -> uses GitAdd
@@ -990,6 +990,11 @@ committed:", "Changes not staged for commit:", ...
                           -> uses GitRemove
   GitUnmergedFile         files listed as "unmerged"
                           -> uses GitRemove
+
+  GitStatusTrackingDiverge  hint that the branch has diverged from upstream
+                            -> uses GitRemove
+  GitStatusTrackingCurrent  hint that the branch is up-to-date with upstream
+                            -> not highlighted by default
  ----------------------------------------------------------------------------
 
 ==============================================================================

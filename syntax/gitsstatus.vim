@@ -31,7 +31,11 @@ syn case match
 " - GitDiffRegion
 
 syn region GitStatusHashRegion  start=/^#/ end=/^#\@!/ contains=GitStagedRegion,GitModifiedRegion,GitUntrackedRegion,GitIgnoredRegion,GitUnmergedRegion fold
-syn region GitStatusBareRegion  start=/^[^#]\%1l/ end=/^\%(diff\)\@=/ contains=GitStagedRegionB,GitModifiedRegionB,GitUntrackedRegionB,GitIgnoredRegionB,GitUnmergedRegionB fold
+syn region GitStatusBareRegion  start=/^[^#]\%1l/ end=/^\%(diff\)\@=/ contains=GitStatusTrackingLine,GitStagedRegionB,GitModifiedRegionB,GitUntrackedRegionB,GitIgnoredRegionB,GitUnmergedRegionB fold
+
+syn match  GitStatusTrackingLine     "^Tracking .*" contained contains=GitStatusTrackingCurrent,GitStatusTrackingDiverge
+syn match  GitStatusTrackingDiverge  "\[\zs.\+\ze\]" contained
+syn match  GitStatusTrackingCurrent  "\[\zsup-to-date\ze]" contained
 
 syn region GitStagedRegion      start=/^# Changes to be committed:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained
 syn match  GitStagedFile        "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
@@ -76,6 +80,8 @@ syn match  GitStatusCommentB    "^\s\+\zs([^)]*)$"  contained
 "-------------------------------------------------------------------------------
 " Highlight
 "-------------------------------------------------------------------------------
+
+highlight default link GitStatusTrackingDiverge  GitRemove
 
 highlight default link GitStatusHeader    GitHeading
 highlight default link GitStatusComment   GitComment
