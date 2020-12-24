@@ -21,7 +21,7 @@ function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir( a:dir_hint )
 
-  let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir()
+  let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir( 'top', cwd )
   if sh_ret != 0 || base_dir == ''
     return s:ErrorMsg( 'could not obtain the repo base directory' )
   endif

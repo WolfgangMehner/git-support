@@ -26,29 +26,39 @@ function! gitsupport#services_path#GetWorkingDir ( ... )
   return ''
 endfunction
 
+function! s:GetOutput ( params, cwd )
+  return gitsupport#run#RunDirect( '', a:params,
+        \ 'cwd', a:cwd,
+        \ 'env_std', 1,
+        \ 'mode', 'return' )
+endfunction
+
 function! gitsupport#services_path#GetGitDir ( ... )
-  if a:0 == 0 || a:1 == '' || a:1 ==# 'top'
-    return gitsupport#run#GitOutput( [ 'rev-parse', '--show-toplevel' ] )
-  elseif a:1 =~ '^top/'
-    let [ ret_code, base_dir ] = gitsupport#run#GitOutput( [ 'rev-parse', '--show-toplevel' ] )
+  let path = get( a:000, 0, 'top' )
+  let cwd  = get( a:000, 1, '' )
+
+  if path ==# 'top'
+    return s:GetOutput( [ 'rev-parse', '--show-toplevel' ], cwd )
+  elseif path =~ '^top/'
+    let [ ret_code, base_dir ] = s:GetOutput( [ 'rev-parse', '--show-toplevel' ], cwd )
 
     if ret_code == 0
-      let text = substitute( a:1, 'top', escape( base_dir, '\&' ), '' )
+      let text = substitute( path, 'top', escape( base_dir, '\&' ), '' )
       return [ 0, fnamemodify( text, ':p' ) ]
     else
       return [ ret_code, base_dir ]
     endif
-  elseif a:1 =~ '^git/'
-    let [ ret_code, git_dir ] = gitsupport#run#GitOutput( [ 'rev-parse', '--git-dir' ] )
+  elseif path =~ '^git/'
+    let [ ret_code, git_dir ] = s:GetOutput( [ 'rev-parse', '--git-dir' ], cwd )
 
     if ret_code == 0
-      let text = substitute( a:1, 'git', escape( git_dir, '\&' ), '' )
+      let text = substitute( path, 'git', escape( git_dir, '\&' ), '' )
       return [ 0, fnamemodify( text, ':p' ) ]
     else
       return [ ret_code, git_dir ]
     endif
   else
-    return s:ErrorMsg( 'unknown option: "'.a:1.'"' )
+    return s:ErrorMsg( 'unknown option: "'.path.'"' )
   endif
 endfunction
 

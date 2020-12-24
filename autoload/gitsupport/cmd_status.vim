@@ -25,7 +25,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
         \ 'ignored': s:ListHas( params, [ '--ignored' ] ),
         \ }
 
-  let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir()
+  let [ sh_ret, base_dir ] = gitsupport#services_path#GetGitDir( 'top', cwd )
   if sh_ret != 0 || base_dir == ''
     return s:ErrorMsg( 'could not obtain the repo base directory' )
   endif

@@ -27,7 +27,7 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   let params = a:params
 
   if a:mode == 'top'
-    let [ sh_ret, base ] = gitsupport#services_path#GetGitDir()
+    let [ sh_ret, base ] = gitsupport#services_path#GetGitDir( 'top', cwd )
     if sh_ret != 0 || base == ''
       return s:ErrorMsg( 'could not obtain the repo base directory' )
     endif
