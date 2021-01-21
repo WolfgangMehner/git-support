@@ -509,10 +509,10 @@ function! s:ProcessSection ( list_status, section )
 
     if is_staged
       if status == 'R'
-        let mlist = matchlist( f_name, '^\(.*\) -> \(.*\)$' )
+        let mlist = matchlist( filename, '^\(.*\) -> \(.*\)$' )
         if !empty( mlist )
-          record.filename     = mlist[2]
-          record.filename_alt = mlist[1]
+          let record.filename     = mlist[2]
+          let record.filename_alt = mlist[1]
         endif
       endif
     elseif is_unstaged
