@@ -393,44 +393,6 @@ function! s:UnicodeLen ( str )
 endfunction    " ----------  end of function s:UnicodeLen  ----------
 "
 "-------------------------------------------------------------------------------
-" s:VersionLess : Compare two version numbers.   {{{2
-"
-" Parameters:
-"   v1 - 1st version number (string)
-"   v2 - 2nd version number (string)
-" Returns:
-"   less - true, if v1 < v2 (string)
-"-------------------------------------------------------------------------------
-"
-function! s:VersionLess ( v1, v2 )
-	"
-	let l1 = matchlist( a:v1, '^\(\d\+\)\.\(\d\+\)\%(\.\(\d\+\)\)\?\%(\.\(\d\+\)\)\?' )
-	let l2 = matchlist( a:v2, '^\(\d\+\)\.\(\d\+\)\%(\.\(\d\+\)\)\?\%(\.\(\d\+\)\)\?' )
-	"
-	if empty( l1 ) || empty( l2 )
-		echoerr 'Can not compare version numbers "'.a:v1.'" and "'.a:v2.'".'
-		return
-	endif
-	"
-	for i in range( 1, 4 )
-		" all previous numbers have been identical!
-		if empty(l2[i])
-			" l1[i] is empty as well or "0"  -> versions are the same
-			" l1[i] is not empty             -> v1 can not be less
-			return 0
-		elseif empty(l1[i])
-			" only l1[i] is empty -> v2 must be larger, unless l2[i] is "0"
-			return l2[i] != 0
-		elseif str2nr(l1[i]) != str2nr( l2[i] )
-			return str2nr(l1[i]) < str2nr( l2[i] )
-		endif
-	endfor
-	"
-	echoerr 'Something went wrong while comparing "'.a:v1.'" and "'.a:v2.'".'
-	return -1
-endfunction    " ----------  end of function s:VersionLess  ----------
-
-"-------------------------------------------------------------------------------
 " s:WarningMsg : Print a warning/error message.   {{{2
 "
 " Parameters:
@@ -738,39 +700,10 @@ let [ s:Git_GitBashExecutable, s:EnabledGitBash, s:DisableGitBashReason ] = s:Ch
 "
 " check Git version   {{{2
 
-" added in 1.7.2:
-" - "git status --ignored"
-" - "git status -s -b"
-let s:HasStatusIgnore = 1
-let s:HasStatusBranch = 1
-
-" changed in 1.8.0:
-" - "git branch --set-upstream" is deprecated,
-"   use "git branch --set-upstream-to="
-let s:HasBranchSetUpstreamTo = 1
-
-" changed in 1.8.5:
-" - output of "git status" without leading "#" char.
-let s:HasStatus185Format = 1
-
 if s:Enabled
 	let s:GitVersion = s:StandardRun( '', ' --version', 't' )[1]
 	if s:GitVersion =~? 'git version [0-9.]\+'
 		let s:GitVersion = matchstr( s:GitVersion, 'git version \zs[0-9.]\+' )
-
-		if s:VersionLess ( s:GitVersion, '1.7.2' )
-			let s:HasStatusIgnore = 0
-			let s:HasStatusBranch = 0
-		endif
-
-		if s:VersionLess ( s:GitVersion, '1.8.0' )
-			let s:HasBranchSetUpstreamTo = 0
-		endif
-
-		if s:VersionLess ( s:GitVersion, '1.8.5' )
-			let s:HasStatus185Format = 0
-		endif
-
 	else
 		call s:ErrorMsg ( 'Can not obtain the version number of Git.' )
 	endif
@@ -1014,19 +947,15 @@ function! GitS_FoldLog ()
 		else
 			return head.line.tail
 		endif
-	elseif ! s:HasStatus185Format && line =~ '^#\s\a.*:$'
-				\ || s:HasStatus185Format && line =~ '^\a.*:$'
+	elseif line =~ '^\a.*:$'
 		" we assume a line in the status comment block and try to guess the number of lines (=files)
 		" :TODO:20.03.2013 19:30:WM: (might be something else)
-		"
-		let prefix = s:HasStatus185Format ? '' : '#'
-		"
 		let filesstart = v:foldstart+1
 		let filesend   = v:foldend
-		while filesstart < v:foldend && getline(filesstart) =~ '\_^'.prefix.'\s*\_$\|\_^'.prefix.'\s\+('
+		while filesstart < v:foldend && getline(filesstart) =~ '\_^\s*\_$\|\_^\s\+('
 			let filesstart += 1
 		endwhile
-		while filesend > v:foldstart && getline(filesend) =~ '^'.prefix.'\s*$'
+		while filesend > v:foldstart && getline(filesend) =~ '^\s*$'
 			let filesend -= 1
 		endwhile
 		return line.' '.( filesend - filesstart + 1 ).' files '
