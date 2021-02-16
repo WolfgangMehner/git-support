@@ -21,8 +21,11 @@ let s:EditFileIDs = [
       \ ]
 
 function! gitsupport#cmd_edit#EditFile ( fileid )
+  let cwd = gitsupport#services_path#GetWorkingDir()
+
   let ret_code = 0
   let filename = ''
+  let is_absolute = 0
 
   if a:fileid == 'config-global'
     let filename = expand( '$HOME/.gitconfig' )
@@ -30,20 +33,21 @@ function! gitsupport#cmd_edit#EditFile ( fileid )
     if exists( '$GIT_CONFIG' )
       let filename = $GIT_CONFIG
     else
-      let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/config' )
+      let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/config', cwd )
     endif
   elseif a:fileid == 'description'
-    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/description' )
+    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/description', cwd )
   elseif a:fileid == 'hooks'
-    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/hooks/' )
+    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/hooks/', cwd )
   elseif a:fileid == 'ignore-global'
     let [ ret_code, filename ] = gitsupport#config#GitConfig( 'core.excludesfile', '' )
+    let is_absolute = 1
   elseif a:fileid == 'ignore-local'
-    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'top/.gitignore' )
+    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'top/.gitignore', cwd )
   elseif a:fileid == 'ignore-private'
-    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/info/exclude' )
+    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'git/info/exclude', cwd )
   elseif a:fileid == 'modules'
-    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'top/.gitmodules' )
+    let [ ret_code, filename ] = gitsupport#services_path#GetGitDir( 'top/.gitmodules', cwd )
   endif
 
   if ret_code != 0
@@ -51,6 +55,11 @@ function! gitsupport#cmd_edit#EditFile ( fileid )
   elseif filename == ''
     return s:ErrorMsg ( 'no file with ID "'.a:fileid.'".' )
   else
+    let is_absolute = is_absolute || filename[0] == '/'
+    if ( ! is_absolute ) && cwd != ''
+      let filename = cwd.'/'.filename
+    endif
+
     exe 'spl '.fnameescape( filename )
   endif
 endfunction
