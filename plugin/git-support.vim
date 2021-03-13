@@ -608,29 +608,11 @@ call s:GetGlobalSetting ( 'Git_CustomMenu' )
 let s:Enabled         = 1           " Git enabled?
 let s:DisabledMessage = "Git-Support not working:"
 let s:DisabledReason  = ""
-"
-let s:EnabledGitBash        = 1     " git bash enabled?
-let s:DisableGitBashMessage = "git bash not avaiable:"
-let s:DisableGitBashReason  = ""
 
 " :TODO:25.09.2017 19:06:WM: enable Windows, check how to start jobs with arguments under Windows
 let s:EnabledGitTerm = has ( 'terminal' ) && ! s:MSWIN || has ( 'nvim' )
 
 let s:GitVersion    = ""            " Git Version
-"
-" git bash
-if s:MSWIN
-	let s:Git_GitBashExecutable = s:Git_BinPath.'sh.exe'
-	call s:GetGlobalSetting ( 'Git_GitBashExecutable' )
-else
-	if exists ( 'g:Xterm_Executable' )
-		let s:Git_GitBashExecutable = g:Xterm_Executable
-	else
-		let s:Git_GitBashExecutable = 'xterm'
-	endif
-	call s:GetGlobalSetting ( 'Git_GitBashExecutable' )
-	call s:ApplyDefaultSetting ( 'Xterm_Options', '-fa courier -fs 12 -geometry 80x24' )
-endif
 "
 " check git executable   {{{2
 "
@@ -679,7 +661,6 @@ function! s:CheckFile ( shortname, filename, esc )
 endfunction    " ----------  end of function s:CheckFile  ----------
 "
 let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecutable( 'git',  s:Git_Executable )
-let [ s:Git_GitBashExecutable, s:EnabledGitBash, s:DisableGitBashReason ] = s:CheckExecutable ( 'git bash', s:Git_GitBashExecutable )
 "
 " check Git version   {{{2
 
@@ -740,6 +721,10 @@ if s:Enabled
   command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
 endif
 
+if s:MSWIN
+  command! -nargs=* -complete=file            GitBash            :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
+endif
+
 if s:Git_NextGen
   command! -nargs=?                -bang      GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
 else
@@ -747,15 +732,13 @@ else
 endif
 command! -nargs=0                           GitSupportHelp      :call gitsupport#plugin#help("gitsupportwww")
 
-if s:Enabled
-	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
-else
+if !s:Enabled
   command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
 endif
-"
+
 " syntax highlighting   {{{2
 
 function! s:HighlightingDefaults ()
@@ -942,48 +925,6 @@ function! GitS_FoldLog ()
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
 "-------------------------------------------------------------------------------
-" s:GitBash : execute 'xterm git ...' or "git bash"   {{{1
-"-------------------------------------------------------------------------------
-
-function! s:GitBash( param )
-
-	" :TODO:10.12.2013 20:14:WM: graphics available?
-	if s:EnabledGitBash == 0
-		return s:ErrorMsg ( s:DisableGitBashMessage, s:DisableGitBashReason )
-	endif
-
-	let title = 'git '.matchstr( a:param, '\S\+' )
-	let param = escape( a:param, '%#' )
-
-	if s:MSWIN && param =~ '^\s*$'
-		" no parameters: start interactive mode in background
-		silent exe '!start '.s:Git_GitBashExecutable.' --login -i'
-	elseif s:MSWIN
-		" otherwise: block editor and execute command
-		silent exe '!'.s:Git_GitBashExecutable.' --login -c '.shellescape ( 'git '.param )
-	else
-		" UNIX: execute command in background, wait for confirmation afterwards
-		if s:Git_GitBashExecutable =~ '\cxterm'
-			let title = ' -title '.shellescape( title )
-		else
-			let title = ''
-		endif
-
-		if s:NEOVIM
-			let job_id = jobstart ( s:Git_GitBashExecutable.' '.g:Xterm_Options.title
-						\ .' -e '.shellescape( s:Git_Executable.' '.param.' ; echo "" ; read -p "  ** PRESS ENTER **  " dummy ' ),
-						\ { 'detach' : 1 } )
-		else
-			silent exe '!' s:Git_GitBashExecutable g:Xterm_Options title
-						\  '-e ' shellescape( s:Git_Executable.' '.param.' ; echo "" ; read -p "  ** PRESS ENTER **  " dummy ' ) '&'
-		endif
-
-		call s:Redraw ( 'r!', '' )                  " redraw in terminal
-	endif
-
-endfunction    " ----------  end of function s:GitBash  ----------
-
-"-------------------------------------------------------------------------------
 " s:PluginSettings : Print the settings on the command line.   {{{1
 "-------------------------------------------------------------------------------
 "
@@ -998,15 +939,12 @@ function! s:PluginSettings( verbose )
 	if s:Enabled | let git_e_status = ' (version '.s:GitVersion.')'
 	else         | let git_e_status = ' (not executable)'
 	endif
-	let gitbash_status = s:EnabledGitBash  ? '' : ' (not executable)'
 	"
 	let file_options_status = filereadable ( s:Git_CmdLineOptionsFile ) ? '' : ' (not readable)'
 	"
 	let	txt = " Git-Support settings\n\n"
 				\ .'     plug-in installation :  '.s:installation.' in '.vim_name.' on '.sys_name."\n"
 				\ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
-	let txt .=
-				\  '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
 	if s:UNIX && a:verbose >= 1
 		let txt .= '            xterm options :  "'.g:Xterm_Options."\"\n"
 	endif

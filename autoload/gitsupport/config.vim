@@ -97,7 +97,11 @@ else
 	let s:Git_GitKExecutable = s:Git_BinPath.'gitk'     " GitK executable
 	let s:Git_GitKScript     = ''                       " GitK script (do not specify separate script by default)
 
-	let s:Git_GitBashExecutable = 'xterm'
+  if exists ( 'g:Xterm_Executable' )
+    let s:Git_GitBashExecutable = g:Xterm_Executable
+  else
+    let s:Git_GitBashExecutable = 'xterm'
+  endif
 endif
 
 call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',       'no' )
@@ -107,6 +111,7 @@ call s:ApplyDefaultSetting( 'Git_ResetExpandEmpty',     'no' )
 call s:ApplyDefaultSetting( 'Git_OpenFoldAfterJump',    'yes' )
 call s:ApplyDefaultSetting( 'Git_StatusStagedOpenDiff', 'cached' )
 call s:ApplyDefaultSetting( 'Git_Editor',               '' )
+call s:ApplyDefaultSetting( 'Xterm_Options', '-fa courier -fs 12 -geometry 80x24' )
 
 let s:Git_Env = {}
 
