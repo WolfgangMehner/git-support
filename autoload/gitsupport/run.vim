@@ -147,6 +147,59 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
   return v:shell_error
 endfunction
 
+function! gitsupport#run#RunDetach ( cmd, params, ... )
+
+  " options
+  let opts = {
+        \ 'env': {},
+        \ 'env_std': 0,
+        \ 'cwd': '',
+        \ }
+
+  if ! gitsupport#common#ParseOptions( opts, a:000 )
+    return
+  endif
+
+  if a:cmd == ''
+    let exec = gitsupport#config#GitExecutable()
+  else
+    let exec = a:cmd
+  endif
+
+  if opts.env_std
+    let opts.env = gitsupport#config#Env()
+  endif
+
+  if s:Features.running_nvim
+    return gitsupport#run_nvim#RunDetach( exec, a:params, opts )
+  endif
+
+  if type( a:params ) == type( [] )
+    let cmd = join( map( copy( a:params ), "shellescape(v:val)" ), ' ' )
+  else
+    let cmd = a:params
+  endif
+
+  let cmd = s:GetEnvStr( opts.env ).shellescape( exec ).' '.cmd
+
+  let saved_dir = s:SetDir( opts.cwd )
+
+  try
+    if s:Features.running_mswin
+      silent exe '!start '.cmd
+    else
+      silent exe '!'.cmd.' &'
+    endif
+  catch /.*/
+    call s:WarningMsg (
+          \ "internal error " . v:exception,
+          \ "   occurred at " . v:throwpoint )
+    return [ 255, '' ]
+  finally
+    call s:ResetDir( saved_dir )
+  endtry
+endfunction
+
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   " options

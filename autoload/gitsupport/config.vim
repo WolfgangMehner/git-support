@@ -34,6 +34,14 @@ function! s:CheckExecutable ( exec )
   endif
 endfunction
 
+function! s:CheckFile ( filename )
+  if filereadable( a:filename )
+    return [ 1, '' ]
+  else
+    return [ 0, 'not found' ]
+  endif
+endfunction
+
 function! s:CheckGitExecutable ( exec )
   if !executable( a:exec )
     return [ 0, 'not executable' ]
@@ -115,6 +123,12 @@ if ! has_key( s:Git_Env, 'LANG' )
 endif
 
 let [ s:GitExec_Enabled, s:GitExec_Reason ] = s:CheckGitExecutable( s:Git_Executable )
+let [ s:GitkExec_Enabled, s:GitkExec_Reason ] = s:CheckExecutable( s:Git_GitKExecutable )
+if empty( s:Git_GitKScript )
+  let [ s:GitkScript_Found, s:GitkScript_Reason ] = [ 2, '' ]
+else
+  let [ s:GitkScript_Found, s:GitkScript_Reason ] = s:CheckFile( s:Git_GitKScript )
+endif
 let [ s:GitBash_Enabled, s:GitBash_Reason ] = s:CheckExecutable( s:Git_GitBashExecutable )
 let [ s:GitTerm_Enabled, s:GitTerm_Reason ] = [ 1, '' ]
 if s:MSWIN
@@ -127,6 +141,14 @@ endif
 
 function! gitsupport#config#GitExecutable ()
   return s:Git_Executable
+endfunction
+
+function! gitsupport#config#GitKExecutableAndScript ()
+  if empty( s:Git_GitKScript )
+    return [ s:Git_GitKExecutable ]
+  else
+    return [ s:Git_GitKExecutable, s:Git_GitKScript ]
+  endif
 endfunction
 
 function! gitsupport#config#GitBashExecutable ()
@@ -143,6 +165,7 @@ let s:Features = {
       \ 'running_unix':  s:UNIX,
       \
       \ 'is_executable_git':  s:GitExec_Enabled,
+      \ 'is_executable_gitk': s:GitkExec_Enabled && s:GitkScript_Found,
       \ 'is_executable_bash': s:GitBash_Enabled,
       \ 'is_avaiable_term':   s:GitTerm_Enabled,
       \
@@ -198,10 +221,10 @@ function! gitsupport#config#PrintSettings ( verbose )
   if s:GitExec_Enabled | let git_e_status = ' (version '.s:GitVersion.')'
   else                 | let git_e_status = ' ('.s:GitExec_Reason.')'
   endif
-"  let gitk_e_status  = s:EnabledGitK     ? '' : ' (not executable)'
-"  let gitk_s_status  = s:FoundGitKScript ? '' : ' (not found)'
+  let gitk_e_status  = s:GitkExec_Enabled ? '' : ' ('.s:GitkExec_Reason.')'
+  let gitk_s_status  = s:GitkScript_Found ? '' : ' ('.s:GitkScript_Reason.')'
   let gitbash_status = s:GitBash_Enabled  ? '' : ' ('.s:GitBash_Reason.')'
-  let gitterm_status = s:GitTerm_Enabled  ? 'yes' : 'no (s:GitTerm_Reason)'
+  let gitterm_status = s:GitTerm_Enabled  ? 'yes' : 'no ('.s:GitTerm_Reason.')'
 
   let environment = ''
   for [ name, value ] in items( s:Git_Env )
@@ -214,10 +237,10 @@ function! gitsupport#config#PrintSettings ( verbose )
   let txt = " Git-Support settings\n\n"
         \ .'     plug-in installation :  '.vim_name.' on '.sys_name."\n"
         \ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
-"        \ .'          gitk executable :  '.s:Git_GitKExecutable.gitk_e_status."\n"
-"  if ! empty( s:Git_GitKScript )
-"    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
-"  endif
+        \ .'          gitk executable :  '.s:Git_GitKExecutable.gitk_e_status."\n"
+  if ! empty( s:Git_GitKScript )
+    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
+  endif
   let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
   let txt .= '         terminal support :  '.gitterm_status."\n"
   if a:verbose >= 1

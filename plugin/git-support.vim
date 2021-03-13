@@ -757,16 +757,17 @@ if s:Enabled && s:Git_NextGen
 	command  -nargs=* -complete=file -bang      Git       :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
 	command! -nargs=* -complete=file            GitRun    :call gitsupport#commands#FromCmdLine('direct',<q-args>)
 	command! -nargs=* -complete=file            GitBuf    :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
+	command! -nargs=* -complete=file            GitK      :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
 endif
 
 if s:Enabled && ! s:Git_NextGen
 	command  -nargs=* -complete=file -bang                           Git                :call GitS_Run(<q-args>,'<bang>'=='!'?'b':'')
 	command! -nargs=* -complete=file                                 GitRun             :call GitS_Run(<q-args>,'')
 	command! -nargs=* -complete=file                                 GitBuf             :call GitS_Run(<q-args>,'b')
+	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 endif
 
 if s:Enabled
-	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))

@@ -14,6 +14,16 @@
 
 let g:all_jobs = {}
 
+function! gitsupport#run_nvim#RunDetach ( cmd, params, opts )
+  let job_data = { 'detach' : 1 }
+  if a:opts.cwd != ''
+    let job_data.cwd = a:opts.cwd
+  endif
+  let job_data.env = a:opts.env
+
+  call jobstart( [a:cmd] + a:params, job_data )
+endfunction
+
 function! gitsupport#run_nvim#JobRun ( cmd, params, opts )
   let job_data = {}
   let job_data.on_stdout = function( 's:JobOutput' )
