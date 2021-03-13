@@ -769,16 +769,15 @@ if s:Git_NextGen
 else
   command! -nargs=?                -bang      GitSupportSettings  :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 endif
+command! -nargs=0                           GitSupportHelp      :call gitsupport#plugin#help("gitsupportwww")
 
 if s:Enabled
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
-	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 else
   command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
-	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
 endif
 "
 " syntax highlighting   {{{2
@@ -1033,19 +1032,6 @@ function! s:GitBash( param )
 	endif
 
 endfunction    " ----------  end of function s:GitBash  ----------
-
-"-------------------------------------------------------------------------------
-" s:PluginHelp : Plug-in help.   {{{1
-"-------------------------------------------------------------------------------
-
-function! s:PluginHelp( topic )
-	try
-		silent exe 'help '.a:topic
-	catch
-		exe 'helptags '.s:plugin_dir.'/doc'
-		silent exe 'help '.a:topic
-	endtry
-endfunction    " ----------  end of function s:PluginHelp  ----------
 
 "-------------------------------------------------------------------------------
 " s:PluginSettings : Print the settings on the command line.   {{{1
@@ -1363,7 +1349,7 @@ function! s:InitMenus()
 		call s:GenerateCustomMenu ( s:Git_RootMenu.'.custom', s:Git_CustomMenu )
 
 		exe ahead.'-HelpSep-                                  :'
-		exe ahead.'help\ (custom\ menu)<TAB>:GitSupportHelp   :call <SID>PluginHelp("gitsupport-menus")<CR>'
+		exe ahead.'help\ (custom\ menu)<TAB>:GitSupportHelp   :call gitsupport#plugin#help("gitsupport-menus")<CR>'
 
 	endif
 
@@ -1386,8 +1372,8 @@ function! s:InitMenus()
 	exe ahead.'Help<TAB>Git :echo "This is a menu header!"<CR>'
 	exe ahead.'-Sep00-      :'
 
-	exe shead.'help\ (Git-Support)<TAB>:GitSupportHelp     :call <SID>PluginHelp("gitsupport")<CR>'
-	exe shead.'plug-in\ settings<TAB>:GitSupportSettings   :call <SID>PluginSettings(0)<CR>'
+	exe shead.'help\ (Git-Support)<TAB>:GitSupportHelp     :call gitsupport#plugin#help("gitsupport")<CR>'
+	exe shead.'plug-in\ settings<TAB>:GitSupportSettings   :call gitsupport#config#PrintSettings(0)<CR>'
 
 	" Main Menu - open buffers   {{{2
 	let ahead = 'anoremenu          '.s:Git_RootMenu.'.'

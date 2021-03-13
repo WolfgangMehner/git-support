@@ -155,6 +155,10 @@ function! gitsupport#config#GitBashExecutable ()
   return s:Git_GitBashExecutable
 endfunction
 
+function! gitsupport#config#PluginDir ()
+  return s:plugin_dir
+endfunction
+
 function! gitsupport#config#Env ()
 	return copy( s:Git_Env )
 endfunction
