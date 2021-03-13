@@ -767,17 +767,21 @@ if s:Enabled && ! s:Git_NextGen
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 endif
 
+if s:Git_NextGen
+  command! -nargs=?                -bang      GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
+else
+  command! -nargs=?                -bang      GitSupportSettings  :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
+endif
+
 if s:Enabled
 	command! -nargs=* -complete=file                                 GitBash            :call <SID>GitBash(<q-args>)
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
-	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 else
   command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
 	command! -nargs=0                                                GitSupportHelp     :call <SID>PluginHelp("gitsupport")
-	command! -nargs=?                -bang                           GitSupportSettings :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
 endif
 "
 " syntax highlighting   {{{2
