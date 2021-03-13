@@ -87,73 +87,6 @@ function! s:AssembleCmdLine ( part1, part2, ... )
 endfunction    " ----------  end of function s:AssembleCmdLine  ----------
 "
 "-------------------------------------------------------------------------------
-" s:ChangeCWD : Check the buffer and the CWD.   {{{2
-"
-" Parameters:
-"   [ bufnr, dir ] - data (list: integer and string, optional)
-" Returns:
-"   -
-"
-" Example:
-" First check the current working directory:
-"   let data = s:CheckCWD ()
-" then jump to the Git buffer:
-"   call s:OpenGitBuffer ( 'Git - <name>' )
-" then call this function to correctly set the directory of the buffer:
-"   call s:ChangeCWD ( data )
-"
-" Usage:
-" The function s:CheckCWD queries the working directory of the buffer your
-" starting out in, which is the buffer where you called the Git command. The
-" call to s:OpenGitBuffer then opens the requested buffer or jumps to it if it
-" already exists. Finally, s:ChangeCWD sets the working directory of the Git
-" buffer.
-" The buffer 'data' is a list, containing first the number of the current buffer
-" at the time s:CheckCWD was called, and second the name of the directory.
-"
-" When called without parameters, changes to the directory stored in
-" 'b:GitSupport_CWD'.
-"-------------------------------------------------------------------------------
-"
-function! s:ChangeCWD ( ... )
-	"
-	" call originated from outside the Git buffer?
-	" also the case for a new buffer
-	if a:0 == 0
-		if ! exists ( 'b:GitSupport_CWD' )
-			call s:ErrorMsg ( 'Not inside a Git buffer.' )
-			return
-		endif
-	elseif bufnr('%') != a:1[0]
-		"echomsg '2 - call from outside: '.a:1[0]
-		let b:GitSupport_CWD = a:1[1]
-	else
-		"echomsg '2 - call from inside: '.bufnr('%')
-		" noop
-	endif
-	"
-	" change buffer
-	"echomsg '3 - changing to: '.b:GitSupport_CWD
-	exe	'lchdir '.fnameescape( b:GitSupport_CWD )
-endfunction    " ----------  end of function s:ChangeCWD  ----------
-"
-"-------------------------------------------------------------------------------
-" s:CheckCWD : Check the buffer and the CWD.   {{{2
-"
-" Parameters:
-"   -
-" Returns:
-"   [ bufnr, dir ] - data (list: integer and string)
-"
-" Usage: see s:ChangeCWD
-"-------------------------------------------------------------------------------
-"
-function! s:CheckCWD ()
-	"echomsg '1 - calling from: '.getcwd()
-	return [ bufnr('%'), getcwd() ]
-endfunction    " ----------  end of function s:CheckCWD  ----------
-"
-"-------------------------------------------------------------------------------
 " s:ErrorMsg : Print an error message.   {{{2
 "
 " Parameters:
@@ -226,33 +159,6 @@ function! s:ImportantMsg ( ... )
 	echo join ( a:000, "\n" )
 	echohl None
 endfunction    " ----------  end of function s:ImportantMsg  ----------
-
-"-------------------------------------------------------------------------------
-" s:Redraw : Redraw depending on whether a GUI is running.   {{{2
-"
-" Example:
-"   call s:Redraw ( 'r!', '' )
-" Clear the screen and redraw in a terminal, do nothing when a GUI is running.
-"
-" Parameters:
-"   cmd_term - redraw command in terminal mode (string)
-"   cmd_gui -  redraw command in GUI mode (string)
-" Returns:
-"   -
-"-------------------------------------------------------------------------------
-
-function! s:Redraw ( cmd_term, cmd_gui )
-	if has('gui_running')
-		let cmd = a:cmd_gui
-	else
-		let cmd = a:cmd_term
-	endif
-
-	let cmd = substitute ( cmd, 'r\%[edraw]', 'redraw', '' )
-	if cmd != ''
-		silent exe cmd
-	endif
-endfunction    " ----------  end of function s:Redraw  ----------
 
 "-------------------------------------------------------------------------------
 " s:Question : Ask the user a question.   {{{2
@@ -645,21 +551,6 @@ function! s:CheckExecutable ( name, exe )
 	return [ executable, enabled, reason ]
 endfunction    " ----------  end of function s:CheckExecutable  ----------
 "
-function! s:CheckFile ( shortname, filename, esc )
-	"
-	let filename = a:filename
-	let found    = 1
-	let message  = ""
-	"
-	if ! filereadable ( filename )
-		let found = 0
-		let message = a:shortname." not found: ".filename
-	endif
-	let filename = shellescape( filename )
-	"
-	return [ filename, found, message ]
-endfunction    " ----------  end of function s:CheckFile  ----------
-"
 let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecutable( 'git',  s:Git_Executable )
 "
 " check Git version   {{{2
@@ -761,114 +652,6 @@ augroup END
 
 " }}}2
 "-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
-" s:OpenGitBuffer : Put output in a read-only buffer.   {{{1
-"
-" Parameters:
-"   buf_name - name of the buffer (string)
-" Returns:
-"   opened -  true, if a new buffer was opened (integer)
-"
-" If a buffer called 'buf_name' already exists, jump to that buffer. Otherwise,
-" open a buffer of the given name an set it up as a "temporary" buffer. It is
-" deleted after the window is closed.
-"
-" Settings:
-" - noswapfile
-" - bufhidden=wipe
-" - tabstop=8
-" - foldmethod=syntax
-"-------------------------------------------------------------------------------
-"
-function! s:OpenGitBuffer ( buf_name )
-
-	" a buffer like this already opened on the current tab page?
-	if bufwinnr ( a:buf_name ) != -1
-		" yes -> go to the window containing the buffer
-		exe bufwinnr( a:buf_name ).'wincmd w'
-		return 0
-	endif
-
-	" no -> open a new window
-	aboveleft new
-
-	" buffer exists elsewhere?
-	if bufnr ( a:buf_name ) != -1
-		" yes -> settings of the new buffer
-		silent exe 'edit #'.bufnr( a:buf_name )
-		return 0
-	else
-		" no -> settings of the new buffer
-		silent exe 'file '.escape( a:buf_name, ' ' )
-		setlocal noswapfile
-		setlocal bufhidden=wipe
-		setlocal tabstop=8
-		setlocal foldmethod=syntax
-	endif
-
-	return 1
-endfunction    " ----------  end of function s:OpenGitBuffer  ----------
-"
-"-------------------------------------------------------------------------------
-" s:UpdateGitBuffer : Put output in a read-only buffer.   {{{1
-"
-" Parameters:
-"   command - the command to run (string)
-"   stay    - if true, return to the old position in the buffer
-"             (integer, default: 0)
-" Returns:
-"   success - true, if the command was run successfully (integer)
-"
-" The output of the command is used to replace the text in the current buffer.
-" If 'stay' is true, return to the same line the cursor was placed in before
-" the update. After updating, 'modified' is cleared.
-"-------------------------------------------------------------------------------
-"
-function! s:UpdateGitBuffer ( command, ... )
-	"
-	if a:0 == 1 && a:1
-		" return to old position
-		let pos_window = line('.') - winline() + 1
-		let pos_cursor = line('.')
-	else
-		let pos_window = 1
-		let pos_cursor = 1
-	endif
-	"
-	" delete the previous contents
-	setlocal modifiable
-	setlocal noro
-	silent exe '1,$delete _'
-	"
-	" pause syntax highlighting (for speed)
-	if &syntax != ''
-		setlocal syntax=OFF
-	endif
-	"
-	" insert the output of the command
-	silent exe 'r! '.a:command
-	"
-	" delete the first line (empty) and go to position
-	normal! gg"_dd
-	silent exe 'normal! '.pos_window.'zt'
-	silent exe ':'.pos_cursor
-	"
-	" restart syntax highlighting
-	if &syntax != ''
-		setlocal syntax=ON
-	endif
-	"
-	" open all folds (closed by the syntax highlighting)
-	normal! zR
-	"
-	" read-only again
-	setlocal ro
-	setlocal nomodified
-	setlocal nomodifiable
-	"
-	return v:shell_error == 0
-endfunction    " ----------  end of function s:UpdateGitBuffer  ----------
 "
 "-------------------------------------------------------------------------------
 " GitS_FoldLog : fold text for 'git diff/log/show/status'   {{{1
