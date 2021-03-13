@@ -747,6 +747,9 @@ if s:Enabled
   command! -nargs=? -complete=file            GitStatus          :call gitsupport#cmd_status#FromCmdLine(<q-args>)
   command! -nargs=*                           GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
 
+  command  -nargs=* -complete=file -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
+  command! -nargs=* -complete=file            GitRun             :call gitsupport#commands#FromCmdLine('direct',<q-args>)
+  command! -nargs=* -complete=file            GitBuf             :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
   command! -nargs=* -complete=file            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
@@ -754,16 +757,10 @@ if s:Enabled
 endif
 
 if s:Enabled && s:Git_NextGen
-	command  -nargs=* -complete=file -bang      Git       :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
-	command! -nargs=* -complete=file            GitRun    :call gitsupport#commands#FromCmdLine('direct',<q-args>)
-	command! -nargs=* -complete=file            GitBuf    :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
 	command! -nargs=* -complete=file            GitK      :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
 endif
 
 if s:Enabled && ! s:Git_NextGen
-	command  -nargs=* -complete=file -bang                           Git                :call GitS_Run(<q-args>,'<bang>'=='!'?'b':'')
-	command! -nargs=* -complete=file                                 GitRun             :call GitS_Run(<q-args>,'')
-	command! -nargs=* -complete=file                                 GitBuf             :call GitS_Run(<q-args>,'b')
 	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 endif
 
@@ -969,73 +966,6 @@ function! GitS_FoldLog ()
 	endif
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
-"-------------------------------------------------------------------------------
-" GitS_Run : execute 'git ...'   {{{1
-"
-" Flags: -> s:StandardRun
-"-------------------------------------------------------------------------------
-"
-function! GitS_Run( param, flags )
-	"
-	if a:flags =~ 'b'
-		call GitS_RunBuf ( 'update', a:param )
-	else
-		return s:StandardRun ( '', a:param, a:flags, 'bc' )
-	endif
-	"
-endfunction    " ----------  end of function GitS_Run  ----------
-"
-"-------------------------------------------------------------------------------
-" GitS_RunBuf : execute 'git ...'   {{{1
-"-------------------------------------------------------------------------------
-"
-function! GitS_RunBuf( action, ... )
-	"
-	if a:action == 'help'
-		echo s:HelpTxtStd
-		return
-	elseif a:action == 'quit'
-		close
-		return
-	elseif a:action == 'update'
-		"
-		if a:1 =~ '^!'
-			let subcmd = matchstr ( a:1, '[a-z][a-z\-]*' )
-		else
-			let param  = a:1
-			let subcmd = matchstr ( a:1, '[a-z][a-z\-]*' )
-		endif
-		"
-	else
-		echoerr 'Unknown action "'.a:action.'".'
-		return
-	endif
-	"
-	let buf = s:CheckCWD ()
-	"
-	if s:OpenGitBuffer ( 'Git - git '.subcmd )
-		"
-		let b:GitSupport_RunBufFlag = 1
-		"
-		exe 'nnoremap          <buffer> <S-F1> :call GitS_RunBuf("help")<CR>'
-		exe 'nnoremap <silent> <buffer> q      :call GitS_RunBuf("quit")<CR>'
-		exe 'nnoremap <silent> <buffer> u      :call GitS_RunBuf("update","!'.subcmd.'")<CR>'
-	endif
-	"
-	call s:ChangeCWD ( buf )
-	"
-	if ! exists ( 'param' )
-		let param = b:GitSupport_Param
-	else
-		let b:GitSupport_Param = param
-	endif
-	"
-	let cmd = s:Git_Executable.' '.param
-	"
-	call s:UpdateGitBuffer ( cmd )
-	"
-endfunction    " ----------  end of function GitS_RunBuf  ----------
-"
 "-------------------------------------------------------------------------------
 " s:GitK : execute 'gitk ...'   {{{1
 "-------------------------------------------------------------------------------
