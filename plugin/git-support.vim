@@ -594,19 +594,13 @@ if s:MSWIN
 	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&\\', '' )
 	"
 	let s:Git_Executable     = s:Git_BinPath.'git.exe'     " Git executable
-	let s:Git_GitKExecutable = s:Git_BinPath.'tclsh.exe'   " GitK executable
-	let s:Git_GitKScript     = s:Git_BinPath.'gitk'        " GitK script
 else
 	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&/', '' )
 	"
 	let s:Git_Executable     = s:Git_BinPath.'git'         " Git executable
-	let s:Git_GitKExecutable = s:Git_BinPath.'gitk'        " GitK executable
-	let s:Git_GitKScript     = ''                          " GitK script (do not specify separate script by default)
 endif
 "
 call s:GetGlobalSetting ( 'Git_Executable' )
-call s:GetGlobalSetting ( 'Git_GitKExecutable' )
-call s:GetGlobalSetting ( 'Git_GitKScript' )
 call s:GetGlobalSetting ( 'Git_LoadMenus' )
 call s:GetGlobalSetting ( 'Git_RootMenu' )
 call s:GetGlobalSetting ( 'Git_CustomMenu' )
@@ -615,10 +609,6 @@ let s:Enabled         = 1           " Git enabled?
 let s:DisabledMessage = "Git-Support not working:"
 let s:DisabledReason  = ""
 "
-let s:EnabledGitK        = 1        " gitk enabled?
-let s:DisableGitKMessage = "gitk not avaiable:"
-let s:DisableGitKReason  = ""
-"
 let s:EnabledGitBash        = 1     " git bash enabled?
 let s:DisableGitBashMessage = "git bash not avaiable:"
 let s:DisableGitBashReason  = ""
@@ -626,9 +616,6 @@ let s:DisableGitBashReason  = ""
 " :TODO:25.09.2017 19:06:WM: enable Windows, check how to start jobs with arguments under Windows
 let s:EnabledGitTerm = has ( 'terminal' ) && ! s:MSWIN || has ( 'nvim' )
 
-let s:FoundGitKScript  = 1
-let s:GitKScriptReason = ""
-"
 let s:GitVersion    = ""            " Git Version
 "
 " git bash
@@ -692,10 +679,6 @@ function! s:CheckFile ( shortname, filename, esc )
 endfunction    " ----------  end of function s:CheckFile  ----------
 "
 let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecutable( 'git',  s:Git_Executable )
-let [ s:Git_GitKExecutable, s:EnabledGitK, s:DisableGitKReason ] = s:CheckExecutable( 'gitk', s:Git_GitKExecutable )
-if ! empty ( s:Git_GitKScript )
-	let [ s:Git_GitKScript, s:FoundGitKScript, s:GitKScriptReason ] = s:CheckFile( 'gitk script', s:Git_GitKScript, 1 )
-endif
 let [ s:Git_GitBashExecutable, s:EnabledGitBash, s:DisableGitBashReason ] = s:CheckExecutable ( 'git bash', s:Git_GitBashExecutable )
 "
 " check Git version   {{{2
@@ -750,18 +733,11 @@ if s:Enabled
   command  -nargs=* -complete=file -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
   command! -nargs=* -complete=file            GitRun             :call gitsupport#commands#FromCmdLine('direct',<q-args>)
   command! -nargs=* -complete=file            GitBuf             :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
+  command! -nargs=* -complete=file            GitK               :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
   command! -nargs=* -complete=file            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
   command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
-endif
-
-if s:Enabled && s:Git_NextGen
-	command! -nargs=* -complete=file            GitK      :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
-endif
-
-if s:Enabled && ! s:Git_NextGen
-	command! -nargs=* -complete=file                                 GitK               :call <SID>GitK(<q-args>)
 endif
 
 if s:Git_NextGen
@@ -966,32 +942,6 @@ function! GitS_FoldLog ()
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
 "-------------------------------------------------------------------------------
-" s:GitK : execute 'gitk ...'   {{{1
-"-------------------------------------------------------------------------------
-
-function! s:GitK( param )
-
-	" :TODO:10.12.2013 20:14:WM: graphics available?
-	if s:EnabledGitK == 0
-		return s:ErrorMsg ( s:DisableGitKMessage, s:DisableGitKReason )
-	elseif s:FoundGitKScript == 0
-		return s:ErrorMsg ( s:DisableGitKMessage, s:GitKScriptReason )
-	endif
-
-	let param = escape( a:param, '%#' )
-
-	if s:NEOVIM
-		call jobstart ( s:Git_GitKExecutable.' '.s:Git_GitKScript.' '.param, { 'detach' : 1 } )
-	elseif s:MSWIN
-		" :TODO:02.01.2014 13:00:WM: Windows: try the shell command 'start'
-		silent exe '!start '.s:Git_GitKExecutable.' '.s:Git_GitKScript.' '.param
-	else
-		silent exe '!'.s:Git_GitKExecutable.' '.s:Git_GitKScript.' '.param.' &'
-	endif
-
-endfunction    " ----------  end of function s:GitK  ----------
-
-"-------------------------------------------------------------------------------
 " s:GitBash : execute 'xterm git ...' or "git bash"   {{{1
 "-------------------------------------------------------------------------------
 
@@ -1048,8 +998,6 @@ function! s:PluginSettings( verbose )
 	if s:Enabled | let git_e_status = ' (version '.s:GitVersion.')'
 	else         | let git_e_status = ' (not executable)'
 	endif
-	let gitk_e_status  = s:EnabledGitK     ? '' : ' (not executable)'
-	let gitk_s_status  = s:FoundGitKScript ? '' : ' (not found)'
 	let gitbash_status = s:EnabledGitBash  ? '' : ' (not executable)'
 	"
 	let file_options_status = filereadable ( s:Git_CmdLineOptionsFile ) ? '' : ' (not readable)'
@@ -1057,11 +1005,6 @@ function! s:PluginSettings( verbose )
 	let	txt = " Git-Support settings\n\n"
 				\ .'     plug-in installation :  '.s:installation.' in '.vim_name.' on '.sys_name."\n"
 				\ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
-				\ .'          gitk executable :  '.s:Git_GitKExecutable.gitk_e_status."\n"
-	if ! empty ( s:Git_GitKScript )
-		let txt .=
-					\  '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
-	endif
 	let txt .=
 				\  '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
 	if s:UNIX && a:verbose >= 1
