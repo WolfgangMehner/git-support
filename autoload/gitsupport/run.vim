@@ -216,6 +216,7 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     return
   endif
 
+  let opts.has_syntax = &l:syntax != ''
   if opts.restore_cursor
     let opts.restore_cursor = gitsupport#common#BufferGetPosition()
   else
@@ -233,6 +234,11 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   if opts.env_std
     let opts.env = gitsupport#config#Env()
+  endif
+
+  if opts.has_syntax
+    let buf_nr = bufnr('%')
+    call setbufvar( buf_nr, '&syntax', 'OFF' )
   endif
 
   if s:Features.running_nvim
@@ -253,6 +259,9 @@ function! gitsupport#run#JobWrapup ( job_data )
     call gitsupport#common#BufferSetPosition( opts.restore_cursor )
   endif
   call opts.callback( buf_nr, status )
+  if opts.has_syntax
+    call setbufvar( buf_nr, '&syntax', 'ON' )
+  endif
 endfunction
 
 function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
@@ -266,8 +275,12 @@ function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
     normal! gg"_dd
   endif
 
-  call gitsupport#common#BufferSetPosition( opts.restore_cursor )
-  call opts.callback( bufnr('%'), ret_code )
+  let job_data = {
+        \ 'status': ret_code,
+        \ 'buf_nr': bufnr('%'),
+        \ 'opts': opts,
+        \ }
+  call gitsupport#run#JobWrapup( job_data)
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )
