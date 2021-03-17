@@ -44,11 +44,12 @@ function! gitsupport#cmd_stash#OpenBuffer ( params )
     let b:GitSupport_CWD = cwd
   elseif subcmd == 'show'
     call gitsupport#run#OpenBuffer( 'Git - stash show' )
-    call s:Run( params, cwd, 0 )
 
     let &l:filetype = 'gitsdiff'
     let &l:foldmethod = 'syntax'
     let &l:foldlevel = 2
+
+    call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>HelpShow()
     nnoremap          <buffer> <S-F1> :call <SID>HelpShow()<CR>

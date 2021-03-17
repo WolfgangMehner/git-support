@@ -35,12 +35,13 @@ function! gitsupport#cmd_help#OpenBuffer ( topic )
     return gitsupport#run#RunDirect( '', ['help', a:topic], 'env_std', 1 )
   else
     call gitsupport#run#OpenBuffer( 'Git - help', 'topic', a:topic )
-    call s:Run( a:topic )
 
     " :WORKAROUND:05.04.2016 21:05:WM: setting the filetype changes the global tabstop
     let ts_save = &g:tabstop
     let &l:filetype = 'man'
     let &g:tabstop = ts_save
+
+    call s:Run( a:topic )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>

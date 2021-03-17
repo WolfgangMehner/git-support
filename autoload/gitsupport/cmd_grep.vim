@@ -37,7 +37,6 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - grep' )
-  call s:Run( params, cwd, 0 )
 
   let &l:filetype = 'gitsgrep'
   let &l:foldmethod = 'syntax'
@@ -47,6 +46,8 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
     let &l:conceallevel  = 2
     let &l:concealcursor = 'nc'
   end
+
+  call s:Run( params, cwd, 0 )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>

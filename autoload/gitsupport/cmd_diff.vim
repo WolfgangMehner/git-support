@@ -31,12 +31,13 @@ function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - diff' )
-  call s:Run( params, cwd, 0 )
 
   let &l:filetype = 'gitsdiff'
   let &l:foldmethod = 'syntax'
   let &l:foldlevel = 2
   let &l:foldtext = 'GitS_FoldLog()'
+
+  call s:Run( params, cwd, 0 )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>

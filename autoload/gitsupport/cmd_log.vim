@@ -31,12 +31,13 @@ function! gitsupport#cmd_log#OpenBuffer ( params, range_info, dir_hint )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - log' )
-  call s:Run( params, cwd )
 
   let &l:filetype = 'gitslog'
   let &l:foldmethod = 'syntax'
   let &l:foldlevel = 3
   let &l:foldtext = 'GitS_FoldLog()'
+
+  call s:Run( params, cwd )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>

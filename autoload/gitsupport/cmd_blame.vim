@@ -34,9 +34,10 @@ function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - blame' )
-  call s:Run( params, cwd, 0 )
 
   let &l:filetype = 'gitsblame'
+
+  call s:Run( params, cwd, 0 )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>

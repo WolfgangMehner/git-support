@@ -117,12 +117,13 @@ function! s:DryRun ( args )
   let cwd = gitsupport#services_path#GetWorkingDir()
 
   call gitsupport#run#OpenBuffer( 'Git - commit --dry-run' )
-  call s:Run( args, cwd, 0 )
 
   let &l:filetype = 'gitsstatus'
   let &l:foldmethod = 'syntax'
   let &l:foldlevel = s:ListHas( args, [ '-v', '--verbose' ] ) ? 2 : 1
   let &l:foldtext = 'GitS_FoldLog()'
+
+  call s:Run( args, cwd, 0 )
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
