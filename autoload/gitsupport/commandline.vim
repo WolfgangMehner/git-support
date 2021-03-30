@@ -38,6 +38,24 @@ function! s:FilterWithLead ( wordlist, lead )
   return filter( a:wordlist, 'v:val =~ "\\V\\<'.escape(a:lead,'\').'\\w\\*"' )
 endfunction
 
+function! s:PreprocessLead ( lead )
+  let idx = 0
+
+  if match( a:lead, '^--[^=]\+=' ) == 0
+    " prefixed by --option=
+    let idx = matchend( a:lead, '^--[^=]\+=' )
+  elseif match( a:lead, '\.\.\.\?\|:' ) >= 0
+    " split at a "..", "...", or ":"
+    let idx = matchend( a:lead, '\.\.\.\?\|:' )
+  endif
+
+  if idx > 0
+    return [ strpart( a:lead, 0, idx ), strpart( a:lead, idx ) ]
+  else
+    return [ '', a:lead ]
+  endif
+endfunction
+
 function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let cwd = gitsupport#services_path#GetWorkingDir()
   let branches = s:GetListFromGit( ['branch', '-a'], cwd )
@@ -45,6 +63,13 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let remotes = s:GetListFromGit( ['remote'], cwd )
   let tags = s:GetListFromGit( ['tag'], cwd )
 
-  return s:FilterWithLead( branches + tags + remotes, a:ArgLead )
+  let lead = a:ArgLead
+  let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
+
+  let [ prep_prefix, prep_lead ] = s:PreprocessLead( lead )
+  let git_objects = s:FilterWithLead( branches + tags + remotes, prep_lead )
+  call map( git_objects, 'prep_prefix.v:val' )
+
+  return git_objects
 endfunction
 
