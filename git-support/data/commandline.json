@@ -1,4 +1,102 @@
 {
+  "branch" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--abbrev=",
+      "--all",
+      "--contains",
+      "-D",
+      "--delete",
+      "--edit-description",
+      "--force",
+      "--list",
+      "-M",
+      "--merged",
+      "--move",
+      "--no-abbrev",
+      "--no-merged",
+      "--no-track",
+      "--remotes",
+      "--set-upstream",
+      "--track",
+      "--verbose"
+    ]
+  },
+  "commit" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--all",
+      "--allow-empty",
+      "--allow-empty-message",
+      "--amend",
+      "--author",
+      "--cleanup",
+      "--date",
+      "--dry-run",
+      "--edit",
+      "--file",
+      "--include",
+      "--message",
+      "--no-status",
+      "--no-verify",
+      "--only",
+      "--quiet",
+      "--reedit-message",
+      "--reset-author",
+      "--reuse-message",
+      "--signoff",
+      "--status",
+      "--template",
+      "--untracked-files",
+      "--verbose"
+    ]
+  },
+  "diff" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--abbrev=",
+      "--binary",
+      "--break-rewrites",
+      "--cached",
+      "--check",
+      "--color-words",
+      "--diff-filter=",
+      "--dirstat",
+      "--find-copies",
+      "--find-copies-harder",
+      "--find-renames",
+      "--full-index",
+      "--function-context",
+      "--histogram",
+      "--ignore-all-space",
+      "--ignore-space-at-eol",
+      "--ignore-space-change",
+      "--ignore-submodules",
+      "--inter-hunk-context=",
+      "--irreversible-delete",
+      "--minimal",
+      "--name-only",
+      "--name-status",
+      "--no-renames",
+      "--numstat",
+      "--patch",
+      "--patch-with-raw",
+      "--patch-with-stat",
+      "--patience",
+      "--pickaxe-all",
+      "--pickaxe-regex",
+      "--raw",
+      "--relative",
+      "--shortstat",
+      "--stat",
+      "--submodule",
+      "--summary",
+      "--unified="
+    ]
+  },
   "log" : {
     "include_branches" : true,
     "include_tags" : true,
@@ -70,6 +168,104 @@
       "--topo-order",
       "--until",
       "--walk-reflogs"
+    ]
+  },
+  "remote" : {
+    "include_branches" : true,
+    "include_remotes" : true,
+    "options" : [
+      "--no-tags",
+      "--tags",
+      "--verbose"
+    ]
+  },
+  "show" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--abbrev-commit",
+      "--encoding",
+      "--no-abbrev-commit",
+      "--no-notes",
+      "--notes",
+      "--oneline",
+      "--pretty=email",
+      "--pretty=format:",
+      "--pretty=full",
+      "--pretty=fuller",
+      "--pretty=medium",
+      "--pretty=oneline",
+      "--pretty=raw",
+      "--pretty=short",
+      "--show-notes",
+      "--stat"
+    ]
+  },
+  "stash" : {
+    "options" : [
+      "--all",
+      "--include-untracked",
+      "--index",
+      "--keep-index",
+      "--no-keep-index",
+      "--patch"
+    ]
+  },
+  "status" : {
+    "options" : [
+      "--ignored"
+    ]
+  },
+  "tag" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--annotate",
+      "--contains",
+      "--delete",
+      "--file",
+      "--force",
+      "--list",
+      "--local-user",
+      "--sign",
+      "--verify"
+    ]
+  },
+  "k" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--after=",
+      "--ancestry-path",
+      "--all",
+      "--before=",
+      "--branches",
+      "--date-order",
+      "--dense",
+      "--first-parent",
+      "--full-history",
+      "--left-right",
+      "--max-age=",
+      "--max-count=",
+      "--max-parents=",
+      "--merge",
+      "--merges",
+      "--min-age=",
+      "--min-parents=",
+      "--no-max-parents",
+      "--no-merges",
+      "--no-min-parents",
+      "--no-notes",
+      "--not",
+      "--notes",
+      "--remotes",
+      "--select-commit=",
+      "--simplify-by-decoration",
+      "--simplify-merges",
+      "--since=",
+      "--sparse",
+      "--tags",
+      "--until="
     ]
   }
 }
