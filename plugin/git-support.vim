@@ -461,7 +461,7 @@ endif
 " == Various settings ==   {{{2
 "-------------------------------------------------------------------------------
 
-call gitsupport#config#GitExecutable()
+let s:Features = gitsupport#config#Features()
 
 let s:Git_LoadMenus      = 'yes'    " load the menus?
 let s:Git_RootMenu       = '&Git'   " name of the root menu
@@ -547,7 +547,7 @@ let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecut
 
 " custom commands   {{{2
 
-if s:Enabled
+if s:Features.is_executable_git
   command! -nargs=* -complete=file            GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
   command! -nargs=* -complete=file -range=-1  GitBlame           :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
   command! -nargs=* -complete=file            GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
@@ -591,12 +591,14 @@ if s:MSWIN
   command! -nargs=* -complete=file            GitBash            :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
 endif
 
-if !s:Enabled
+if ! s:Features.is_executable_git
   command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
-  command! -nargs=0        GitSupportHelp  :call gitsupport#plugin#help("gitsupport")
+
+  command! -nargs=? -bang  GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
+  command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")
 endif
 
 " syntax highlighting   {{{2
