@@ -12,6 +12,13 @@
 "       License:  Copyright (c) 2021, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
+function! s:PreloadData ()
+  let basic_data = gitsupport#data#LoadData( 'basic' )
+  let s:command_list = get( basic_data, 'commands', [] )
+endfunction
+
+call s:PreloadData()
+
 function! s:ProcessBranchList ( branch_list )
   let ret_list = []
 
@@ -56,17 +63,33 @@ function! s:PreprocessLead ( lead )
   endif
 endfunction
 
+function! s:SubcommandAnalysis ( head )
+  let general_command = match( a:head, '^\cGit\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
+  if general_command
+    let sub_cmd = matchstr( a:head, '^Git\w*\s\+\zs\S\+' )
+    return [ tolower( sub_cmd ), ( len( a:head ) == matchend( a:head, '^Git\w*\s\+\S*' ) ) ]
+  endif
+
+  let sub_cmd = matchstr( a:head, '^\cGit\zs[a-z]\+\ze\s' )
+  return [ tolower( sub_cmd ), 0 ]
+endfunction
+
 function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
+  let argument_lead = a:ArgLead
+  let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
+
+  let [ sub_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
+  if complete_command
+    return s:FilterWithLead( s:command_list, sub_cmd )
+  endif
+
   let cwd = gitsupport#services_path#GetWorkingDir()
   let branches = s:GetListFromGit( ['branch', '-a'], cwd )
   let branches = s:ProcessBranchList( branches )
   let remotes = s:GetListFromGit( ['remote'], cwd )
   let tags = s:GetListFromGit( ['tag'], cwd )
 
-  let lead = a:ArgLead
-  let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
-
-  let [ prep_prefix, prep_lead ] = s:PreprocessLead( lead )
+  let [ prep_prefix, prep_lead ] = s:PreprocessLead( argument_lead )
   let git_objects = s:FilterWithLead( branches + tags + remotes, prep_lead )
   call map( git_objects, 'prep_prefix.v:val' )
 
