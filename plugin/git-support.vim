@@ -610,24 +610,21 @@ if s:Enabled
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
   command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
+
+  command! -nargs=? -bang  GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
+  command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")
 endif
 
 if s:MSWIN
   command! -nargs=* -complete=file            GitBash            :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
 endif
 
-if s:Git_NextGen
-  command! -nargs=?                -bang      GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
-else
-  command! -nargs=?                -bang      GitSupportSettings  :call <SID>PluginSettings(('<bang>'=='!')+str2nr(<q-args>))
-endif
-command! -nargs=0                           GitSupportHelp      :call gitsupport#plugin#help("gitsupportwww")
-
 if !s:Enabled
   command  -nargs=* -bang  Git      :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitRun   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitBuf   :call gitsupport#config#PrintGitDisabled()
   command! -nargs=*        GitHelp  :call gitsupport#config#PrintGitDisabled()
+  command! -nargs=0        GitSupportHelp  :call gitsupport#plugin#help("gitsupport")
 endif
 
 " syntax highlighting   {{{2
@@ -707,50 +704,6 @@ function! GitS_FoldLog ()
 	endif
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
-"-------------------------------------------------------------------------------
-" s:PluginSettings : Print the settings on the command line.   {{{1
-"-------------------------------------------------------------------------------
-"
-function! s:PluginSettings( verbose )
-	"
-	if     s:MSWIN | let sys_name = 'Windows'
-	elseif s:UNIX  | let sys_name = 'UNIX'
-	else           | let sys_name = 'unknown' | endif
-	if    s:NEOVIM | let vim_name = 'nvim'
-	else           | let vim_name = has('gui_running') ? 'gvim' : 'vim' | endif
-
-	if s:Enabled | let git_e_status = ' (version '.s:GitVersion.')'
-	else         | let git_e_status = ' (not executable)'
-	endif
-	"
-	let file_options_status = filereadable ( s:Git_CmdLineOptionsFile ) ? '' : ' (not readable)'
-	"
-	let	txt = " Git-Support settings\n\n"
-				\ .'     plug-in installation :  '.s:installation.' in '.vim_name.' on '.sys_name."\n"
-				\ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
-	if s:UNIX && a:verbose >= 1
-		let txt .= '            xterm options :  "'.g:Xterm_Options."\"\n"
-	endif
-	if a:verbose >= 1
-		let	txt .= "\n"
-					\ .'             expand empty :  checkout: "'.g:Git_CheckoutExpandEmpty.'" ; diff: "'.g:Git_DiffExpandEmpty.'" ; reset: "'.g:Git_ResetExpandEmpty."\"\n"
-					\ .'     open fold after jump :  "'.g:Git_OpenFoldAfterJump."\"\n"
-					\ .'  status staged open diff :  "'.g:Git_StatusStagedOpenDiff."\"\n\n"
-					\ .'    cmd-line options file :  '.s:Git_CmdLineOptionsFile.file_options_status."\n"
-"					\ .'            commit editor :  "'.g:Git_Editor."\"\n"
-	endif
-	let txt .=
-				\  "________________________________________________________________________________\n"
-				\ ." Git-Support, Version ".g:GitSupport_Version." / Wolfgang Mehner / wolfgang-mehner@web.de\n\n"
-	"
-	if a:verbose == 2
-		split GitSupport_Settings.txt
-		put = txt
-	else
-		echo txt
-	endif
-endfunction    " ----------  end of function s:PluginSettings  ----------
-"
 "-------------------------------------------------------------------------------
 " s:LoadCmdLineOptions : Load s:CmdLineOptions   {{{1
 "-------------------------------------------------------------------------------
