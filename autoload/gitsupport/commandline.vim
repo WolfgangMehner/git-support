@@ -15,6 +15,12 @@
 function! s:PreloadData ()
   let basic_data = gitsupport#data#LoadData( 'basic' )
   let s:command_list = get( basic_data, 'commands', [] )
+  let s:command_details = gitsupport#data#LoadData( 'commandline' )
+endfunction
+
+function! s:GetCommandDetails ( cmd, key, default )
+  let details = get( s:command_details, a:cmd, {} )
+  return get( details, a:key, a:default )
 endfunction
 
 call s:PreloadData()
@@ -39,10 +45,6 @@ function! s:GetListFromGit ( cmd, cwd )
   else
     return []
   endif
-endfunction
-
-function! s:FilterWithLead ( wordlist, lead )
-  return filter( a:wordlist, 'v:val =~ "\\V\\<'.escape(a:lead,'\').'\\w\\*"' )
 endfunction
 
 function! s:PreprocessLead ( lead )
@@ -74,23 +76,44 @@ function! s:SubcommandAnalysis ( head )
   return [ tolower( sub_cmd ), 0 ]
 endfunction
 
+function! s:FilterOnWord ( wordlist, lead )
+  return filter( copy( a:wordlist ), 'v:val =~ "\\V\\<'.escape(a:lead,'\').'\\w\\*"' )
+endfunction
+
+function! s:FilterOnStart ( wordlist, lead )
+  return filter( copy( a:wordlist ), 'v:val =~ "\\V\\^'.escape(a:lead,'\').'"' )
+endfunction
+
 function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let argument_lead = a:ArgLead
   let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
 
-  let [ sub_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
+  let [ git_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
   if complete_command
-    return s:FilterWithLead( s:command_list, sub_cmd )
+    return s:FilterOnWord( s:command_list, git_cmd )
+  endif
+
+  let [ prep_prefix, prep_lead ] = s:PreprocessLead( argument_lead )
+
+  if prep_lead =~# '^-'
+    let options = s:GetCommandDetails( git_cmd, 'options', [] )
+    return s:FilterOnStart( options, prep_lead )
   endif
 
   let cwd = gitsupport#services_path#GetWorkingDir()
-  let branches = s:GetListFromGit( ['branch', '-a'], cwd )
-  let branches = s:ProcessBranchList( branches )
-  let remotes = s:GetListFromGit( ['remote'], cwd )
-  let tags = s:GetListFromGit( ['tag'], cwd )
+  let git_objects = []
+  if s:GetCommandDetails( git_cmd, 'include_branches', 0 )
+    let branches = s:GetListFromGit( ['branch', '-a'], cwd )
+    let git_objects += s:ProcessBranchList( branches )
+  endif
+  if s:GetCommandDetails( git_cmd, 'include_remotes', 0 )
+    let git_objects += s:GetListFromGit( ['remote'], cwd )
+  endif
+  if s:GetCommandDetails( git_cmd, 'include_tags', 0 )
+    let git_objects += s:GetListFromGit( ['tag'], cwd )
+  endif
 
-  let [ prep_prefix, prep_lead ] = s:PreprocessLead( argument_lead )
-  let git_objects = s:FilterWithLead( branches + tags + remotes, prep_lead )
+  let git_objects = s:FilterOnWord( git_objects, prep_lead )
   call map( git_objects, 'prep_prefix.v:val' )
 
   return git_objects
