@@ -461,9 +461,6 @@ endif
 " == Various settings ==   {{{2
 "-------------------------------------------------------------------------------
 
-let s:Git_NextGen = 0
-call s:GetGlobalSetting ( 'Git_NextGen' )
-
 call gitsupport#config#GitExecutable()
 
 let s:Git_LoadMenus      = 'yes'    " load the menus?
@@ -515,11 +512,6 @@ let s:Enabled         = 1           " Git enabled?
 let s:DisabledMessage = "Git-Support not working:"
 let s:DisabledReason  = ""
 
-" :TODO:25.09.2017 19:06:WM: enable Windows, check how to start jobs with arguments under Windows
-let s:EnabledGitTerm = has ( 'terminal' ) && ! s:MSWIN || has ( 'nvim' )
-
-let s:GitVersion    = ""            " Git Version
-"
 " check git executable   {{{2
 "
 function! s:CheckExecutable ( name, exe )
@@ -552,26 +544,6 @@ function! s:CheckExecutable ( name, exe )
 endfunction    " ----------  end of function s:CheckExecutable  ----------
 "
 let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecutable( 'git',  s:Git_Executable )
-"
-" check Git version   {{{2
-
-if s:Enabled
-	let s:GitVersion = s:StandardRun( '', ' --version', 't' )[1]
-	if s:GitVersion =~? 'git version [0-9.]\+'
-		let s:GitVersion = matchstr( s:GitVersion, 'git version \zs[0-9.]\+' )
-	else
-		call s:ErrorMsg ( 'Can not obtain the version number of Git.' )
-	endif
-endif
-
-" standard help text   {{{2
-"
-let s:HelpTxtStd  = "S-F1    : help\n"
-let s:HelpTxtStd .= "q       : close\n"
-let s:HelpTxtStd .= "u       : update"
-"
-let s:HelpTxtStdNoUpdate  = "S-F1    : help\n"
-let s:HelpTxtStdNoUpdate .= "q       : close"
 
 " custom commands   {{{2
 
