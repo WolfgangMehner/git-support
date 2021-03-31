@@ -66,14 +66,33 @@ function! s:PreprocessLead ( lead )
 endfunction
 
 function! s:SubcommandAnalysis ( head )
+  let main_cmd = ''
+  let sub_cmd = ''
+  let idx1 = 0
+
   let general_command = match( a:head, '^\cGit\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
   if general_command
-    let sub_cmd = matchstr( a:head, '^Git\w*\s\+\zs\S\+' )
-    return [ tolower( sub_cmd ), ( len( a:head ) == matchend( a:head, '^Git\w*\s\+\S*' ) ) ]
+    let main_cmd = matchstr( a:head, '^Git\w*\s\+\zs\S\+' )
+    let idx1 = matchend( a:head, '^Git\w*\s\+\S*' )
+
+    if len( a:head ) == idx1
+      return [ tolower( main_cmd ), '', 1 ]
+    endif
+  else
+    let main_cmd = matchstr( a:head, '^\cGit\zs[a-z]\+' )
+    let idx1 = 3 + len( main_cmd )
   endif
 
-  let sub_cmd = matchstr( a:head, '^\cGit\zs[a-z]\+\ze\s' )
-  return [ tolower( sub_cmd ), 0 ]
+  if match( a:head, '^\s', idx1 ) >= 0
+    let sub_cmd = matchstr( a:head, '^\s\+\zs\S\+', idx1 )
+    let idx2 = matchend( a:head, '^\s\+\S*', idx1 )
+
+    if len( a:head ) == idx2
+      return [ tolower( main_cmd ), tolower( sub_cmd ), 2 ]
+    endif
+  endif
+
+  return [ tolower( main_cmd ), tolower( sub_cmd ), 0 ]
 endfunction
 
 function! s:FilterOnWord ( wordlist, lead )
@@ -88,8 +107,8 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let argument_lead = a:ArgLead
   let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
 
-  let [ git_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
-  if complete_command
+  let [ git_cmd, sub_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
+  if complete_command == 1
     return s:FilterOnWord( s:command_list, git_cmd )
   endif
 
@@ -116,6 +135,15 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let git_objects = s:FilterOnWord( git_objects, prep_lead )
   call map( git_objects, 'prep_prefix.v:val' )
 
-  return git_objects
+  let all_returns = []
+
+  if complete_command == 2
+    let cmds = s:GetCommandDetails( git_cmd, 'subcommands', [] )
+    let all_returns += s:FilterOnWord( cmds, sub_cmd )
+  endif
+
+  let all_returns += git_objects
+
+  return all_returns
 endfunction
 

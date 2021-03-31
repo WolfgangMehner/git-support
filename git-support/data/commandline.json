@@ -173,6 +173,17 @@
   "remote" : {
     "include_branches" : true,
     "include_remotes" : true,
+    "subcommands" : [
+      "add",
+      "prune",
+      "rename",
+      "rm",
+      "set-branches",
+      "set-head",
+      "set-url",
+      "show",
+      "update"
+    ],
     "options" : [
       "--no-tags",
       "--tags",
@@ -202,6 +213,17 @@
     ]
   },
   "stash" : {
+    "subcommands" : [
+      "apply",
+      "branch",
+      "clear",
+      "create",
+      "drop",
+      "list",
+      "pop",
+      "save",
+      "show"
+    ],
     "options" : [
       "--all",
       "--include-untracked",
