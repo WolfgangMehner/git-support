@@ -5,6 +5,8 @@
     "options" : [
       "--abbrev=",
       "--all",
+      "--column",
+      "--no-column",
       "--contains",
       "-D",
       "--delete",
@@ -17,9 +19,14 @@
       "--no-abbrev",
       "--no-merged",
       "--no-track",
+      "--points-at",
+      "--quiet",
       "--remotes",
       "--set-upstream",
+      "--set-upstream-to",
+      "--sort",
       "--track",
+      "--unset-upstream",
       "--verbose"
     ]
   },
@@ -37,7 +44,11 @@
       "--date",
       "--dry-run",
       "--edit",
+      "--no-edit",
       "--file",
+      "--fixup",
+      "--gpg-sign",
+      "--no-gpg-sign",
       "--include",
       "--message",
       "--no-status",
@@ -48,6 +59,7 @@
       "--reset-author",
       "--reuse-message",
       "--signoff",
+      "--squash",
       "--status",
       "--template",
       "--untracked-files",
@@ -188,8 +200,13 @@
       "update"
     ],
     "options" : [
-      "--no-tags",
+      "--auto",
+      "--delete",
+      "--dry-run",
+      "--prune",
+      "--push",
       "--tags",
+      "--no-tags",
       "--verbose"
     ]
   },
@@ -234,7 +251,9 @@
       "--index",
       "--keep-index",
       "--no-keep-index",
-      "--patch"
+      "--message",
+      "--patch",
+      "--quiet"
     ]
   },
   "status" : {
@@ -248,13 +267,18 @@
     "include_files" : true,
     "options" : [
       "--annotate",
+      "--cleanup",
+      "--column",
       "--contains",
       "--delete",
       "--file",
       "--force",
       "--list",
       "--local-user",
+      "--message",
+      "--points-at",
       "--sign",
+      "--sort",
       "--verify"
     ]
   },
