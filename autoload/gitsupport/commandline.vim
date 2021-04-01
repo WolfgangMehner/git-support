@@ -55,7 +55,12 @@ function! s:GetFileList ( lead )
       let filelist[i] .= '/'
     endif
   endfor
-  return filelist
+
+  if len( filelist ) == 1 && isdirectory( filelist[0] )
+    return [filelist[0]] + s:GetFileList( filelist[0] )
+  else
+    return filelist
+  endif
 endfunction
 
 function! s:PreprocessLead ( lead )
@@ -156,8 +161,7 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let all_returns += git_objects
 
   if s:GetCommandDetails( git_cmd, 'include_files', 0 )
-    let file_list = s:GetFileList( prep_lead )
-    call map( file_list, 'prep_prefix.v:val' )
+    let file_list = s:GetFileList( argument_lead )
     let all_returns += file_list
   endif
 
