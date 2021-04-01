@@ -47,13 +47,24 @@ function! s:GetListFromGit ( cmd, cwd )
   endif
 endfunction
 
+function! s:GetFileList ( lead )
+  let filelist = glob( a:lead.'*', 0, 1 )
+
+  for i in range( len(filelist) )
+    if isdirectory( filelist[i] )
+      let filelist[i] .= '/'
+    endif
+  endfor
+  return filelist
+endfunction
+
 function! s:PreprocessLead ( lead )
   let idx = 0
 
   if match( a:lead, '^--[^=]\+=' ) == 0
     " prefixed by --option=
     let idx = matchend( a:lead, '^--[^=]\+=' )
-  elseif match( a:lead, '\.\.\.\?\|:' ) >= 0
+  elseif match( a:lead, '[^.]\.\.\.\?\|:' ) >= 0
     " split at a "..", "...", or ":"
     let idx = matchend( a:lead, '\.\.\.\?\|:' )
   endif
@@ -143,6 +154,12 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   endif
 
   let all_returns += git_objects
+
+  if s:GetCommandDetails( git_cmd, 'include_files', 0 )
+    let file_list = s:GetFileList( prep_lead )
+    call map( file_list, 'prep_prefix.v:val' )
+    let all_returns += file_list
+  endif
 
   return all_returns
 endfunction

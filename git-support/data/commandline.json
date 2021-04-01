@@ -26,6 +26,7 @@
   "commit" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--all",
       "--allow-empty",
@@ -56,6 +57,7 @@
   "diff" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--abbrev=",
       "--binary",
@@ -100,6 +102,7 @@
   "log" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--abbrev-commit",
       "--after",
@@ -193,6 +196,7 @@
   "show" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--abbrev-commit",
       "--encoding",
@@ -241,6 +245,7 @@
   "tag" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--annotate",
       "--contains",
@@ -256,6 +261,7 @@
   "k" : {
     "include_branches" : true,
     "include_tags" : true,
+    "include_files" : true,
     "options" : [
       "--after=",
       "--ancestry-path",
