@@ -574,7 +574,7 @@ if s:Features.is_executable_git
   command! -nargs=? -complete=file            GitStatus          :call gitsupport#cmd_status#FromCmdLine(<q-args>)
   command! -nargs=*                           GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
 
-  command  -nargs=* -complete=file -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
+  command! -nargs=* -complete=file -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
   command! -nargs=* -complete=file            GitRun             :call gitsupport#commands#FromCmdLine('direct',<q-args>)
   command! -nargs=* -complete=file            GitBuf             :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
   command! -nargs=* -complete=file            GitK               :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
