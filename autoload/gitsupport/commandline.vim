@@ -86,10 +86,10 @@ function! s:SubcommandAnalysis ( head )
   let sub_cmd = ''
   let idx1 = 0
 
-  let general_command = match( a:head, '^\cGit\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
+  let general_command = match( a:head, '^Git\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
   if general_command
-    let main_cmd = matchstr( a:head, '^Git\w*\s\+\zs\S\+' )
-    let idx1 = matchend( a:head, '^Git\w*\s\+\S*' )
+    let main_cmd = matchstr( a:head, '^Git\S*\s\+\zs\S\+' )
+    let idx1 = matchend( a:head, '^Git\S*\s\+\S*' )
 
     if len( a:head ) == idx1
       return [ tolower( main_cmd ), '', 1 ]
