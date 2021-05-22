@@ -126,6 +126,17 @@ function! gitsupport#common#ParseShellParseArgs ( line )
 	return list
 endfunction
 
+function! gitsupport#common#ExpandWildcards ( argument_list )
+  for i in range( len(a:argument_list) )
+    let arg = a:argument_list[i]
+    if arg == '%'
+      let a:argument_list[i] = expand( '%' )
+    elseif arg == '#'
+      let a:argument_list[i] = expand( '#' )
+    endif
+  endfor
+endfunction
+
 function! gitsupport#common#Question ( text, ... )
 
 	" options
