@@ -578,7 +578,7 @@ function! s:IsStaged ( list_status )
 endfunction
 
 function! s:IsNotStaged ( list_status )
-  return filter( copy( a:list_status ), 'v:val =~ "^.[MD]"' )
+  return filter( copy( a:list_status ), 'v:val =~ "^.[AMD]"' )
 endfunction
 
 function! s:IsConflict ( list_status )
