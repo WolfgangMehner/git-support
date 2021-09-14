@@ -11,8 +11,8 @@
 "  Organization:  
 "       Version:  see variable g:GitSupport_Version below
 "       Created:  06.10.2012
-"      Revision:  18.07.2020
-"       License:  Copyright (c) 2012-2020, Wolfgang Mehner
+"      Revision:  14.09.2021
+"       License:  Copyright (c) 2012-2021, Wolfgang Mehner
 "                 This program is free software; you can redistribute it and/or
 "                 modify it under the terms of the GNU General Public License as
 "                 published by the Free Software Foundation, version 2 of the
@@ -548,37 +548,37 @@ let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecut
 " custom commands   {{{2
 
 if s:Features.is_executable_git
-  command! -nargs=* -complete=file            GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
-  command! -nargs=* -complete=file -range=-1  GitBlame           :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
-  command! -nargs=* -complete=file            GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
-  command! -nargs=? -complete=file            GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
-  command! -nargs=0                           GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
-  command! -nargs=+                           GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
-  command! -nargs=* -complete=file            GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>)
-  command! -nargs=*                           GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
-  command! -nargs=+ -complete=file            GitGrep            :call gitsupport#cmd_grep#FromCmdLine('cwd',<q-args>)
-  command! -nargs=+ -complete=file            GitGrepTop         :call gitsupport#cmd_grep#FromCmdLine('top',<q-args>)
-  command! -nargs=* -complete=file -range=-1  GitLog             :call gitsupport#cmd_log#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
-  command! -nargs=*                           GitMerge           :call gitsupport#commands#FromCmdLine('direct','merge '.<q-args>)
-  command! -nargs=* -complete=file            GitMv              :call gitsupport#commands#FromCmdLine('direct','mv '.<q-args>)
-  command! -nargs=*                           GitPull            :call gitsupport#commands#FromCmdLine('direct','pull '.<q-args>)
-  command! -nargs=*                           GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
-  command! -nargs=* -complete=file            GitRemote          :call gitsupport#cmd_remote#FromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitShow            :call gitsupport#cmd_show#FromCmdLine(<q-args>)
-  command! -nargs=*                           GitStash           :call gitsupport#cmd_stash#FromCmdLine(<q-args>)
-  command! -nargs=*                           GitSlist           :call gitsupport#cmd_stash#FromCmdLine('list '.<q-args>)
-  command! -nargs=? -complete=file            GitStatus          :call gitsupport#cmd_status#FromCmdLine(<q-args>)
-  command! -nargs=*                           GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=file                                                  GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
+  command! -nargs=* -complete=file -range=-1                                        GitBlame           :call gitsupport#cmd_blame#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitBranch          :call gitsupport#cmd_branch#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=file                                                  GitCheckout        :call gitsupport#commands#CheckoutFromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitCommit          :call gitsupport#cmd_commit#FromCmdLine('direct',<q-args>)
+  command! -nargs=? -complete=file                                                  GitCommitFile      :call gitsupport#cmd_commit#FromCmdLine('file',<q-args>)
+  command! -nargs=0                                                                 GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
+  command! -nargs=+                                                                 GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>)
+  command! -nargs=*                                                                 GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
+  command! -nargs=+ -complete=file                                                  GitGrep            :call gitsupport#cmd_grep#FromCmdLine('cwd',<q-args>)
+  command! -nargs=+ -complete=file                                                  GitGrepTop         :call gitsupport#cmd_grep#FromCmdLine('top',<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete -range=-1  GitLog             :call gitsupport#cmd_log#FromCmdLine(<q-args>,<line1>,<line2>,<count>)
+  command! -nargs=*                                                                 GitMerge           :call gitsupport#commands#FromCmdLine('direct','merge '.<q-args>)
+  command! -nargs=* -complete=file                                                  GitMv              :call gitsupport#commands#FromCmdLine('direct','mv '.<q-args>)
+  command! -nargs=*                                                                 GitPull            :call gitsupport#commands#FromCmdLine('direct','pull '.<q-args>)
+  command! -nargs=*                                                                 GitPush            :call gitsupport#commands#FromCmdLine('direct','push '.<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitRemote          :call gitsupport#cmd_remote#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=file                                                  GitReset           :call gitsupport#commands#ResetFromCmdLine(<q-args>)
+  command! -nargs=* -complete=file                                                  GitRm              :call gitsupport#commands#RmFromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitShow            :call gitsupport#cmd_show#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitStash           :call gitsupport#cmd_stash#FromCmdLine(<q-args>)
+  command! -nargs=*                                                                 GitSlist           :call gitsupport#cmd_stash#FromCmdLine('list '.<q-args>)
+  command! -nargs=? -complete=customlist,gitsupport#commandline#Complete            GitStatus          :call gitsupport#cmd_status#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitTag             :call gitsupport#cmd_tag#FromCmdLine(<q-args>)
 
-  command! -nargs=* -complete=file -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
-  command! -nargs=* -complete=file            GitRun             :call gitsupport#commands#FromCmdLine('direct',<q-args>)
-  command! -nargs=* -complete=file            GitBuf             :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
-  command! -nargs=* -complete=file            GitK               :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
-  command! -nargs=* -complete=file            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete -bang      Git                :call gitsupport#commands#FromCmdLine('<bang>'=='!'?'buffer':'direct',<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitRun             :call gitsupport#commands#FromCmdLine('direct',<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitBuf             :call gitsupport#commands#FromCmdLine('buffer',<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitK               :call gitsupport#cmd_gitk#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
   command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)

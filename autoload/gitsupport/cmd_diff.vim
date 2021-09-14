@@ -14,6 +14,7 @@
 
 function! gitsupport#cmd_diff#FromCmdLine ( q_params )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
+  call gitsupport#common#ExpandWildcards( args )
   return gitsupport#cmd_diff#OpenBuffer( args, '' )
 endfunction
 

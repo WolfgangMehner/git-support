@@ -16,6 +16,7 @@ function! gitsupport#cmd_commit#FromCmdLine ( mode, q_params )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
 
   if a:mode == 'direct'
+    call gitsupport#common#ExpandWildcards( args )
     return s:CommitDirect( args )
   elseif a:mode == 'file'
     return s:CommitFromFile( a:q_params )

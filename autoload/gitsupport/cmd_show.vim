@@ -22,6 +22,7 @@ let s:RevisionNames = {
 
 function! gitsupport#cmd_show#FromCmdLine ( q_params )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
+  call gitsupport#common#ExpandWildcards( args )
   return gitsupport#cmd_show#OpenBuffer ( args )
 endfunction
 
