@@ -376,42 +376,6 @@ endfunction    " ----------  end of function s:GenerateCustomMenu  ----------
 "-------------------------------------------------------------------------------
 " Modul setup.   {{{1
 "-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
-" command lists, help topics   {{{2
-"
-let s:GitCommands = [
-			\ 'add',               'add--interactive',         'am',                'annotate',           'apply',
-			\ 'archive',           'bisect',                   'bisect--helper',    'blame',              'branch',
-			\ 'bundle',            'cat-file',                 'check-attr',        'checkout',           'checkout-index',
-			\ 'check-ref-format',  'cherry',                   'cherry-pick',       'citool',             'clean',
-			\ 'clone',             'commit',                   'commit-tree',       'config',             'count-objects',
-			\ 'credential-cache',  'credential-cache--daemon', 'credential-store',  'daemon',             'describe',
-			\ 'diff',              'diff-files',               'diff-index',        'difftool',           'difftool--helper',
-			\ 'diff-tree',         'fast-export',              'fast-import',       'fetch',              'fetch-pack',
-			\ 'filter-branch',     'fmt-merge-msg',            'for-each-ref',      'format-patch',       'fsck',
-			\ 'fsck-objects',      'gc',                       'get-tar-commit-id', 'grep',               'gui',
-			\ 'gui--askpass',      'hash-object',              'help',              'http-backend',       'http-fetch',
-			\ 'http-push',         'imap-send',                'index-pack',        'init',               'init-db',
-			\ 'instaweb',          'log',                      'lost-found',        'ls-files',           'ls-remote',
-			\ 'ls-tree',           'mailinfo',                 'mailsplit',         'merge',              'merge-base',
-			\ 'merge-file',        'merge-index',              'merge-octopus',     'merge-one-file',     'merge-ours',
-			\ 'merge-recursive',   'merge-resolve',            'merge-subtree',     'mergetool',          'merge-tree',
-			\ 'mktag',             'mktree',                   'mv',                'name-rev',           'notes',
-			\ 'pack-objects',      'pack-redundant',           'pack-refs',         'patch-id',           'peek-remote',
-			\ 'prune',             'prune-packed',             'pull',              'push',               'quiltimport',
-			\ 'read-tree',         'rebase',                   'receive-pack',      'reflog',             'relink',
-			\ 'remote',            'remote-ext',               'remote-fd',         'remote-ftp',         'remote-ftps',
-			\ 'remote-http',       'remote-https',             'remote-testgit',    'repack',             'replace',
-			\ 'repo-config',       'request-pull',             'rerere',            'reset',              'revert',
-			\ 'rev-list',          'rev-parse',                'rm',                'send-pack',          'shell',
-			\ 'sh-i18n--envsubst', 'shortlog',                 'show',              'show-branch',        'show-index',
-			\ 'show-ref',          'stage',                    'stash',             'status',             'stripspace',
-			\ 'submodule',         'symbolic-ref',             'tag',               'tar-tree',           'unpack-file',
-			\ 'unpack-objects',    'update-index',             'update-ref',        'update-server-info', 'upload-archive',
-			\ 'upload-pack',       'var',                      'verify-pack',       'verify-tag',         'web--browse',
-			\ 'whatchanged',       'write-tree',
-			\ ]
 
 "-------------------------------------------------------------------------------
 " == Platform specific items ==   {{{2
@@ -465,9 +429,7 @@ let s:Features = gitsupport#config#Features()
 
 let s:Git_LoadMenus      = 'yes'    " load the menus?
 let s:Git_RootMenu       = '&Git'   " name of the root menu
-"
-let s:Git_CmdLineOptionsFile = s:plugin_dir.'/git-support/data/options.txt'
-"
+
 if ! exists ( 's:MenuVisible' )
 	let s:MenuVisible = 0           " menus are not visible at the moment
 endif
@@ -679,175 +641,6 @@ function! GitS_FoldLog ()
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
 "-------------------------------------------------------------------------------
-" s:LoadCmdLineOptions : Load s:CmdLineOptions   {{{1
-"-------------------------------------------------------------------------------
-"
-function! s:LoadCmdLineOptions ()
-	"
-	let s:CmdLineOptions = {}
-	let current_list     = []
-	"
-	if ! filereadable ( s:Git_CmdLineOptionsFile )
-		return
-	endif
-	"
-	for line in readfile ( s:Git_CmdLineOptionsFile )
-		let name = matchstr ( line, '^\s*\zs.*\S\ze\s*$' )
-		"
-		if line =~ '^\S'
-			let current_list = []
-			let s:CmdLineOptions[ name ] = current_list
-		else
-			call add ( current_list, name )
-		endif
-	endfor
-endfunction    " ----------  end of function s:LoadCmdLineOptions  ----------
-"
-call s:LoadCmdLineOptions ()
-"
-"-------------------------------------------------------------------------------
-" s:CmdLineComplete : Command line completion.   {{{1
-"
-" Parameters:
-"   mode     - the mode (string)
-"   backward - move backwards in the list of replacements (integer, optional);
-"              move forward otherwise
-" Returns:
-"   cmd_line - the new command line (string)
-"
-" Mode is one of:
-"   branch  command  remote  tag
-"-------------------------------------------------------------------------------
-function! s:CmdLineComplete ( mode, ... )
-	"
-	let forward = 1
-	"
-	if a:0 >= 1 && a:1 == 1
-		let forward = 0
-	endif
-	"
-	let cmdline = getcmdline()
-	let cmdpos  = getcmdpos() - 1
-	"
-	let cmdline_tail = strpart ( cmdline, cmdpos )
-	let cmdline_head = strpart ( cmdline, 0, cmdpos )
-
-	" split at blanks
-	let idx = match ( cmdline_head, '[^[:blank:]]*$' )
-
-	" prefixed by --option=
-	if a:mode != 'command' && -1 != match ( strpart ( cmdline_head, idx ), '^--[^=]\+=' )
-		let idx2 = matchend ( strpart ( cmdline_head, idx ), '^--[^=]\+=' )
-		if idx2 >= 0
-			let idx += idx2
-		endif
-	endif
-
-	" for a branch or tag, split at a "..", "...", or ":"
-	if a:mode == 'branch' || a:mode == 'tag'
-		let idx2 = matchend ( strpart ( cmdline_head, idx ), '\.\.\.\?\|:' )
-		if idx2 >= 0
-			let idx += idx2
-		endif
-	endif
-	"
-	let cmdline_pre = strpart ( cmdline_head, 0, idx )
-	"
-	" not a word, skip completion
-	if idx < 0
-		return cmdline_head.cmdline_tail
-	endif
-	"
-	" s:vars initial if first time or changed cmdline
-	if ! exists('b:GitSupport_NewCmdLine') || cmdline_head != b:GitSupport_NewCmdLine || a:mode != b:GitSupport_CurrentMode
-		"
-		let b:GitSupport_NewCmdLine  = ''
-		let b:GitSupport_CurrentMode = a:mode
-		"
-		let b:GitSupport_WordPrefix = strpart ( cmdline_head, idx )
-		let b:GitSupport_WordMatch  = escape ( b:GitSupport_WordPrefix, '\' )
-		let b:GitSupport_WordList   = [ b:GitSupport_WordPrefix ]
-		let b:GitSupport_WordIndex  = 0
-		"
-		if a:mode == 'branch'
-			let [ suc, txt ] = s:StandardRun ( 'branch', '-a', 't' )
-			"
-			for part in split( txt, "\n" ) + [ 'HEAD', 'ORIG_HEAD', 'FETCH_HEAD', 'MERGE_HEAD' ]
-				" remove leading whitespaces, "*" (current branch), and "remotes/"
-				" remove trailing "-> ..." (as in "origin/HEAD -> origin/master")
-				let branch = matchstr( part, '^[ *]*\%(remotes\/\)\?\zs.\{-}\ze\%(\s*->.*\)\?$' )
-				if -1 != match( branch, '\V\^'.b:GitSupport_WordMatch )
-					call add ( b:GitSupport_WordList, branch )
-				endif
-			endfor
-		elseif a:mode == 'command'
-			let suc      = 0                          " initialized variable 'suc' needed below
-			let use_list = s:GitCommands
-			let sub_cmd  = matchstr ( cmdline_pre,
-						\       '\c\_^Git\%(!\|Run\|Buf\|Bash\|Term\)\?\s\+\zs[a-z\-]\+\ze\s'
-						\ .'\|'.'\c\_^Git\zs[a-z]\+\ze\s' )
-			"
-			if sub_cmd != ''
-				let sub_cmd = tolower ( sub_cmd )
-				if has_key ( s:CmdLineOptions, sub_cmd )
-					let use_list = get ( s:CmdLineOptions, sub_cmd, s:GitCommands )
-				endif
-			endif
-				"
-			for part in use_list
-				if -1 != match( part, '\V\^'.b:GitSupport_WordMatch )
-					call add ( b:GitSupport_WordList, part )
-				endif
-			endfor
-		elseif a:mode == 'remote'
-			let [ suc, txt ] = s:StandardRun ( 'remote', '', 't' )
-			"
-			for part in split( txt, "\n" )
-				if -1 != match( part, '\V\^'.b:GitSupport_WordMatch )
-					call add ( b:GitSupport_WordList, part )
-				endif
-			endfor
-		elseif a:mode == 'tag'
-			let [ suc, txt ] = s:StandardRun ( 'tag', '', 't' )
-			"
-			for part in split( txt, "\n" )
-				if -1 != match( part, '\V\^'.b:GitSupport_WordMatch )
-					call add ( b:GitSupport_WordList, part )
-				endif
-			endfor
-		else
-			return cmdline_head.cmdline_tail
-		endif
-		"
-		if suc != 0
-			return cmdline_head.cmdline_tail
-		endif
-		"
-	endif
-	"
-	if forward
-		let b:GitSupport_WordIndex = ( b:GitSupport_WordIndex + 1 ) % len( b:GitSupport_WordList )
-	else
-		let b:GitSupport_WordIndex = ( b:GitSupport_WordIndex - 1 + len( b:GitSupport_WordList ) ) % len( b:GitSupport_WordList )
-	endif
-	"
-	let word = b:GitSupport_WordList[ b:GitSupport_WordIndex ]
-	"
-	" new cmdline
-	let b:GitSupport_NewCmdLine = cmdline_pre.word
-	"
-	" overcome map silent
-	" (silent map together with this trick seems to look prettier)
-	call feedkeys(" \<bs>")
-	"
-	" set new cmdline cursor postion
-	call setcmdpos ( len(b:GitSupport_NewCmdLine)+1 )
-	"
-	return b:GitSupport_NewCmdLine.cmdline_tail
-	"
-endfunction    " ----------  end of function s:CmdLineComplete  ----------
-"
-"-------------------------------------------------------------------------------
 " s:InitMenus : Initialize menus.   {{{1
 "-------------------------------------------------------------------------------
 "
@@ -1036,28 +829,6 @@ function! Git_RemoveMenus()
 		let s:MenuVisible = 0
 	endif
 endfunction    " ----------  end of function Git_RemoveMenus  ----------
-"
-"-------------------------------------------------------------------------------
-" Setup maps.   {{{1
-"-------------------------------------------------------------------------------
-"
-let s:maps = [
-			\ [ 'complete branch',  'g:Git_MapCompleteBranch',  '<C-\>e<SID>CmdLineComplete("branch")<CR>'  ],
-			\ [ 'complete command', 'g:Git_MapCompleteCommand', '<C-\>e<SID>CmdLineComplete("command")<CR>' ],
-			\ [ 'complete remote',  'g:Git_MapCompleteRemote',  '<C-\>e<SID>CmdLineComplete("remote")<CR>'  ],
-			\ [ 'complete tag',     'g:Git_MapCompleteTag',     '<C-\>e<SID>CmdLineComplete("tag")<CR>'     ],
-			\ ]
-"
-for [ name, map_var, cmd ] in s:maps
-	if exists ( map_var )
-		try
-			silent exe 'cnoremap <silent> '.{map_var}.' '.cmd
-		catch /.*/
-			call s:ErrorMsg ( 'Error while creating the map "'.name.'", with lhs "'.{map_var}.'":', v:exception )
-		finally
-		endtry
-	endif
-endfor
 "
 "-------------------------------------------------------------------------------
 " Setup menus.   {{{1
