@@ -85,40 +85,7 @@ function! s:AssembleCmdLine ( part1, part2, ... )
 	endif
 	return a:part1.a:part2.repeat( left, s:UnicodeLen( a:part2 ) )
 endfunction    " ----------  end of function s:AssembleCmdLine  ----------
-"
-"-------------------------------------------------------------------------------
-" s:ErrorMsg : Print an error message.   {{{2
-"
-" Parameters:
-"   line1 - a line (string)
-"   line2 - a line (string)
-"   ...   - ...
-" Returns:
-"   -
-"-------------------------------------------------------------------------------
 
-function! s:ErrorMsg ( ... )
-	echohl WarningMsg
-	for line in a:000
-		echomsg line
-	endfor
-	echohl None
-endfunction    " ----------  end of function s:ErrorMsg  ----------
-
-"-------------------------------------------------------------------------------
-" s:EscapeCurrent : Escape the name of the current file for the shell,   {{{2
-"     and prefix it with "--".
-"
-" Parameters:
-"   -
-" Returns:
-"   file_argument - the escaped filename (string)
-"-------------------------------------------------------------------------------
-"
-function! s:EscapeCurrent ()
-	return '-- '.shellescape ( expand ( '%' ) )
-endfunction    " ----------  end of function s:EscapeCurrent  ----------
-"
 "-------------------------------------------------------------------------------
 " s:GetGlobalSetting : Get a setting from a global variable.   {{{2
 "
@@ -144,145 +111,6 @@ function! s:GetGlobalSetting ( varname, ... )
 endfunction
 
 "-------------------------------------------------------------------------------
-" s:ImportantMsg : Print an important message.   {{{2
-"
-" Parameters:
-"   line1 - a line (string)
-"   line2 - a line (string)
-"   ...   - ...
-" Returns:
-"   -
-"-------------------------------------------------------------------------------
-
-function! s:ImportantMsg ( ... )
-	echohl Search
-	echo join ( a:000, "\n" )
-	echohl None
-endfunction    " ----------  end of function s:ImportantMsg  ----------
-
-"-------------------------------------------------------------------------------
-" s:Question : Ask the user a question.   {{{2
-"
-" Parameters:
-"   prompt    - prompt, shown to the user (string)
-"   highlight - "normal" or "warning" (string, default "normal")
-" Returns:
-"   retval - the user input (integer)
-"
-" The possible values of 'retval' are:
-"    1 - answer was yes ("y")
-"    0 - answer was no ("n")
-"   -1 - user aborted ("ESC" or "CTRL-C")
-"-------------------------------------------------------------------------------
-"
-function! s:Question ( text, ... )
-	"
-	let ret = -2
-	"
-	" highlight prompt
-	if a:0 == 0 || a:1 == 'normal'
-		echohl Search
-	elseif a:1 == 'warning'
-		echohl Error
-	else
-		echoerr 'Unknown option : "'.a:1.'"'
-		return
-	endif
-	"
-	" question
-	echo a:text.' [y/n]: '
-	"
-	" answer: "y", "n", "ESC" or "CTRL-C"
-	while ret == -2
-		let c = nr2char( getchar() )
-		"
-		if c == "y"
-			let ret = 1
-		elseif c == "n"
-			let ret = 0
-		elseif c == "\<ESC>" || c == "\<C-C>"
-			let ret = -1
-		endif
-	endwhile
-	"
-	" reset highlighting
-	echohl None
-	"
-	return ret
-endfunction    " ----------  end of function s:Question  ----------
-
-"-------------------------------------------------------------------------------
-" s:SID : Return the <SID>.   {{{2
-"
-" Parameters:
-"   -
-" Returns:
-"   SID - the SID of the script (string)
-"-------------------------------------------------------------------------------
-
-function! s:SID ()
-	return matchstr ( expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$' )
-endfunction    " ----------  end of function s:SID  ----------
-
-"-------------------------------------------------------------------------------
-" s:StandardRun : execute 'git <cmd> ...'   {{{2
-"
-" Parameters:
-"   cmd     - the Git command to run (string), this is not the Git executable!
-"   param   - the parameters (string)
-"   flags   - all set flags (string)
-"   allowed - all allowed flags (string, default: 'cet')
-" Returns:
-"   [ ret, text ] - the status code and text produced by the command (string),
-"                   only if the flag 't' is set
-"
-" Flags are characters. The parameter 'flags' is a concatenation of all set
-" flags, the parameter 'allowed' is a concatenation of all allowed flags.
-"
-" Flags:
-"   c - ask for confirmation
-"   e - expand empty 'param' to current buffer
-"   t - return the text instead of echoing it
-"-------------------------------------------------------------------------------
-"
-function! s:StandardRun( cmd, param, flags, ... )
-	"
-	if a:0 == 0
-		let flag_check = '[^cet]'
-	else
-		let flag_check = '[^'.a:1.']'
-	endif
-	"
-	if a:flags =~ flag_check
-		return s:ErrorMsg ( 'Unknown flag "'.matchstr( a:flags, flag_check ).'".' )
-	endif
-	"
-	if a:flags =~ 'e' && empty( a:param ) | let param = s:EscapeCurrent()
-	else                                  | let param = a:param
-	endif
-	"
-	let cmd = s:Git_Executable.' '.a:cmd.' '.param
-	"
-	if a:flags =~ 'c' && s:Question ( 'Execute "git '.a:cmd.' '.param.'"?' ) != 1
-		echo "aborted"
-		return
-	endif
-	"
-	let text = system ( cmd )
-	"
-	if a:flags =~ 't'
-		return [ v:shell_error, substitute ( text, '\_s*$', '', '' ) ]
-	elseif v:shell_error != 0
-		echo "\"".cmd."\" failed:\n\n".text           | " failure
-	elseif text =~ '^\_s*$'
-		echo "ran successfully"                       | " success
-	else
-		echo "ran successfully:\n".text               | " success
-	endif
-	"
-endfunction    " ----------  end of function s:StandardRun  ----------
-"
-"-------------------------------------------------------------------------------
 " s:UnicodeLen : Number of characters in a Unicode string.   {{{2
 "
 " Parameters:
@@ -297,23 +125,6 @@ endfunction    " ----------  end of function s:StandardRun  ----------
 function! s:UnicodeLen ( str )
 	return len(split(a:str,'.\zs'))
 endfunction    " ----------  end of function s:UnicodeLen  ----------
-"
-"-------------------------------------------------------------------------------
-" s:WarningMsg : Print a warning/error message.   {{{2
-"
-" Parameters:
-"   line1 - a line (string)
-"   line2 - a line (string)
-"   ...   - ...
-" Returns:
-"   -
-"-------------------------------------------------------------------------------
-
-function! s:WarningMsg ( ... )
-	echohl WarningMsg
-	echo join ( a:000, "\n" )
-	echohl None
-endfunction    " ----------  end of function s:WarningMsg  ----------
 
 " }}}2
 "-------------------------------------------------------------------------------
@@ -377,49 +188,7 @@ endfunction    " ----------  end of function s:GenerateCustomMenu  ----------
 " Modul setup.   {{{1
 "-------------------------------------------------------------------------------
 
-"-------------------------------------------------------------------------------
-" == Platform specific items ==   {{{2
-"-------------------------------------------------------------------------------
-
 let s:MSWIN = has("win16") || has("win32")   || has("win64")     || has("win95")
-let s:UNIX	= has("unix")  || has("macunix") || has("win32unix")
-
-let s:NEOVIM = has("nvim")
-
-if s:MSWIN
-	"
-	"-------------------------------------------------------------------------------
-	" MS Windows
-	"-------------------------------------------------------------------------------
-	"
-	if match(      substitute( expand('<sfile>'), '\\', '/', 'g' ),
-				\   '\V'.substitute( expand('$HOME'),   '\\', '/', 'g' ) ) == 0
-		" user installation assumed
-		let s:installation = 'local'
-	else
-		" system wide installation
-		let s:installation = 'system'
-	endif
-	"
-	let s:plugin_dir = substitute( expand('<sfile>:p:h:h'), '\\', '/', 'g' )
-	"
-else
-	"
-	"-------------------------------------------------------------------------------
-	" Linux/Unix
-	"-------------------------------------------------------------------------------
-	"
-	if match( expand('<sfile>'), '\V'.resolve(expand('$HOME')) ) == 0
-		" user installation assumed
-		let s:installation = 'local'
-	else
-		" system wide installation
-		let s:installation = 'system'
-	endif
-	"
-	let s:plugin_dir = expand('<sfile>:p:h:h')
-	"
-endif
 
 "-------------------------------------------------------------------------------
 " == Various settings ==   {{{2
@@ -446,66 +215,10 @@ let s:Git_CustomMenu = [
 			\ [ '&merge, no commit',         ':GitMerge',   ':GitMerge --no-commit <CURSOR>' ],
 			\ [ '&merge, abort',             ':GitMerge',   ':GitMerge --abort<EXECUTE>' ],
 			\ ]
-"
-if s:MSWIN
-	let s:Git_BinPath = 'C:\Program Files\Git\bin\'
-else
-	let s:Git_BinPath = ''
-endif
-"
-call s:GetGlobalSetting ( 'Git_BinPath' )
-"
-if s:MSWIN
-	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&\\', '' )
-	"
-	let s:Git_Executable     = s:Git_BinPath.'git.exe'     " Git executable
-else
-	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&/', '' )
-	"
-	let s:Git_Executable     = s:Git_BinPath.'git'         " Git executable
-endif
-"
-call s:GetGlobalSetting ( 'Git_Executable' )
+
 call s:GetGlobalSetting ( 'Git_LoadMenus' )
 call s:GetGlobalSetting ( 'Git_RootMenu' )
 call s:GetGlobalSetting ( 'Git_CustomMenu' )
-
-let s:Enabled         = 1           " Git enabled?
-let s:DisabledMessage = "Git-Support not working:"
-let s:DisabledReason  = ""
-
-" check git executable   {{{2
-"
-function! s:CheckExecutable ( name, exe )
-	"
-	let executable = a:exe
-	let enabled = 1
-	let reason  = ""
-	"
-	if executable =~ '^LANG=\S\+\s\+\S'
-		let [ lang, executable ] = matchlist ( executable, '^\(LANG=\S\+\)\s\+\(.\+\)$' )[1:2]
-		if ! executable ( executable )
-			let enabled = 0
-			let reason = a:name." not executable: ".executable
-		endif
-		let executable = lang.' '.shellescape( executable )
-	elseif executable =~ '^\(["'']\)\zs.\+\ze\1'
-		if ! executable ( matchstr ( executable, '^\(["'']\)\zs.\+\ze\1' ) )
-			let enabled = 0
-			let reason = a:name." not executable: ".executable
-		endif
-	else
-		if ! executable ( executable )
-			let enabled = 0
-			let reason = a:name." not executable: ".executable
-		endif
-		let executable = shellescape( executable )
-	endif
-	"
-	return [ executable, enabled, reason ]
-endfunction    " ----------  end of function s:CheckExecutable  ----------
-"
-let [ s:Git_Executable,     s:Enabled,     s:DisabledReason    ] = s:CheckExecutable( 'git',  s:Git_Executable )
 
 " custom commands   {{{2
 
