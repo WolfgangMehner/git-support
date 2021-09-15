@@ -130,61 +130,6 @@ endfunction    " ----------  end of function s:UnicodeLen  ----------
 "-------------------------------------------------------------------------------
 
 "-------------------------------------------------------------------------------
-" Custom menus.   {{{1
-"-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
-" s:GenerateCustomMenu : Generate custom menu entries.   {{{2
-"
-" Parameters:
-"   prefix - defines the menu the entries will be placed in (string)
-"   data   - custom menu entries (list of lists of strings)
-" Returns:
-"   -
-"
-" See :help g:Git_CustomMenu for a description of the format 'data' uses.
-"-------------------------------------------------------------------------------
-"
-function! s:GenerateCustomMenu ( prefix, data )
-	"
-	for [ entry_l, entry_r, cmd ] in a:data
-		" escape special characters and assemble entry
-		let entry_l = escape ( entry_l, ' |\' )
-		let entry_l = substitute ( entry_l, '\.\.', '\\.', 'g' )
-		let entry_r = escape ( entry_r, ' .|\' )
-		"
-		if entry_r == '' | let entry = a:prefix.'.'.entry_l
-		else             | let entry = a:prefix.'.'.entry_l.'<TAB>'.entry_r
-		endif
-		"
-		if cmd == ''
-			let cmd = ':'
-		endif
-		"
-		let silent = '<silent> '
-		"
-		" prepare command
-		if cmd =~ '<CURSOR>'
-			let mlist = matchlist ( cmd, '^\(.\+\)<CURSOR>\(.\{-}\)$' )
-			let cmd = s:AssembleCmdLine ( mlist[1], mlist[2], '<Left>' )
-			let silent = ''
-		elseif cmd =~ '<EXECUTE>$'
-			let cmd = substitute ( cmd, '<EXECUTE>$', '<CR>', '' )
-		endif
-		"
-		let cmd = substitute ( cmd, '<WORD>',   '<cword>', 'g' )
-		let cmd = substitute ( cmd, '<FILE>',   '<cfile>', 'g' )
-		let cmd = substitute ( cmd, '<BUFFER>', '%',       'g' )
-		"
-		exe 'anoremenu '.silent.entry.'      '.cmd
-		exe 'vnoremenu '.silent.entry.' <C-C>'.cmd
-	endfor
-	"
-endfunction    " ----------  end of function s:GenerateCustomMenu  ----------
-" }}}2
-"-------------------------------------------------------------------------------
-"
-"-------------------------------------------------------------------------------
 " Modul setup.   {{{1
 "-------------------------------------------------------------------------------
 
@@ -195,30 +140,11 @@ let s:MSWIN = has("win16") || has("win32")   || has("win64")     || has("win95")
 "-------------------------------------------------------------------------------
 
 let s:Features = gitsupport#config#Features()
-
-let s:Git_LoadMenus      = 'yes'    " load the menus?
-let s:Git_RootMenu       = '&Git'   " name of the root menu
+let s:MenuData = gitsupport#config#Menu()
 
 if ! exists ( 's:MenuVisible' )
 	let s:MenuVisible = 0           " menus are not visible at the moment
 endif
-"
-let s:Git_CustomMenu = [
-			\ [ '&grep, word under cursor',  ':GitGrepTop', ':GitGrepTop <WORD><EXECUTE>' ],
-			\ [ '&grep, version x..y',       ':GitGrepTop', ':GitGrepTop -i "Version[^[:digit:]]\+<CURSOR>"' ],
-			\ [ '-SEP1-',                    '',            '' ],
-			\ [ '&log, grep commit msg..',   ':GitLog',     ':GitLog -i --grep="<CURSOR>"' ],
-			\ [ '&log, grep diff word',      ':GitLog',     ':GitLog -p -S "<CURSOR>"' ],
-			\ [ '&log, grep diff line',      ':GitLog',     ':GitLog -p -G "<CURSOR>"' ],
-			\ [ '-SEP2-',                    '',            '' ],
-			\ [ '&merge, fast-forward only', ':GitMerge',   ':GitMerge --ff-only <CURSOR>' ],
-			\ [ '&merge, no commit',         ':GitMerge',   ':GitMerge --no-commit <CURSOR>' ],
-			\ [ '&merge, abort',             ':GitMerge',   ':GitMerge --abort<EXECUTE>' ],
-			\ ]
-
-call s:GetGlobalSetting ( 'Git_LoadMenus' )
-call s:GetGlobalSetting ( 'Git_RootMenu' )
-call s:GetGlobalSetting ( 'Git_CustomMenu' )
 
 " custom commands   {{{2
 
@@ -354,150 +280,13 @@ function! GitS_FoldLog ()
 endfunction    " ----------  end of function GitS_FoldLog  ----------
 
 "-------------------------------------------------------------------------------
-" s:InitMenus : Initialize menus.   {{{1
-"-------------------------------------------------------------------------------
-"
-function! s:InitMenus()
-
-	if ! has ( 'menu' )
-		return
-	endif
-
-	let ahead = 'anoremenu '.s:Git_RootMenu.'.'
-
-	exe ahead.'Git       :echo "This is a menu header!"<CR>'
-	exe ahead.'-Sep00-   :'
-
-	" Commands   {{{2
-	let ahead = 'anoremenu '.s:Git_RootMenu.'.&git\ \.\.\..'
-	let vhead = 'vnoremenu '.s:Git_RootMenu.'.&git\ \.\.\..'
-
-	exe ahead.'Commands<TAB>Git :echo "This is a menu header!"<CR>'
-	exe ahead.'-Sep00-          :'
-
-	exe ahead.'&add<TAB>:GitAdd           :GitAdd<space>'
-	exe ahead.'&blame<TAB>:GitBlame       :GitBlame<space>'
-	exe vhead.'&blame<TAB>:GitBlame       :GitBlame<space>'
-	exe ahead.'&branch<TAB>:GitBranch     :GitBranch<space>'
-	exe ahead.'&checkout<TAB>:GitCheckout :GitCheckout<space>'
-	exe ahead.'&commit<TAB>:GitCommit     :GitCommit<space>'
-	exe ahead.'&diff<TAB>:GitDiff         :GitDiff<space>'
-	exe ahead.'&fetch<TAB>:GitFetch       :GitFetch<space>'
-	exe ahead.'&grep<TAB>:GitGrep         :GitGrep<space>'
-	exe ahead.'&help<TAB>:GitHelp         :GitHelp<space>'
-	exe ahead.'&log<TAB>:GitLog           :GitLog<space>'
-	exe ahead.'&merge<TAB>:GitMerge       :GitMerge<space>'
-	exe ahead.'&mv<TAB>:GitMv             :GitMv<space>'
-	exe ahead.'&pull<TAB>:GitPull         :GitPull<space>'
-	exe ahead.'&push<TAB>:GitPush         :GitPush<space>'
-	exe ahead.'&remote<TAB>:GitRemote     :GitRemote<space>'
-	exe ahead.'&rm<TAB>:GitRm             :GitRm<space>'
-	exe ahead.'&reset<TAB>:GitReset       :GitReset<space>'
-	exe ahead.'&show<TAB>:GitShow         :GitShow<space>'
-	exe ahead.'&stash<TAB>:GitStash       :GitStash<space>'
-	exe ahead.'&status<TAB>:GitStatus     :GitStatus<space>'
-	exe ahead.'&tag<TAB>:GitTag           :GitTag<space>'
-
-	exe ahead.'-Sep01-                      :'
-	exe ahead.'run\ git&k<TAB>:GitK         :GitK<space>'
-	exe ahead.'run\ git\ &bash<TAB>:GitBash :GitBash<space>'
-
-	" Current File   {{{2
-	let shead = 'anoremenu <silent> '.s:Git_RootMenu.'.&file.'
-	let vhead = 'vnoremenu <silent> '.s:Git_RootMenu.'.&file.'
-
-	exe shead.'Current\ File<TAB>Git :echo "This is a menu header!"<CR>'
-	exe shead.'-Sep00-               :'
-
-	exe shead.'&add<TAB>:GitAdd               :GitAdd -- %<CR>'
-	exe shead.'&blame<TAB>:GitBlame           :GitBlame -- %<CR>'
-	exe vhead.'&blame<TAB>:GitBlame           :GitBlame -- %<CR>'
-	exe shead.'&checkout<TAB>:GitCheckout     :GitCheckout -- %<CR>'
-	exe shead.'&diff<TAB>:GitDiff             :GitDiff -- %<CR>'
-	exe shead.'&diff\ --cached<TAB>:GitDiff   :GitDiff --cached -- %<CR>'
-	exe shead.'&log<TAB>:GitLog               :GitLog --stat -- %<CR>'
-	exe shead.'r&m<TAB>:GitRm                 :GitRm -- %<CR>'
-	exe shead.'&reset<TAB>:GitReset           :GitReset -q -- %<CR>'
-
-	" Specials   {{{2
-	let ahead = 'anoremenu          '.s:Git_RootMenu.'.s&pecials.'
-	let shead = 'anoremenu <silent> '.s:Git_RootMenu.'.s&pecials.'
-
-	exe ahead.'Specials<TAB>Git :echo "This is a menu header!"<CR>'
-	exe ahead.'-Sep00-          :'
-
-	exe ahead.'&commit,\ msg\ from\ file<TAB>:GitCommitFile   :GitCommitFile<space>'
-	exe shead.'&commit,\ msg\ from\ merge<TAB>:GitCommitMerge :GitCommitMerge<CR>'
-	exe ahead.'&commit,\ msg\ from\ cmdline<TAB>:GitCommitMsg :GitCommitMsg<space>'
-	exe ahead.'-Sep01-          :'
-
-	exe ahead.'&grep,\ use\ top-level\ dir<TAB>:GitGrepTop       :GitGrepTop<space>'
-	exe shead.'&stash\ list<TAB>:GitSlist                        :GitSlist<CR>'
-
-	" Custom Menu   {{{2
-	if ! empty ( s:Git_CustomMenu )
-
-		let ahead = 'anoremenu          '.s:Git_RootMenu.'.&custom.'
-		let ahead = 'anoremenu <silent> '.s:Git_RootMenu.'.&custom.'
-
-		exe ahead.'Custom<TAB>Git :echo "This is a menu header!"<CR>'
-		exe ahead.'-Sep00-        :'
-
-		call s:GenerateCustomMenu ( s:Git_RootMenu.'.custom', s:Git_CustomMenu )
-
-		exe ahead.'-HelpSep-                                  :'
-		exe ahead.'help\ (custom\ menu)<TAB>:GitSupportHelp   :call gitsupport#plugin#help("gitsupport-menus")<CR>'
-
-	endif
-
-	" Edit   {{{2
-	let ahead = 'anoremenu          '.s:Git_RootMenu.'.&edit.'
-	let shead = 'anoremenu <silent> '.s:Git_RootMenu.'.&edit.'
-
-	exe ahead.'Edit File<TAB>Git :echo "This is a menu header!"<CR>'
-	exe ahead.'-Sep00-          :'
-
-	for fileid in gitsupport#cmd_edit#Options()
-		let filepretty = substitute ( fileid, '-', '\\ ', 'g' )
-		exe shead.'&'.filepretty.'<TAB>:GitEdit   :GitEdit '.fileid.'<CR>'
-	endfor
-
-	" Help   {{{2
-	let ahead = 'anoremenu          '.s:Git_RootMenu.'.help.'
-	let shead = 'anoremenu <silent> '.s:Git_RootMenu.'.help.'
-
-	exe ahead.'Help<TAB>Git :echo "This is a menu header!"<CR>'
-	exe ahead.'-Sep00-      :'
-
-	exe shead.'help\ (Git-Support)<TAB>:GitSupportHelp     :call gitsupport#plugin#help("gitsupport")<CR>'
-	exe shead.'plug-in\ settings<TAB>:GitSupportSettings   :call gitsupport#config#PrintSettings(0)<CR>'
-
-	" Main Menu - open buffers   {{{2
-	let ahead = 'anoremenu          '.s:Git_RootMenu.'.'
-	let shead = 'anoremenu <silent> '.s:Git_RootMenu.'.'
-
-	exe ahead.'-Sep01-                      :'
-
-	exe ahead.'&run\ git<TAB>:Git           :Git<space>'
-	exe shead.'&branch<TAB>:GitBranch       :GitBranch<CR>'
-	exe ahead.'&help\ \.\.\.<TAB>:GitHelp   :GitHelp<space>'
-	exe shead.'&log<TAB>:GitLog             :GitLog<CR>'
-	exe shead.'&remote<TAB>:GitRemote       :GitRemote<CR>'
-	exe shead.'&stash\ list<TAB>:GitSlist   :GitSlist<CR>'
-	exe shead.'&status<TAB>:GitStatus       :GitStatus<CR>'
-	exe shead.'&tag<TAB>:GitTag             :GitTag<CR>'
-	" }}}2
-
-endfunction    " ----------  end of function s:InitMenus  ----------
-
-"-------------------------------------------------------------------------------
 " Git_AddMenus : Add menus.   {{{1
 "-------------------------------------------------------------------------------
 "
 function! Git_AddMenus()
 	if s:MenuVisible == 0
 		" initialize if not existing
-		call s:InitMenus ()
+		call gitsupport#menus#Init()
 		" the menu is now visible
 		let s:MenuVisible = 1
 	endif
@@ -511,7 +300,7 @@ function! Git_RemoveMenus()
 	if s:MenuVisible == 1
 		" destroy if visible
 		if has ( 'menu' )
-			exe 'aunmenu <silent> '.s:Git_RootMenu
+			exe 'aunmenu <silent> '.s:MenuData.root_menu_name
 		endif
 		" the menu is now invisible
 		let s:MenuVisible = 0
@@ -523,7 +312,7 @@ endfunction    " ----------  end of function Git_RemoveMenus  ----------
 "-------------------------------------------------------------------------------
 
 " load the menu right now?
-if s:Git_LoadMenus == 'yes'
+if s:MenuData.load_menus == 'yes'
 	call Git_AddMenus ()
 endif
 

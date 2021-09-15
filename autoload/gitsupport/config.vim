@@ -104,6 +104,22 @@ else
   endif
 endif
 
+let s:Git_LoadMenus = 'yes'    " load the menus?
+let s:Git_RootMenu  = '&Git'   " name of the root menu
+
+let s:Git_CustomMenu = [
+      \ [ '&grep, word under cursor',  ':GitGrepTop', ':GitGrepTop <WORD><EXECUTE>' ],
+      \ [ '&grep, version x..y',       ':GitGrepTop', ':GitGrepTop -i "Version[^[:digit:]]\+<CURSOR>"' ],
+      \ [ '-SEP1-',                    '',            '' ],
+      \ [ '&log, grep commit msg..',   ':GitLog',     ':GitLog -i --grep="<CURSOR>"' ],
+      \ [ '&log, grep diff word',      ':GitLog',     ':GitLog -p -S "<CURSOR>"' ],
+      \ [ '&log, grep diff line',      ':GitLog',     ':GitLog -p -G "<CURSOR>"' ],
+      \ [ '-SEP2-',                    '',            '' ],
+      \ [ '&merge, fast-forward only', ':GitMerge',   ':GitMerge --ff-only <CURSOR>' ],
+      \ [ '&merge, no commit',         ':GitMerge',   ':GitMerge --no-commit <CURSOR>' ],
+      \ [ '&merge, abort',             ':GitMerge',   ':GitMerge --abort<EXECUTE>' ],
+      \ ]
+
 call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',       'no' )
 call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty',  'no' )
 call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',      'no' )
@@ -120,6 +136,10 @@ call s:GetGlobalSetting ( 'Git_GitKExecutable' )
 call s:GetGlobalSetting ( 'Git_GitKScript' )
 call s:GetGlobalSetting ( 'Git_GitBashExecutable' )
 call s:GetGlobalSetting ( 'Git_Env.LANG', 'Git_Lang' )
+
+call s:GetGlobalSetting ( 'Git_LoadMenus' )
+call s:GetGlobalSetting ( 'Git_RootMenu' )
+call s:GetGlobalSetting ( 'Git_CustomMenu' )
 
 if ! has_key( s:Git_Env, 'LANG' )
 	if s:Git_Executable =~# '^LANG=\S\+\s\S'
@@ -166,6 +186,15 @@ endfunction
 
 function! gitsupport#config#Env ()
 	return copy( s:Git_Env )
+endfunction
+
+function! gitsupport#config#Menu ()
+  let menu_data = {
+        \ 'load_menus':     s:Git_LoadMenus,
+        \ 'root_menu_name': s:Git_RootMenu,
+        \ 'custom_menu':    s:Git_CustomMenu,
+        \ }
+  return menu_data
 endfunction
 
 let s:Features = {
