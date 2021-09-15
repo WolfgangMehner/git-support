@@ -489,30 +489,7 @@ function! s:InitMenus()
 	" }}}2
 
 endfunction    " ----------  end of function s:InitMenus  ----------
-"
-"-------------------------------------------------------------------------------
-" s:ToolMenu : Add or remove tool menu entries.   {{{1
-"-------------------------------------------------------------------------------
-"
-function! s:ToolMenu( action )
-	"
-	if ! has ( 'menu' )
-		return
-	endif
-	"
-	if a:action == 'setup'
-		anoremenu <silent> 40.1000 &Tools.-SEP100- :
-		anoremenu <silent> 40.1080 &Tools.Load\ Git\ Support   :call Git_AddMenus()<CR>
-	elseif a:action == 'loading'
-		aunmenu   <silent> &Tools.Load\ Git\ Support
-		anoremenu <silent> 40.1080 &Tools.Unload\ Git\ Support :call Git_RemoveMenus()<CR>
-	elseif a:action == 'unloading'
-		aunmenu   <silent> &Tools.Unload\ Git\ Support
-		anoremenu <silent> 40.1080 &Tools.Load\ Git\ Support   :call Git_AddMenus()<CR>
-	endif
-	"
-endfunction    " ----------  end of function s:ToolMenu  ----------
-"
+
 "-------------------------------------------------------------------------------
 " Git_AddMenus : Add menus.   {{{1
 "-------------------------------------------------------------------------------
@@ -520,7 +497,6 @@ endfunction    " ----------  end of function s:ToolMenu  ----------
 function! Git_AddMenus()
 	if s:MenuVisible == 0
 		" initialize if not existing
-		call s:ToolMenu ( 'loading' )
 		call s:InitMenus ()
 		" the menu is now visible
 		let s:MenuVisible = 1
@@ -534,7 +510,6 @@ endfunction    " ----------  end of function Git_AddMenus  ----------
 function! Git_RemoveMenus()
 	if s:MenuVisible == 1
 		" destroy if visible
-		call s:ToolMenu ( 'unloading' )
 		if has ( 'menu' )
 			exe 'aunmenu <silent> '.s:Git_RootMenu
 		endif
@@ -546,16 +521,14 @@ endfunction    " ----------  end of function Git_RemoveMenus  ----------
 "-------------------------------------------------------------------------------
 " Setup menus.   {{{1
 "-------------------------------------------------------------------------------
-"
-" tool menu entry
-call s:ToolMenu ( 'setup' )
-"
+
 " load the menu right now?
 if s:Git_LoadMenus == 'yes'
 	call Git_AddMenus ()
 endif
+
 " }}}1
 "-------------------------------------------------------------------------------
-"
+
 " =====================================================================================
 "  vim: foldmethod=marker
