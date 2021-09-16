@@ -25,32 +25,31 @@
 "===============================================================================
 
 "-------------------------------------------------------------------------------
-" Basic checks.   {{{1
+" Basic checks
 "-------------------------------------------------------------------------------
 
 " need at least 7.4
 if v:version < 740
-	echohl WarningMsg
-	echo 'The plugin git-support.vim needs Vim version >= 7.4'
-	echohl None
-	finish
+  echohl WarningMsg
+  echo 'The plugin git-support.vim needs Vim version >= 7.4'
+  echohl None
+  finish
 endif
 
-" prevent duplicate loading
 " need compatible
-if &cp || ( exists('g:GitSupport_Version') && ! exists('g:GitSupport_DevelopmentOverwrite') )
-	finish
+if &cp
+  finish
 endif
 let g:GitSupport_Version= '0.9.9-dev'     " version number of this script; do not change
 
 "-------------------------------------------------------------------------------
-" Modul setup.   {{{1
+" Modul setup
 "-------------------------------------------------------------------------------
 
 let s:MSWIN = has("win16") || has("win32")   || has("win64")     || has("win95")
 
 "-------------------------------------------------------------------------------
-" == Various settings ==   {{{2
+" Various settings
 "-------------------------------------------------------------------------------
 
 let s:Features = gitsupport#config#Features()
@@ -60,7 +59,7 @@ if ! exists ( 's:MenuVisible' )
 	let s:MenuVisible = 0           " menus are not visible at the moment
 endif
 
-" custom commands   {{{2
+" custom commands
 
 if s:Features.is_executable_git
   command! -nargs=* -complete=file                                                  GitAdd             :call gitsupport#commands#AddFromCmdLine(<q-args>)
@@ -116,7 +115,7 @@ if ! s:Features.is_executable_git
   command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")
 endif
 
-" syntax highlighting   {{{2
+" syntax highlighting
 
 function! s:HighlightingDefaults ()
 	highlight default link GitComment     Comment
@@ -136,9 +135,6 @@ augroup GitSupport
 	autocmd VimEnter,ColorScheme * call s:HighlightingDefaults()
 augroup END
 
-" }}}2
-"-------------------------------------------------------------------------------
-"
 "-------------------------------------------------------------------------------
 " GitS_FoldLog : fold text for 'git diff/log/show/status'   {{{1
 "
