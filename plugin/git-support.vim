@@ -46,18 +46,7 @@ let g:GitSupport_Version= '0.9.9-dev'     " version number of this script; do no
 " Modul setup
 "-------------------------------------------------------------------------------
 
-let s:MSWIN = has("win16") || has("win32")   || has("win64")     || has("win95")
-
-"-------------------------------------------------------------------------------
-" Various settings
-"-------------------------------------------------------------------------------
-
 let s:Features = gitsupport#config#Features()
-let s:MenuData = gitsupport#config#Menu()
-
-if ! exists ( 's:MenuVisible' )
-	let s:MenuVisible = 0           " menus are not visible at the moment
-endif
 
 " custom commands
 
@@ -101,7 +90,7 @@ if s:Features.is_executable_git
   command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")
 endif
 
-if s:MSWIN
+if s:Features.running_mswin
   command! -nargs=* -complete=file            GitBash            :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
 endif
 
@@ -114,6 +103,10 @@ if ! s:Features.is_executable_git
   command! -nargs=? -bang  GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
   command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")
 endif
+
+" optional menus
+
+call gitsupport#menus#Add()
 
 " syntax highlighting
 
@@ -188,43 +181,6 @@ function! GitS_FoldLog ()
 		return head.line.tail
 	endif
 endfunction    " ----------  end of function GitS_FoldLog  ----------
-
-"-------------------------------------------------------------------------------
-" Git_AddMenus : Add menus.   {{{1
-"-------------------------------------------------------------------------------
-"
-function! Git_AddMenus()
-	if s:MenuVisible == 0
-		" initialize if not existing
-		call gitsupport#menus#Init()
-		" the menu is now visible
-		let s:MenuVisible = 1
-	endif
-endfunction    " ----------  end of function Git_AddMenus  ----------
-"
-"-------------------------------------------------------------------------------
-" Git_RemoveMenus : Remove menus.   {{{1
-"-------------------------------------------------------------------------------
-"
-function! Git_RemoveMenus()
-	if s:MenuVisible == 1
-		" destroy if visible
-		if has ( 'menu' )
-			exe 'aunmenu <silent> '.s:MenuData.root_menu_name
-		endif
-		" the menu is now invisible
-		let s:MenuVisible = 0
-	endif
-endfunction    " ----------  end of function Git_RemoveMenus  ----------
-"
-"-------------------------------------------------------------------------------
-" Setup menus.   {{{1
-"-------------------------------------------------------------------------------
-
-" load the menu right now?
-if s:MenuData.load_menus == 'yes'
-	call Git_AddMenus ()
-endif
 
 " }}}1
 "-------------------------------------------------------------------------------

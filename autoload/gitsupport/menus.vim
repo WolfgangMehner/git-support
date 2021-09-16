@@ -14,11 +14,33 @@
 
 let s:MenuData = gitsupport#config#Menu()
 
-function! gitsupport#menus#Init ()
+if ! exists( 's:MenuVisible' )
+  let s:MenuVisible = 0
+endif
+
+function! gitsupport#menus#Add ()
   if ! has( 'menu' )
     return
   endif
 
+  if s:MenuData.load_menus && s:MenuVisible == 0
+    call s:Init()
+    let s:MenuVisible = 1
+  endif
+endfunction
+
+function! gitsupport#menus#Remove ()
+  if ! has( 'menu' )
+    return
+  endif
+
+  if s:MenuVisible == 1
+    exe 'aunmenu <silent> '.s:MenuData.root_menu_name
+    let s:MenuVisible = 0
+  endif
+endfunction
+
+function! s:Init ()
   let root_menu_name = s:MenuData.root_menu_name
 
   let ahead = 'anoremenu '.root_menu_name.'.'

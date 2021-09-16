@@ -187,7 +187,7 @@ endfunction
 
 function! gitsupport#config#Menu ()
   let menu_data = {
-        \ 'load_menus':     s:Git_LoadMenus,
+        \ 'load_menus':     s:Git_LoadMenus == 'yes',
         \ 'root_menu_name': s:Git_RootMenu,
         \ 'custom_menu':    s:Git_CustomMenu,
         \ }
