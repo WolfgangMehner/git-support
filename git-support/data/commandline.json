@@ -1,4 +1,8 @@
 {
+  "_default" : {
+    "include_files" : true,
+    "options" : []
+  },
   "branch" : {
     "include_branches" : true,
     "include_tags" : true,

@@ -16,14 +16,15 @@ function! s:PreloadData ()
   let basic_data = gitsupport#data#LoadData( 'basic' )
   let s:command_list = get( basic_data, 'commands', [] )
   let s:command_details = gitsupport#data#LoadData( 'commandline' )
-endfunction
-
-function! s:GetCommandDetails ( cmd, key, default )
-  let details = get( s:command_details, a:cmd, {} )
-  return get( details, a:key, a:default )
+  let s:default_command_details = get( s:command_details, '_default', {} )
 endfunction
 
 call s:PreloadData()
+
+function! s:GetCommandDetails ( cmd, key, default )
+  let details = get( s:command_details, a:cmd, s:default_command_details )
+  return get( details, a:key, a:default )
+endfunction
 
 function! s:ProcessBranchList ( branch_list )
   let ret_list = []
