@@ -40,7 +40,7 @@ endif
 if &cp
   finish
 endif
-let g:GitSupport_Version= '0.9.9-dev'     " version number of this script; do not change
+let g:GitSupport_Version = '0.9.9-dev'     " version number of this script; do not change
 
 "-------------------------------------------------------------------------------
 " Modul setup
@@ -111,21 +111,21 @@ call gitsupport#menus#Add()
 " syntax highlighting
 
 function! s:HighlightingDefaults ()
-	highlight default link GitComment     Comment
-	highlight default      GitHeading     term=bold       cterm=bold       gui=bold
-	highlight default link GitHighlight1  Identifier
-	highlight default link GitHighlight2  PreProc
-	highlight default      GitHighlight3  term=underline  cterm=underline  gui=underline
-	highlight default link GitWarning     WarningMsg
-	highlight default link GitSevere      ErrorMsg
+  highlight default link GitComment     Comment
+  highlight default      GitHeading     term=bold       cterm=bold       gui=bold
+  highlight default link GitHighlight1  Identifier
+  highlight default link GitHighlight2  PreProc
+  highlight default      GitHighlight3  term=underline  cterm=underline  gui=underline
+  highlight default link GitWarning     WarningMsg
+  highlight default link GitSevere      ErrorMsg
 
-	highlight default link GitAdd         DiffAdd
-	highlight default link GitRemove      DiffDelete
-	highlight default link GitConflict    DiffText
-endfunction    " ----------  end of function s:HighlightingDefaults  ----------
+  highlight default link GitAdd         DiffAdd
+  highlight default link GitRemove      DiffDelete
+  highlight default link GitConflict    DiffText
+endfunction
 
 augroup GitSupport
-	autocmd VimEnter,ColorScheme * call s:HighlightingDefaults()
+  autocmd VimEnter,ColorScheme * call s:HighlightingDefaults()
 augroup END
 
 "-------------------------------------------------------------------------------
@@ -184,6 +184,3 @@ endfunction    " ----------  end of function GitS_FoldLog  ----------
 
 " }}}1
 "-------------------------------------------------------------------------------
-
-" =====================================================================================
-"  vim: foldmethod=marker
