@@ -156,10 +156,7 @@ else
 endif
 let [ s:GitBash_Enabled, s:GitBash_Reason ] = s:CheckExecutable( s:Git_GitBashExecutable )
 let [ s:GitTerm_Enabled, s:GitTerm_Reason ] = [ 1, '' ]
-if s:MSWIN
-  let s:GitTerm_Enabled = 0
-  let s:GitTerm_Reason = 'not yet available under Windows'
-elseif !s:NEOVIM && !has( 'terminal' )
+if !s:NEOVIM && !has( 'terminal' )
   let s:GitTerm_Enabled = 0
   let s:GitTerm_Reason = '+terminal feature not available'
 endif
