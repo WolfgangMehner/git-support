@@ -91,7 +91,7 @@ if s:Features.is_executable_git
 endif
 
 if s:Features.running_mswin
-  command! -nargs=* -complete=file            GitBash            :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete  GitBash  :call gitsupport#cmd_gitbash#FromCmdLine(<q-args>)
 endif
 
 if ! s:Features.is_executable_git
