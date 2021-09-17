@@ -34,36 +34,6 @@ function! s:WarningMsg ( ... )
 	echohl None
 endfunction
 
-function! s:ChangeDir ( dir )
-	let cmd = 'cd'
-
-	if haslocaldir()
-		let cmd = 'lchdir'
-	endif
-
-	exec cmd fnameescape( a:dir )
-endfunction
-
-function! s:GetCurrentDir (  )
-	return getcwd()
-endfunction
-
-function! s:SetDir ( dir )
-  if a:dir != ''
-    let saved_dir = s:GetCurrentDir()
-    call s:ChangeDir( a:dir )
-    return saved_dir
-  else
-    return ''
-  endif
-endfunction
-
-function! s:ResetDir ( saved_dir )
-	if a:saved_dir != ''
-		call s:ChangeDir( a:saved_dir )
-	endif
-endfunction
-
 function! s:GetEnvStr ( env )
 	let env_str = ''
 	for [ name, value ] in items( a:env )
@@ -114,7 +84,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
     let cmd = s:GetEnvStr( opts.env ) . cmd
   endif
 
-  let saved_dir = s:SetDir( opts.cwd )
+  let saved_dir = gitsupport#services_path#SetDir( opts.cwd )
 
   try
     if opts.mode == 'buffer'
@@ -130,7 +100,7 @@ function! gitsupport#run#RunDirect ( cmd, params, ... )
           \ "   occurred at " . v:throwpoint )
     return [ 255, '' ]
   finally
-    call s:ResetDir( saved_dir )
+    call gitsupport#services_path#ResetDir( saved_dir )
   endtry
 
   if opts.mode == 'return'
@@ -182,7 +152,7 @@ function! gitsupport#run#RunDetach ( cmd, params, ... )
 
   let cmd = s:GetEnvStr( opts.env ).shellescape( exec ).' '.cmd
 
-  let saved_dir = s:SetDir( opts.cwd )
+  let saved_dir = gitsupport#services_path#SetDir( opts.cwd )
 
   try
     if s:Features.running_mswin
@@ -196,7 +166,7 @@ function! gitsupport#run#RunDetach ( cmd, params, ... )
           \ "   occurred at " . v:throwpoint )
     return [ 255, '' ]
   finally
-    call s:ResetDir( saved_dir )
+    call gitsupport#services_path#ResetDir( saved_dir )
   endtry
 endfunction
 

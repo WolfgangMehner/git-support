@@ -62,6 +62,36 @@ function! gitsupport#services_path#GetGitDir ( ... )
   endif
 endfunction
 
+function! gitsupport#services_path#SetDir ( dir )
+  if a:dir != ''
+    let saved_dir = s:GetCurrentDir()
+    call s:ChangeDir( a:dir )
+    return saved_dir
+  else
+    return ''
+  endif
+endfunction
+
+function! gitsupport#services_path#ResetDir ( saved_dir )
+  if a:saved_dir != ''
+    call s:ChangeDir( a:saved_dir )
+  endif
+endfunction
+
+function! s:ChangeDir ( dir )
+  let cmd = 'cd'
+
+  if haslocaldir()
+    let cmd = 'lchdir'
+  endif
+
+  exec cmd fnameescape( a:dir )
+endfunction
+
+function! s:GetCurrentDir (  )
+  return getcwd()
+endfunction
+
 function! s:ErrorMsg ( ... )
   echohl WarningMsg
   for line in a:000

@@ -20,15 +20,22 @@ function! gitsupport#cmd_gitbash#FromCmdLine ( param )
     return s:ErrorMsg( 'can not execute git bash' )
   endif
 
-  let param = escape( a:param, '%#' )
+  let cwd = gitsupport#services_path#GetWorkingDir()
 
-  if param =~ '^\s*$'
+  if a:param =~ '^\s*$'
     " no parameters: start interactive mode in background
-    silent exe '!start '.s:Exec.' --login -i'
+    call gitsupport#run#RunDetach( s:Exec, [ '--login', '-i' ], 'cwd', cwd, 'env_std', 1 )
   else
     " otherwise: block editor and execute command
-    silent exe '!'.s:Exec.' --login -c '.shellescape ( 'git '.param )
+    call s:RunWithParams( a:param, cwd )
   endif
+endfunction
+
+function! s:RunWithParams ( param, cwd )
+  let param = escape( a:param, '%#' )
+  let saved_dir = gitsupport#services_path#SetDir( a:cwd )
+  exec '!'.shellescape( s:Exec ).' --login -c '.shellescape( 'git '.param )
+  call gitsupport#services_path#ResetDir( saved_dir )
 endfunction
 
 function! s:ErrorMsg ( ... )
