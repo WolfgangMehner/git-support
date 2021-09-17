@@ -1009,7 +1009,6 @@ in the .vimrc file.
   |g:Git_BinPath|               ''          the path to the Git binaries (^1)
   |g:Git_Executable|            'git'       the Git executable (^1)
   |g:Git_GitKExecutable|        'gitk'      the gitk executable (^1)
-  |g:Git_GitKScript|            ''          the gitk script (^1)
   |g:Git_GitBashExecutable|     'xterm'     the git bash executable (^1) (^2)
   |g:Git_LoadMenus|             'yes'       whether to load the menus
                                           ('yes' or 'no')
@@ -1037,13 +1036,11 @@ in the .vimrc file.
   |g:Git_BinPath|           - -empty-
   |g:Git_Executable|        - g:Git_BinPath + git
   |g:Git_GitKExecutable|    - g:Git_BinPath + gitk
-  |g:Git_GitKScript|        - -empty-
   the Windows defaults are as follows:
   |g:Git_BinPath|           - C:\Program Files\Git\bin\
   |g:Git_Executable|        - g:Git_BinPath + git.exe
-  |g:Git_GitKExecutable|    - g:Git_BinPath + tclsh.exe
-  |g:Git_GitKScript|        - g:Git_BinPath + gitk
-  |g:Git_GitBashExecutable| - g:Git_BinPath + sh.exe
+  |g:Git_GitKExecutable|    - g:Git_BinPath + ..\cmd\gitk.exe
+  |g:Git_GitBashExecutable| - g:Git_BinPath + bash.exe
 (^2) under UNIX, the default for g:Git_GitBashExecutable is the value of
   g:Xterm_Executable, which in turn is "xterm"
 (^3) UNIX only, see |gitsupport-config-xterm|
@@ -1060,9 +1057,9 @@ UNIX systems.
 For Windows, set up the binary path similar to this: >
   let g:Git_BinPath = 'C:\Program Files\Git\bin\'
 <
-The defaults for |g:Git_Executable|, |g:Git_GitKExecutable|, |g:Git_GitKScript|
-and |g:Git_GitBashExecutable| are derived from g:Git_BinPath. However, the
-setting g:Git_BinPath is only used to derive the defaults. If one of the
+The defaults for |g:Git_Executable|, |g:Git_GitKExecutable|,
+and |g:Git_GitBashExecutable| are derived from `g:Git_BinPath`. However, the
+setting `g:Git_BinPath` is only used to derive the defaults. If one of the
 executables is set explicitly, it has to be set with the whole path.
 
                                                             *g:Git_Executable*
@@ -1073,20 +1070,18 @@ environment: >
 For Windows, set up the executable similar to this: >
   let g:Git_Executable = 'C:\Program Files\Git\bin\git.exe'
 <
-                                       *g:Git_GitKExecutable* *g:Git_GitKScript*
-Sets the gitk executable. You should use the English language environment: >
-  let g:Git_Executable = 'LANG=en_US gitk'
+                                                        *g:Git_GitKExecutable*
+Sets the gitk executable: >
+  let g:Git_Executable = 'gitk'
 <
-For Windows, set up gitk similar to this, the interpreter and the gitk script
-have to be given separately: >
-  let g:Git_GitKExecutable = 'C:\Program Files\Git\bin\tclsh.exe'
-  let g:Git_GitKScript     = 'C:\Program Files\Git\bin\gitk'
+For Windows, set up gitk similar to this: >
+  let g:Git_GitKExecutable = 'C:\Program Files\Git\com\gitk.exe'
 <
                                                      *g:Git_GitBashExecutable*
 Sets the git bash executable. Under UNIX "xterm" is used.
 
 For Windows, set up the executable similar to this: >
-  let g:Git_GitBashExecutable= 'C:\Program Files\Git\bin\sh.exe'
+  let g:Git_GitBashExecutable= 'C:\Program Files\Git\bin\bash.exe'
 <
 ------------------------------------------------------------------------------
 6.2  MENUS                                           *gitsupport-config-menus*

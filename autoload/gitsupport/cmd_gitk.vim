@@ -20,7 +20,7 @@ function! gitsupport#cmd_gitk#FromCmdLine ( q_params )
 endfunction
 
 function! gitsupport#cmd_gitk#Run ( args, dir_hint )
-  let args = gitsupport#config#GitKExecutableAndScript() + a:args
+  let args = [ gitsupport#config#GitKExecutable() ] + a:args
   let env = gitsupport#config#Env()
 
   if ! s:Features.is_executable_gitk

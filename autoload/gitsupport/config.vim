@@ -84,18 +84,16 @@ let s:Git_CmdLineOptionsFile = s:plugin_dir.'/git-support/data/options.txt'
 call s:GetGlobalSetting ( 'Git_BinPath' )
 
 if s:MSWIN
-	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&\\', '' )
+  let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&\\', '' )
 
-	let s:Git_Executable        = s:Git_BinPath.'git.exe'     " Git executable
-	let s:Git_GitKExecutable    = s:Git_BinPath.'tclsh.exe'   " GitK executable
-	let s:Git_GitKScript        = s:Git_BinPath.'gitk'        " GitK script
-	let s:Git_GitBashExecutable = s:Git_BinPath.'sh.exe'
+  let s:Git_Executable        = s:Git_BinPath.'git.exe'            " Git executable
+  let s:Git_GitKExecutable    = s:Git_BinPath.'/../cmd/gitk.exe'   " GitK executable
+  let s:Git_GitBashExecutable = s:Git_BinPath.'bash.exe'
 else
-	let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&/', '' )
+  let s:Git_BinPath = substitute ( s:Git_BinPath, '[^\\/]$', '&/', '' )
 
-	let s:Git_Executable     = s:Git_BinPath.'git'      " Git executable
-	let s:Git_GitKExecutable = s:Git_BinPath.'gitk'     " GitK executable
-	let s:Git_GitKScript     = ''                       " GitK script (do not specify separate script by default)
+  let s:Git_Executable     = s:Git_BinPath.'git'      " Git executable
+  let s:Git_GitKExecutable = s:Git_BinPath.'gitk'     " GitK executable
 
   if exists ( 'g:Xterm_Executable' )
     let s:Git_GitBashExecutable = g:Xterm_Executable
@@ -133,7 +131,6 @@ let s:Git_Env = {}
 
 call s:GetGlobalSetting ( 'Git_Executable' )
 call s:GetGlobalSetting ( 'Git_GitKExecutable' )
-call s:GetGlobalSetting ( 'Git_GitKScript' )
 call s:GetGlobalSetting ( 'Git_GitBashExecutable' )
 call s:GetGlobalSetting ( 'Git_Env.LANG', 'Git_Lang' )
 
@@ -149,11 +146,6 @@ endif
 
 let [ s:GitExec_Enabled, s:GitExec_Reason ] = s:CheckGitExecutable( s:Git_Executable )
 let [ s:GitkExec_Enabled, s:GitkExec_Reason ] = s:CheckExecutable( s:Git_GitKExecutable )
-if empty( s:Git_GitKScript )
-  let [ s:GitkScript_Found, s:GitkScript_Reason ] = [ 2, '' ]
-else
-  let [ s:GitkScript_Found, s:GitkScript_Reason ] = s:CheckFile( s:Git_GitKScript )
-endif
 let [ s:GitBash_Enabled, s:GitBash_Reason ] = s:CheckExecutable( s:Git_GitBashExecutable )
 let [ s:GitTerm_Enabled, s:GitTerm_Reason ] = [ 1, '' ]
 if !s:NEOVIM && !has( 'terminal' )
@@ -165,12 +157,8 @@ function! gitsupport#config#GitExecutable ()
   return s:Git_Executable
 endfunction
 
-function! gitsupport#config#GitKExecutableAndScript ()
-  if empty( s:Git_GitKScript )
-    return [ s:Git_GitKExecutable ]
-  else
-    return [ s:Git_GitKExecutable, s:Git_GitKScript ]
-  endif
+function! gitsupport#config#GitKExecutable ()
+  return s:Git_GitKExecutable
 endfunction
 
 function! gitsupport#config#GitBashExecutable ()
@@ -200,7 +188,7 @@ let s:Features = {
       \ 'running_unix':  s:UNIX,
       \
       \ 'is_executable_git':  s:GitExec_Enabled,
-      \ 'is_executable_gitk': s:GitkExec_Enabled && s:GitkScript_Found,
+      \ 'is_executable_gitk': s:GitkExec_Enabled,
       \ 'is_executable_bash': s:GitBash_Enabled,
       \ 'is_avaiable_term':   s:GitTerm_Enabled,
       \
@@ -257,7 +245,6 @@ function! gitsupport#config#PrintSettings ( verbose )
   else                 | let git_e_status = ' ('.s:GitExec_Reason.')'
   endif
   let gitk_e_status  = s:GitkExec_Enabled ? '' : ' ('.s:GitkExec_Reason.')'
-  let gitk_s_status  = s:GitkScript_Found ? '' : ' ('.s:GitkScript_Reason.')'
   let gitbash_status = s:GitBash_Enabled  ? '' : ' ('.s:GitBash_Reason.')'
   let gitterm_status = s:GitTerm_Enabled  ? 'yes' : 'no ('.s:GitTerm_Reason.')'
 
@@ -273,9 +260,6 @@ function! gitsupport#config#PrintSettings ( verbose )
         \ .'     plug-in installation :  '.vim_name.' on '.sys_name."\n"
         \ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
         \ .'          gitk executable :  '.s:Git_GitKExecutable.gitk_e_status."\n"
-  if ! empty( s:Git_GitKScript )
-    let txt .= '              gitk script :  '.s:Git_GitKScript.gitk_s_status."\n"
-  endif
   let txt .= '      git bash executable :  '.s:Git_GitBashExecutable.gitbash_status."\n"
   let txt .= '         terminal support :  '.gitterm_status."\n"
   if a:verbose >= 1
