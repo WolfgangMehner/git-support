@@ -113,7 +113,7 @@ run the commands in every subdirectory of the project.
   |:GitTag| <args>                   (run) git tag <args>
 
   |:GitK| <args>                     start gitk with the given arguments
-  |:GitBash| <args>                  run git in an external terminal
+  |:GitBash|                         run external Git Bash (Windows only)
   |:GitTerm| <args>                  run git in a terminal window
 
   |:GitEdit| <fileid>                edit the file referred to by <fileid>
@@ -698,13 +698,11 @@ Starts gitk with the given arguments.
 
 ------------------------------------------------------------------------------
                                                                     *:GitBash*
-  :GitBash <args> ~
+  :GitBash ~
 
-Runs git in an external terminal. Useful for interactive commands, for
-example: >
-  :GitBash add --patch %
-<
-Windows: If called without arguments, starts the git bash in interactive mode.
+Windows only: Starts Git Bash in an external window. Does not accept arguments
+and does not implement the plugin's usual logic for working directories.
+For the most part, |:GitTerm| will offer a better experience.
 
 ------------------------------------------------------------------------------
                                                                     *:GitTerm*
@@ -1009,7 +1007,7 @@ in the .vimrc file.
   |g:Git_BinPath|               ''          the path to the Git binaries (^1)
   |g:Git_Executable|            'git'       the Git executable (^1)
   |g:Git_GitKExecutable|        'gitk'      the gitk executable (^1)
-  |g:Git_GitBashExecutable|     'xterm'     the git bash executable (^1) (^2)
+  |g:Git_GitBashExecutable|     'bash'      the git bash executable (^1) (^2)
   |g:Git_LoadMenus|             'yes'       whether to load the menus
                                           ('yes' or 'no')
   |g:Git_RootMenu|              '&Git'      name and shortcut of the root menu
