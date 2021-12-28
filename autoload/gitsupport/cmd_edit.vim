@@ -8,8 +8,8 @@
 "        Author:  Wolfgang Mehner, wolfgang-mehner@web.de
 "       Version:  1.0
 "       Created:  19.12.2020
-"      Revision:  ---
-"       License:  Copyright (c) 2020, Wolfgang Mehner
+"      Revision:  28.12.2021
+"       License:  Copyright (c) 2020-2021, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
 let s:EditFileIDs = [
@@ -55,11 +55,6 @@ function! gitsupport#cmd_edit#EditFile ( fileid )
   elseif filename == ''
     return s:ErrorMsg ( 'no file with ID "'.a:fileid.'".' )
   else
-    let is_absolute = is_absolute || filename[0] == '/'
-    if ( ! is_absolute ) && cwd != ''
-      let filename = cwd.'/'.filename
-    endif
-
     exe 'spl '.fnameescape( filename )
   endif
 endfunction

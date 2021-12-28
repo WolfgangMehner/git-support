@@ -43,8 +43,8 @@ function! gitsupport#services_path#GetGitDir ( ... )
     let [ ret_code, base_dir ] = s:GetOutput( [ 'rev-parse', '--show-toplevel' ], cwd )
 
     if ret_code == 0
-      let text = substitute( path, 'top', escape( base_dir, '\&' ), '' )
-      return [ 0, fnamemodify( text, ':p' ) ]
+      let full_path = base_dir . path[3:]
+      return [ 0, full_path ]
     else
       return [ ret_code, base_dir ]
     endif
@@ -52,8 +52,13 @@ function! gitsupport#services_path#GetGitDir ( ... )
     let [ ret_code, git_dir ] = s:GetOutput( [ 'rev-parse', '--git-dir' ], cwd )
 
     if ret_code == 0
-      let text = substitute( path, 'git', escape( git_dir, '\&' ), '' )
-      return [ 0, fnamemodify( text, ':p' ) ]
+      let full_path = git_dir . path[3:]
+
+      if full_path =~ '^\.git'
+        let full_path = cwd . '/' . full_path
+      endif
+
+      return [ 0, full_path ]
     else
       return [ ret_code, git_dir ]
     endif
