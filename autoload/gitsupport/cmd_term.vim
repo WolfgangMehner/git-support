@@ -9,13 +9,14 @@
 "       Version:  1.0
 "       Created:  23.12.2020
 "      Revision:  ---
-"       License:  Copyright (c) 2020, Wolfgang Mehner
+"       License:  Copyright (c) 2020-2021, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
 let s:Features = gitsupport#config#Features()
 
 function! gitsupport#cmd_term#FromCmdLine ( q_params )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
+  call gitsupport#common#ExpandWildcards( args )
   return gitsupport#cmd_term#Run( args, '' )
 endfunction
 
