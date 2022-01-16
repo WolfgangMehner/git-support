@@ -54,7 +54,7 @@ function! gitsupport#services_path#GetGitDir ( ... )
     if ret_code == 0
       let full_path = git_dir . path[3:]
 
-      if full_path =~ '^\.git'
+      if cwd != '' && full_path =~# '^\.git'
         let full_path = cwd . '/' . full_path
       endif
 
