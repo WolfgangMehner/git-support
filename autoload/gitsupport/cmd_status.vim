@@ -9,7 +9,7 @@
 "       Version:  1.0
 "       Created:  20.12.2020
 "      Revision:  ---
-"       License:  Copyright (c) 2020, Wolfgang Mehner
+"       License:  Copyright (c) 2020-2022, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
 function! gitsupport#cmd_status#FromCmdLine ( q_params )
@@ -176,8 +176,8 @@ function! s:ShowLog ()
     return s:ErrorMsg( 'can not perform action "log" in section '.section_meta.name )
   endif
 
-  let file_name = file_record.filename_alt
-  return gitsupport#cmd_log#OpenBuffer( [ '--stat', '--follow', '--', file_name ], [], b:GitSupport_BaseDir )
+  let file_name_in_head = file_record.filename_alt
+  return gitsupport#cmd_log#OpenBuffer( [ '--stat', '--follow', '--', file_name_in_head ], [], b:GitSupport_BaseDir )
 endfunction
 
 function! s:FileAction ( action )
@@ -294,11 +294,11 @@ function! s:FileActionReset ( file_name, file_record )
     let filename_old = a:file_record.filename_alt
     if gitsupport#common#Question( 'Reset the old file "'.filename_old.'"?' )
       call gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename_old ],
-            \ 'cwd', b:GitSupport_BaseDir ) == 0
+            \ 'cwd', b:GitSupport_BaseDir )
     endif
     if gitsupport#common#Question( 'Reset the new file "'.filename.'"?' )
       call gitsupport#run#RunDirect( '', [ 'reset', '-q', '--', filename ],
-            \ 'cwd', b:GitSupport_BaseDir ) == 0
+            \ 'cwd', b:GitSupport_BaseDir )
     endif
     if gitsupport#common#Question( 'Undo the rename?' )
       call rename( filename, filename_old )
@@ -507,15 +507,15 @@ function! s:ProcessSection ( list_status, section )
           \ 'section': a:section,
           \ }
 
-    if is_staged
-      if status == 'R'
-        let mlist = matchlist( filename, '^\(.*\) -> \(.*\)$' )
-        if !empty( mlist )
-          let record.filename     = mlist[2]
-          let record.filename_alt = mlist[1]
-        endif
+    if status == 'R' || status_alt == 'R'
+      let mlist = matchlist( filename, '^\(.*\) -> \(.*\)$' )
+      if !empty( mlist )
+        let record.filename     = mlist[2]
+        let record.filename_alt = mlist[1]
       endif
-    elseif is_unstaged
+    endif
+
+    if is_unstaged
       let record.status = status_alt
     elseif is_conflict
       let record.status  = 'U'
