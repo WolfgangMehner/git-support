@@ -173,6 +173,9 @@ endfunction
 function! gitsupport#run#RunToBuffer ( cmd, params, ... )
 
   " options
+  "   additionally at runtime
+  "   - is_modifiable
+  "   - has_syntax
   let opts = {
         \ 'env': {},
         \ 'env_std': 0,
@@ -186,12 +189,16 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     return
   endif
 
+  let opts.is_modifiable = &l:modifiable
   let opts.has_syntax = &l:syntax != ''
   if opts.restore_cursor
     let opts.restore_cursor = gitsupport#common#BufferGetPosition()
   else
     let opts.restore_cursor = []
   endif
+
+  let &l:modifiable = 1
+
   if ! opts.keep
     call gitsupport#common#BufferWipe()
   endif
@@ -232,6 +239,7 @@ function! gitsupport#run#JobWrapup ( job_data )
   if opts.has_syntax
     call setbufvar( buf_nr, '&syntax', 'ON' )
   endif
+  call setbufvar( buf_nr, '&modifiable', opts.is_modifiable )
 endfunction
 
 function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
@@ -260,6 +268,7 @@ function! gitsupport#run#OpenBuffer( name, ... )
 				\   'showdir': 0,
 				\   'reuse_ontab': 1,
 				\   'reuse_other': 0,
+				\   'modifiable': 0,
 				\   'topic': '',
 				\ }
 
@@ -300,14 +309,15 @@ function! gitsupport#run#OpenBuffer( name, ... )
 		return 0
 	endif
 
-	" no -> settings of the new buffer
-	let &l:buftype   = opts.showdir ? 'nowrite' : 'nofile'
-	let &l:bufhidden = 'wipe'
-	let &l:swapfile  = 0
-	let &l:tabstop   = 8
-	call s:RenameBuffer( buf_name )
+  " no -> settings of the new buffer
+  let &l:buftype    = opts.showdir ? 'nowrite' : 'nofile'
+  let &l:bufhidden  = 'wipe'
+  let &l:modifiable = opts.modifiable
+  let &l:swapfile   = 0
+  let &l:tabstop    = 8
+  call s:RenameBuffer( buf_name )
 
-	return 1
+  return 1
 endfunction
 
 function! s:RenameBuffer ( name )

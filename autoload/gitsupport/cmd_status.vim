@@ -408,6 +408,8 @@ let s:status_strings = {
       \ }
 
 function! s:Run ( options, cwd, restore_cursor )
+  let &l:modifiable = 1
+
   let params = [ '--porcelain', '--branch' ]
 
   if a:options.ignored
@@ -450,6 +452,7 @@ function! s:Run ( options, cwd, restore_cursor )
   call gitsupport#common#BufferSetPosition( restore_pos )
 
   let &l:foldlevel = 2          " open folds closed by manual creation
+  let &l:modifiable = 0
 endfunction
 
 function! s:ProcessBranchInfo ( list_status )
