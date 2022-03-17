@@ -79,8 +79,6 @@ else
 	let s:Git_BinPath = ''
 endif
 
-let s:Git_CmdLineOptionsFile = s:plugin_dir.'/git-support/data/options.txt'
-
 call s:GetGlobalSetting ( 'Git_BinPath' )
 
 if s:MSWIN
@@ -254,8 +252,6 @@ function! gitsupport#config#PrintSettings ( verbose )
   endfor
   let environment = environment[0:-2]
 
-  let file_options_status = filereadable( s:Git_CmdLineOptionsFile ) ? '' : ' (not readable)'
-
   let txt = " Git-Support settings\n\n"
         \ .'     plug-in installation :  '.vim_name.' on '.sys_name."\n"
         \ .'           git executable :  '.s:Git_Executable.git_e_status."\n"
@@ -273,7 +269,6 @@ function! gitsupport#config#PrintSettings ( verbose )
           \ .'             expand empty :  add: "'.g:Git_AddExpandEmpty.'"  checkout: "'.g:Git_CheckoutExpandEmpty.'"  diff: "'.g:Git_DiffExpandEmpty.'"  reset: "'.g:Git_ResetExpandEmpty."\"\n"
           \ .'     open fold after jump :  "'.g:Git_OpenFoldAfterJump."\"\n"
           \ .'  status staged open diff :  "'.g:Git_StatusStagedOpenDiff."\"\n\n"
-          \ .'    cmd-line options file :  '.s:Git_CmdLineOptionsFile.file_options_status."\n"
           \ .'            commit editor :  "'.g:Git_Editor."\"\n"
   endif
   if !s:NEOVIM && a:verbose >= 1
