@@ -189,6 +189,7 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
     return
   endif
 
+  let opts.wrap_up = function( 's:JobWrapup' )
   let opts.is_modifiable = &l:modifiable
   let opts.has_syntax = &l:syntax != ''
   if opts.restore_cursor
@@ -223,11 +224,11 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
   elseif s:Features.vim_full_job_support
     call gitsupport#run_vim#JobRun( cmd, a:params, opts )
   else
-    call gitsupport#run#JobRunNoBackground( cmd, a:params, opts )
+    call s:JobRunNoBackground( cmd, a:params, opts )
   endif
 endfunction
 
-function! gitsupport#run#JobWrapup ( job_data )
+function! s:JobWrapup ( job_data )
   let status = a:job_data.status
   let buf_nr = a:job_data.buf_nr
   let opts = a:job_data.opts
@@ -242,7 +243,7 @@ function! gitsupport#run#JobWrapup ( job_data )
   call setbufvar( buf_nr, '&modifiable', opts.is_modifiable )
 endfunction
 
-function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
+function! s:JobRunNoBackground ( cmd, params, opts )
   let opts = a:opts
 
   let starts_empty = line('$') == 1 && getline('$') == ''
@@ -258,7 +259,7 @@ function! gitsupport#run#JobRunNoBackground ( cmd, params, opts )
         \ 'buf_nr': bufnr('%'),
         \ 'opts': opts,
         \ }
-  call gitsupport#run#JobWrapup( job_data)
+  call opts.wrap_up( job_data)
 endfunction
 
 function! gitsupport#run#OpenBuffer( name, ... )

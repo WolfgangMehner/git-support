@@ -37,13 +37,13 @@ function! gitsupport#run_nvim#JobRun ( cmd, params, opts )
   let job_id = jobstart( [a:cmd] + a:params, job_data )
 
   if job_id > 0
-    let g:all_jobs[job_id] = { 'job': job_id, 'buf': bufnr('%'), 'line_accu': '', 'buf_nr': bufnr('%'), 'opts': a:opts, }
+    let g:all_jobs[job_id] = { 'job': job_id, 'buf': bufnr('%'), 'line_accu': '', 'buf_nr': bufnr('%'), 'opts': a:opts, 'wrap_up': a:opts.wrap_up, }
   endif
 endfunction
 
 function! s:JobWrapup ( job_id )
   let job_data = g:all_jobs[ a:job_id ]
-  call gitsupport#run#JobWrapup( job_data )
+  call job_data.wrap_up( job_data )
 
   unlet g:all_jobs[ a:job_id ]
 endfunction
