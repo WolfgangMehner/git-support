@@ -12,6 +12,11 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
+let s:NO_COMMIT_HASH = repeat( '0', 40 )
+let s:DATE_FORMAT_TIME_THRESHOLD = 100 * ( 24 * 60 * 60 )   " 100 days
+
+let s:use_advanced_mode = 1
+
 function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
   if a:count > 0 
@@ -28,6 +33,9 @@ function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
 
   if empty( params )
     let params = [ '--', expand( '%' ) ]
+  endif
+  if s:use_advanced_mode
+    let params = [ '--porcelain' ] + params
   endif
   if len( a:range_info ) == 2
     let params = [ '-L', a:range_info[0].','.a:range_info[1] ] + params
@@ -73,9 +81,20 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd, restore_cursor )
+  if s:use_advanced_mode
+    let Callback = function( 's:ProcessPorcelain' )
+    let b:GitSupport_BlameData = {
+          \ 'commits': {},
+          \ 'lines': [],
+          \ 'filename': get( a:params, -1, '' ),
+          \ }
+  else
+    let Callback = function( 's:Empty' )
+  endif
   call gitsupport#run#RunToBuffer( '', ['blame'] + a:params,
         \ 'cwd', a:cwd,
-        \ 'restore_cursor', a:restore_cursor )
+        \ 'restore_cursor', a:restore_cursor,
+        \ 'callback', Callback )
 endfunction
 
 function! s:Update ()
@@ -111,6 +130,14 @@ function! s:Show ( mode )
 endfunction
 
 function! s:GetInfo ( line_nr, property )
+  if s:use_advanced_mode
+    return s:GetInfoAdvanded( a:line_nr, a:property )
+  else
+    return s:GetInfoBasic( a:line_nr, a:property )
+  endif
+endfunction
+
+function! s:GetInfoBasic ( line_nr, property )
 
   " LINE:
   "   [^] commit [ofile] (INFO line)
@@ -132,11 +159,118 @@ function! s:GetInfo ( line_nr, property )
     return [ file_name, str2nr( file_line ) ]
   elseif a:property == 'commit' 
     if info =~? '^Not Committed Yet '
-      return 'NEW'
+      return ''
     else
       return commit
     endif
   endif
+endfunction
+
+function! s:GetInfoAdvanded ( line_nr, property )
+  if a:line_nr < 1 || a:line_nr > len( b:GitSupport_BlameData.lines )
+    return [ '', '-1' ]
+  endif
+
+  let line_data = b:GitSupport_BlameData.lines[ a:line_nr - 1 ]
+
+  if a:property == 'position'
+    return [ b:GitSupport_BlameData.filename, str2nr( line_data.line_final ) ]
+  elseif a:property == 'commit'
+    let commit_hash = line_data.commit.hash
+    if commit_hash == s:NO_COMMIT_HASH
+      return ''
+    else
+      return commit_hash
+    endif
+  endif
+endfunction
+
+function! s:ProcessPorcelain ( buf_nr, status )
+  call s:ParsePorcelain( a:buf_nr )
+  call s:RenderLines( a:buf_nr )
+endfunction
+
+let s:HEADER = 1
+let s:PARSE  = 2
+
+function! s:ParsePorcelain ( buf_nr )
+  let state = s:HEADER
+
+  let commit  = {}
+  let line    = {}
+  let commits = b:GitSupport_BlameData.commits
+  let lines   = b:GitSupport_BlameData.lines
+  let line_original = -1
+  let line_final    = -1
+
+  for line_raw in getbufline( a:buf_nr, 1, '$' )
+    if state == s:HEADER
+      let state = s:PARSE
+      let mlist = matchlist( line_raw, '\(\x\+\)\s\+\(\d\+\)\s\+\(\d\+\)' )
+
+      if empty( mlist )
+        break
+      endif
+
+      let [ commit_sha, line1, line2 ] = mlist[1:3]
+
+      if has_key( commits, commit_sha )
+        let commit = commits[ commit_sha ]
+      else
+        let commit = { 'hash': commit_sha, }
+        let commits[ commit_sha ] = commit
+      endif
+
+      let line = {
+            \ 'commit':        commit,
+            \ 'line_original': str2nr( line1 ),
+            \ 'line_final':    str2nr( line2 ),
+            \ }
+      call add( lines, line )
+    elseif state == s:PARSE
+
+      if line_raw[0] == "\t"
+        " With some combinations of parameters (e.g. '-C -M') more than one
+        " filename might appear per commit, if lines originate from different
+        " files in the same commit. We use the commit data structure as a
+        " buffer for the 'filename' property, but store it per line.
+        let line.file_original = commit.filename
+        let line.str = line_raw[1:]
+        let state = s:HEADER
+      else
+        let mlist = matchlist( line_raw, '\(\S\+\)\s\+\(.\+\)' )
+
+        if len( mlist ) >= 2
+          let commit[ mlist[1] ] = mlist[2]
+        endif
+      endif
+    endif
+  endfor
+endfunction
+
+function! s:RenderLines ( buf_nr )
+  let &l:modifiable = 1
+  call deletebufline( a:buf_nr, 1, '$' )
+
+  let commits = b:GitSupport_BlameData.commits
+  let lines   = b:GitSupport_BlameData.lines
+
+  for line in lines
+    let commit = line.commit
+    let a_time = str2nr( commit['author-time'] )
+    if localtime() - a_time > s:DATE_FORMAT_TIME_THRESHOLD
+      let time_str = strftime( '%x', a_time )
+    else
+      let time_str = strftime( '%b %d %H:%M', a_time )
+    endif
+    call appendbufline( a:buf_nr, '$', printf( '%s %12s %s', commit.hash[0:6], time_str, line.str ) )
+  endfor
+
+  normal! gg"_dd
+  let &l:modifiable = 0
+endfunction
+
+function! s:Empty ( ... )
 endfunction
 
 function! s:ErrorMsg ( ... )
