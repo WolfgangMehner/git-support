@@ -85,10 +85,12 @@ endfunction
 function! s:Run ( params, cwd, restore_cursor )
   if s:use_advanced_mode
     let Callback = function( 's:ProcessPorcelain' )
+    let file_name = get( a:params, -1, '' )
     let b:GitSupport_BlameData = {
           \ 'commits': {},
           \ 'lines': [],
-          \ 'filename': get( a:params, -1, '' ),
+          \ 'filename': file_name,
+          \ 'filename_repo': gitsupport#services_path#GetFullRepoPath( file_name ),
           \ }
   else
     let Callback = function( 's:Empty' )
@@ -136,14 +138,41 @@ function! s:Show ( mode )
   endif
 endfunction
 
+function! s:CommitDate ( sys_time )
+  return strftime( '%c', a:sys_time )
+endfunction
+
 function! s:CommitPopup ( buf_id, line )
-  let commit = s:GetInfo( a:line, 'commit' )
-  let aut_time = commit['author-time']
+  let file_name = s:GetInfo( a:line, 'position-repo' )[0]
+  let line_data = s:GetInfo( a:line, 'line' )
+  let commit    = line_data.commit
+
+  let author_mail = commit['author-mail']
+  let commit_mail = commit['committer-mail']
+  let author_time = commit['author-time']
+  let commit_time = commit['committer-time']
+
+  let committer_different = author_mail != commit_mail || author_time != commit_time
+  let file_original_different = file_name != line_data.file_original
 
   let lines = []
-  call add( lines, printf( 'commit %s', commit.hash ) )
-  call add( lines, printf( 'Author: %s %s', commit['author'], commit['author-mail'] ) )
-  call add( lines, printf( 'Date:   %s', aut_time ) )
+  if commit.hash == s:NO_COMMIT_HASH
+    let lines = [printf( '    %-50s', commit['author'] )]
+  else
+    call add( lines, printf( 'commit %s', commit.hash ) )
+    call add( lines, printf( 'Author: %s %s', commit['author'], author_mail ) )
+    call add( lines, printf( 'Date:   %s %s', s:CommitDate( author_time ), commit['author-tz'] ) )
+    if committer_different
+      call add( lines, printf( 'Commit: %s %s', commit['committer'], commit_mail ) )
+      call add( lines, printf( 'Date:   %s %s', s:CommitDate( commit_time ), commit['committer-tz'] ) )
+    endif
+    call add( lines, '' )
+    call add( lines, printf( '    %-50s', commit['summary'] ) )
+    if file_original_different
+      call add( lines, '' )
+      call add( lines, printf( '(originally from %s)', line_data.file_original ) )
+    endif
+  endif
 
   call deletebufline( a:buf_id, 1, '$' )
   call setbufline( a:buf_id, 1, lines )
@@ -151,8 +180,10 @@ endfunction
 
 function! gitsupport#cmd_blame#PopupCallback ( event )
   if a:event == 'leave'
-    call gitsupport#popup#Close( b:GitSupport_BlameData.commit_popup.win_id )
-    unlet b:GitSupport_BlameData.commit_popup
+    if has_key ( b:GitSupport_BlameData, 'commit_popup' )
+      call gitsupport#popup#Close( b:GitSupport_BlameData.commit_popup.win_id )
+      unlet b:GitSupport_BlameData.commit_popup
+    endif
   elseif a:event == 'hold'
     if !has_key ( b:GitSupport_BlameData, 'commit_popup' )
       let [win_id, buf_id] = gitsupport#popup#Open( [], {} )
@@ -215,6 +246,10 @@ function! s:GetInfoAdvanded ( line_nr, property )
 
   if a:property == 'position'
     return [ b:GitSupport_BlameData.filename, str2nr( line_data.line_final ) ]
+  elseif a:property == 'position-repo'
+    return [ b:GitSupport_BlameData.filename_repo, str2nr( line_data.line_final ) ]
+  elseif a:property == 'line'
+    return line_data
   elseif a:property == 'commit'
     return line_data.commit
   elseif a:property == 'commit-hash'

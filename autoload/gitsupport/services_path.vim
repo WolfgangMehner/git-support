@@ -26,6 +26,15 @@ function! gitsupport#services_path#GetWorkingDir ( ... )
   return ''
 endfunction
 
+function! gitsupport#services_path#GetFullRepoPath ( file_name )
+  let [ ret_code, full_name ] = s:GetOutput( [ 'ls-files', '--full-name', '--', a:file_name ], '' )
+  if ret_code == 0
+    return full_name
+  else
+    return ''
+  endif
+endfunction
+
 function! s:GetOutput ( params, cwd )
   return gitsupport#run#RunDirect( '', a:params,
         \ 'cwd', a:cwd,
