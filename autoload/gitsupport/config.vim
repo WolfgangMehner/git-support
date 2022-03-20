@@ -192,6 +192,7 @@ let s:Features = {
       \
       \ 'vim_has_json_decode':  has('patch-7.4.1304'),
       \ 'vim_full_job_support': has('patch-8.0.0902'),
+      \ 'vim_has_popups':       has('patch-8.1.1612'),
       \ }
 
 function! gitsupport#config#Features ()
