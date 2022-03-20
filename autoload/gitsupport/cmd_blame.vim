@@ -16,6 +16,8 @@ let s:NO_COMMIT_HASH = repeat( '0', 40 )
 let s:DATE_FORMAT_TIME_THRESHOLD = 100 * ( 24 * 60 * 60 )   " 100 days
 
 let s:use_advanced_mode = 1
+let s:Features = gitsupport#config#Features()
+let s:use_popups = s:use_advanced_mode && s:Features.vim_has_popups
 
 function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
@@ -95,6 +97,9 @@ function! s:Run ( params, cwd, restore_cursor )
         \ 'cwd', a:cwd,
         \ 'restore_cursor', a:restore_cursor,
         \ 'callback', Callback )
+  if s:use_popups
+    call gitsupport#cursor_tracker#Add( 'gitsupport#cmd_blame#PopupCallback' )
+  endif
 endfunction
 
 function! s:Update ()
@@ -120,13 +125,48 @@ function! s:Jump ( mode )
 endfunction
 
 function! s:Show ( mode )
-  let commit_name = s:GetInfo( line('.'), 'commit' )
+  if a:mode == 'commit'
+    let commit_name = s:GetInfo( line('.'), 'commit-hash' )
 
-  if commit_name == ''
-    return s:ErrorMsg( 'no commit under the cursor' )
+    if commit_name == ''
+      return s:ErrorMsg( 'no commit under the cursor' )
+    endif
+
+    return gitsupport#cmd_show#OpenBuffer( [ commit_name ] )
   endif
+endfunction
 
-  return gitsupport#cmd_show#OpenBuffer( [ commit_name ] )
+function! s:CommitPopup ( buf_id, line )
+  let commit = s:GetInfo( a:line, 'commit' )
+  let aut_time = commit['author-time']
+
+  let lines = []
+  call add( lines, printf( 'commit %s', commit.hash ) )
+  call add( lines, printf( 'Author: %s %s', commit['author'], commit['author-mail'] ) )
+  call add( lines, printf( 'Date:   %s', aut_time ) )
+
+  call deletebufline( a:buf_id, 1, '$' )
+  call setbufline( a:buf_id, 1, lines )
+endfunction
+
+function! gitsupport#cmd_blame#PopupCallback ( event )
+  if a:event == 'leave'
+    call gitsupport#popup#Close( b:GitSupport_BlameData.commit_popup.win_id )
+    unlet b:GitSupport_BlameData.commit_popup
+  elseif a:event == 'hold'
+    if !has_key ( b:GitSupport_BlameData, 'commit_popup' )
+      let [win_id, buf_id] = gitsupport#popup#Open( [], {} )
+      let b:GitSupport_BlameData.commit_popup = {
+            \ 'win_id': win_id,
+            \ 'buf_id': buf_id,
+            \ }
+      call s:CommitPopup( buf_id, line('.') )
+    endif
+  elseif a:event == 'move'
+    if has_key ( b:GitSupport_BlameData, 'commit_popup' )
+      call s:CommitPopup( b:GitSupport_BlameData.commit_popup.buf_id, line('.') )
+    endif
+  endif
 endfunction
 
 function! s:GetInfo ( line_nr, property )
@@ -157,7 +197,7 @@ function! s:GetInfoBasic ( line_nr, property )
     let file_name = get( b:GitSupport_Param, -1, '' )
 
     return [ file_name, str2nr( file_line ) ]
-  elseif a:property == 'commit' 
+  elseif a:property == 'commit-hash'
     if info =~? '^Not Committed Yet '
       return ''
     else
@@ -176,6 +216,8 @@ function! s:GetInfoAdvanded ( line_nr, property )
   if a:property == 'position'
     return [ b:GitSupport_BlameData.filename, str2nr( line_data.line_final ) ]
   elseif a:property == 'commit'
+    return line_data.commit
+  elseif a:property == 'commit-hash'
     let commit_hash = line_data.commit.hash
     if commit_hash == s:NO_COMMIT_HASH
       return ''
