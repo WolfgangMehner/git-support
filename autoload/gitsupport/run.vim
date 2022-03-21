@@ -270,6 +270,7 @@ function! gitsupport#run#OpenBuffer( name, ... )
 				\   'reuse_ontab': 1,
 				\   'reuse_other': 0,
 				\   'modifiable': 0,
+				\   'mods': 'aboveleft',
 				\   'topic': '',
 				\ }
 
@@ -299,8 +300,8 @@ function! gitsupport#run#OpenBuffer( name, ... )
 		return 0
 	endif
 
-	" no -> open a new window
-	aboveleft new
+  " no -> open a new window
+  exec opts.mods "new"
 
 	" buffer exists elsewhere?
 	if opts.reuse_other && bufnr( buf_regex ) != -1

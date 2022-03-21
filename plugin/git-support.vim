@@ -84,7 +84,7 @@ if s:Features.is_executable_git
   command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitTerm            :call gitsupport#cmd_term#FromCmdLine(<q-args>)
 
   command! -nargs=1 -complete=customlist,gitsupport#cmd_edit#Complete     GitEdit             :call gitsupport#cmd_edit#EditFile(<q-args>)
-  command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#cmd_help#Complete     GitHelp             :call gitsupport#cmd_help#ShowHelp(<q-args>,"<mods>")
 
   command! -nargs=? -bang  GitSupportSettings  :call gitsupport#config#PrintSettings(('<bang>'=='!')+str2nr(<q-args>))
   command! -nargs=0        GitSupportHelp      :call gitsupport#plugin#help("gitsupport")

@@ -26,15 +26,15 @@ let help_data = gitsupport#data#LoadData( 'basic' )
 let s:HelpTopics = get( help_data, 'commands', [] )
       \          + get( help_data, 'additional_help_topics', [] )
 
-function! gitsupport#cmd_help#ShowHelp ( topic )
-  return gitsupport#cmd_help#OpenBuffer( a:topic )
+function! gitsupport#cmd_help#ShowHelp ( topic, cmd_mods )
+  return gitsupport#cmd_help#OpenBuffer( a:topic, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_help#OpenBuffer ( topic )
+function! gitsupport#cmd_help#OpenBuffer ( topic, cmd_mods )
   if s:UseHtmlHelp
     return gitsupport#run#RunDirect( '', ['help', a:topic], 'env_std', 1 )
   else
-    call gitsupport#run#OpenBuffer( 'Git - help', 'topic', a:topic )
+    call gitsupport#run#OpenBuffer( 'Git - help', 'topic', a:topic, 'mods', a:cmd_mods )
 
     " :WORKAROUND:05.04.2016 21:05:WM: setting the filetype changes the global tabstop
     let ts_save = &g:tabstop
