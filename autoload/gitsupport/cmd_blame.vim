@@ -21,6 +21,7 @@ let s:use_popups = s:use_advanced_mode && s:Features.vim_has_popups
 
 function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
+  call gitsupport#common#ExpandWildcards( args )
   if a:count > 0 
     let range_info = [ a:line1, a:line2 ]
   else

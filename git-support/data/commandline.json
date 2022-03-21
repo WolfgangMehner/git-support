@@ -3,6 +3,26 @@
     "include_files" : true,
     "options" : []
   },
+  "blame" : {
+    "include_branches" : true,
+    "include_files" : true,
+    "include_tags" : true,
+    "options" : [
+      "--abbrev",
+      "--contents=",
+      "--first-parent",
+      "--ignore-rev=",
+      "--ignore-revs-file=",
+      "--minimal",
+      "--no-...",
+      "--no-incremental",
+      "--root",
+      "--show-email",
+      "--show-name",
+      "--show-number",
+      "--show-stats"
+    ]
+  },
   "branch" : {
     "include_branches" : true,
     "include_tags" : true,
@@ -187,6 +207,44 @@
       "--topo-order",
       "--until",
       "--walk-reflogs"
+    ]
+  },
+  "merge" : {
+    "include_branches" : true,
+    "include_tags" : true,
+    "options" : [
+      "--abort",
+      "--allow-unrelated-histories",
+      "--autostash",
+      "--cleanup=",
+      "--commit",
+      "--no-commit",
+      "--continue",
+      "--edit",
+      "--ff-only",
+      "--ff",
+      "--no-ff",
+      "--file",
+      "--gpg-sign",
+      "--log",
+      "--message=",
+      "--no-...",
+      "--overwrite-ignore",
+      "--no-overwrite-ignore",
+      "--progress",
+      "--quiet",
+      "--quit",
+      "--rerere-autoupdate",
+      "--signoff",
+      "--squash",
+      "--stat",
+      "--strategy-option=",
+      "--strategy=",
+      "--summary",
+      "--verbose",
+      "--verify-signatures",
+      "--verify",
+      "--no-verify"
     ]
   },
   "remote" : {
