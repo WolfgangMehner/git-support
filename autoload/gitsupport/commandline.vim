@@ -82,6 +82,10 @@ function! s:PreprocessLead ( lead )
   endif
 endfunction
 
+function! s:HasFileOnlySeparator ( cmd_line_lead )
+  return match( a:cmd_line_lead, ' -- ' ) >= 0
+endfunction
+
 let s:CURSOR_IN_COMMMAND    = 1
 let s:CURSOR_IN_SUBCOMMMAND = 2
 let s:CURSOR_OTHER          = 0
@@ -138,6 +142,7 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   endif
 
   let [ prep_prefix, prep_lead ] = s:PreprocessLead( argument_lead )
+  let files_only = s:HasFileOnlySeparator( cmdline_head )
 
   if prep_lead =~# '^-'
     let options = s:GetCommandDetails( git_cmd, 'options', [] )
@@ -146,14 +151,14 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
 
   let cwd = gitsupport#services_path#GetWorkingDir()
   let git_objects = []
-  if s:GetCommandDetails( git_cmd, 'include_branches', 0 )
+  if !files_only && s:GetCommandDetails( git_cmd, 'include_branches', 0 )
     let branches = s:GetListFromGit( ['branch', '-a'], cwd )
     let git_objects += s:ProcessBranchList( branches )
   endif
-  if s:GetCommandDetails( git_cmd, 'include_remotes', 0 )
+  if !files_only && s:GetCommandDetails( git_cmd, 'include_remotes', 0 )
     let git_objects += s:GetListFromGit( ['remote'], cwd )
   endif
-  if s:GetCommandDetails( git_cmd, 'include_tags', 0 )
+  if !files_only && s:GetCommandDetails( git_cmd, 'include_tags', 0 )
     let git_objects += s:GetListFromGit( ['tag'], cwd )
   endif
 
@@ -162,7 +167,7 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
 
   let all_returns = []
 
-  if complete_command == s:CURSOR_IN_SUBCOMMMAND
+  if !files_only && complete_command == s:CURSOR_IN_SUBCOMMMAND
     let cmds = s:GetCommandDetails( git_cmd, 'subcommands', [] )
     let all_returns += s:FilterOnWord( cmds, sub_cmd )
   endif
