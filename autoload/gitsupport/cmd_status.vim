@@ -12,12 +12,12 @@
 "       License:  Copyright (c) 2020-2022, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_status#FromCmdLine ( q_params )
+function! gitsupport#cmd_status#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_status#OpenBuffer( args )
+  return gitsupport#cmd_status#OpenBuffer( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_status#OpenBuffer ( params )
+function! gitsupport#cmd_status#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
@@ -30,7 +30,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params )
     return s:ErrorMsg( 'could not obtain the repo base directory' )
   endif
 
-  call gitsupport#run#OpenBuffer( 'Git - status' )
+  call gitsupport#run#OpenBuffer( 'Git - status', 'mods', a:cmd_mods )
   call s:Run( options, cwd, 0 )
 
   let &l:filetype = 'gitsstatus'

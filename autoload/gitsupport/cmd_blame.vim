@@ -19,7 +19,7 @@ let s:use_advanced_mode = 1
 let s:Features = gitsupport#config#Features()
 let s:use_popups = s:use_advanced_mode && s:Features.vim_has_popups
 
-function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count )
+function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
   call gitsupport#common#ExpandWildcards( args )
   if a:count > 0 
@@ -27,10 +27,10 @@ function! gitsupport#cmd_blame#FromCmdLine ( q_params, line1, line2, count )
   else
     let range_info = []
   endif
-  return gitsupport#cmd_blame#OpenBuffer( args, range_info )
+  return gitsupport#cmd_blame#OpenBuffer( args, range_info, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
+function! gitsupport#cmd_blame#OpenBuffer ( params, range_info, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
@@ -44,7 +44,7 @@ function! gitsupport#cmd_blame#OpenBuffer ( params, range_info )
     let params = [ '-L', a:range_info[0].','.a:range_info[1] ] + params
   endif
 
-  call gitsupport#run#OpenBuffer( 'Git - blame' )
+  call gitsupport#run#OpenBuffer( 'Git - blame', 'mods', a:cmd_mods )
 
   let &l:filetype = 'gitsblame'
 

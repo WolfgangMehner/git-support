@@ -18,12 +18,12 @@ else
   let s:use_conceal = 0
 endif
 
-function! gitsupport#cmd_grep#FromCmdLine ( mode, q_params )
+function! gitsupport#cmd_grep#FromCmdLine ( mode, q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_grep#OpenBuffer( a:mode, args )
+  return gitsupport#cmd_grep#OpenBuffer( a:mode, args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
+function! gitsupport#cmd_grep#OpenBuffer ( mode, params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
@@ -36,7 +36,7 @@ function! gitsupport#cmd_grep#OpenBuffer ( mode, params )
     let cwd = base
   endif
 
-  call gitsupport#run#OpenBuffer( 'Git - grep' )
+  call gitsupport#run#OpenBuffer( 'Git - grep', 'mods', a:cmd_mods )
 
   let &l:filetype = 'gitsgrep'
   let &l:foldmethod = 'syntax'
