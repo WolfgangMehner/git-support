@@ -82,34 +82,42 @@ function! s:PreprocessLead ( lead )
   endif
 endfunction
 
+let s:CURSOR_IN_COMMMAND    = 1
+let s:CURSOR_IN_SUBCOMMMAND = 2
+let s:CURSOR_OTHER          = 0
+
 function! s:SubcommandAnalysis ( head )
   let main_cmd = ''
   let sub_cmd = ''
   let idx1 = 0
 
-  let general_command = match( a:head, '^Git\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
-  if general_command
-    let main_cmd = matchstr( a:head, '^Git\S*\s\+\zs\S\+' )
-    let idx1 = matchend( a:head, '^Git\S*\s\+\S*' )
+  " remove command modifiers: aboveleft, belowright, vertical, tab, ...
+  let head = a:head
+  let head = matchstr( head, '^[a-z ]*\zsGit.*' )
 
-    if len( a:head ) == idx1
-      return [ tolower( main_cmd ), '', 1 ]
+  let general_command = match( head, '^Git\%(!\|Run\|Buf\|Bash\|Term\)\?\s' ) == 0
+  if general_command
+    let main_cmd = matchstr( head, '^Git\S*\s\+\zs\S\+' )
+    let idx1 = matchend( head, '^Git\S*\s\+\S*' )
+
+    if len( head ) == idx1
+      return [ tolower( main_cmd ), '', s:CURSOR_IN_COMMMAND ]
     endif
   else
-    let main_cmd = matchstr( a:head, '^\cGit\zs[a-z]\+' )
+    let main_cmd = matchstr( head, '^\cGit\zs[a-z]\+' )
     let idx1 = 3 + len( main_cmd )
   endif
 
-  if match( a:head, '^\s', idx1 ) >= 0
-    let sub_cmd = matchstr( a:head, '^\s\+\zs\S\+', idx1 )
-    let idx2 = matchend( a:head, '^\s\+\S*', idx1 )
+  if match( head, '^\s', idx1 ) >= 0
+    let sub_cmd = matchstr( head, '^\s\+\zs\S\+', idx1 )
+    let idx2 = matchend( head, '^\s\+\S*', idx1 )
 
-    if len( a:head ) == idx2
-      return [ tolower( main_cmd ), tolower( sub_cmd ), 2 ]
+    if len( head ) == idx2
+      return [ tolower( main_cmd ), tolower( sub_cmd ), s:CURSOR_IN_SUBCOMMMAND ]
     endif
   endif
 
-  return [ tolower( main_cmd ), tolower( sub_cmd ), 0 ]
+  return [ tolower( main_cmd ), tolower( sub_cmd ), s:CURSOR_OTHER ]
 endfunction
 
 function! s:FilterOnWord ( wordlist, lead )
@@ -125,7 +133,7 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
   let cmdline_head = strpart( a:CmdLine, 0, a:CursorPos )
 
   let [ git_cmd, sub_cmd, complete_command ] = s:SubcommandAnalysis( cmdline_head )
-  if complete_command == 1
+  if complete_command == s:CURSOR_IN_COMMMAND
     return s:FilterOnWord( s:command_list, git_cmd )
   endif
 
@@ -154,7 +162,7 @@ function! gitsupport#commandline#Complete ( ArgLead, CmdLine, CursorPos )
 
   let all_returns = []
 
-  if complete_command == 2
+  if complete_command == s:CURSOR_IN_SUBCOMMMAND
     let cmds = s:GetCommandDetails( git_cmd, 'subcommands', [] )
     let all_returns += s:FilterOnWord( cmds, sub_cmd )
   endif
