@@ -12,12 +12,12 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_tag#FromCmdLine ( q_params )
+function! gitsupport#cmd_tag#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_tag#OpenBuffer ( args )
+  return gitsupport#cmd_tag#OpenBuffer ( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_tag#OpenBuffer ( params )
+function! gitsupport#cmd_tag#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
@@ -26,7 +26,7 @@ function! gitsupport#cmd_tag#OpenBuffer ( params )
         \ || index ( params, '--list' ) != -1
         \ || index ( params, '--contains' ) != -1
         \ || match ( params, '^-n\d\?' ) != -1
-    call gitsupport#run#OpenBuffer( 'Git - tag' )
+    call gitsupport#run#OpenBuffer( 'Git - tag', 'mods', a:cmd_mods )
     call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()

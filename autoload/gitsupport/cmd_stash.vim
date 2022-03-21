@@ -12,18 +12,18 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_stash#FromCmdLine ( q_params )
+function! gitsupport#cmd_stash#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_stash#OpenBuffer ( args )
+  return gitsupport#cmd_stash#OpenBuffer ( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_stash#OpenBuffer ( params )
+function! gitsupport#cmd_stash#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
   let subcmd = get ( params, 0, '' )
 
   if subcmd == 'list'
-    call gitsupport#run#OpenBuffer( 'Git - stash list' )
+    call gitsupport#run#OpenBuffer( 'Git - stash list', 'mods', a:cmd_mods )
     call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
@@ -43,7 +43,7 @@ function! gitsupport#cmd_stash#OpenBuffer ( params )
     let b:GitSupport_Param = params
     let b:GitSupport_CWD = cwd
   elseif subcmd == 'show'
-    call gitsupport#run#OpenBuffer( 'Git - stash show' )
+    call gitsupport#run#OpenBuffer( 'Git - stash show', 'mods', a:cmd_mods )
 
     let &l:filetype = 'gitsdiff'
     let &l:foldmethod = 'syntax'

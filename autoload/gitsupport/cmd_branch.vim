@@ -12,17 +12,17 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_branch#FromCmdLine ( q_params )
+function! gitsupport#cmd_branch#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_branch#OpenBuffer( args )
+  return gitsupport#cmd_branch#OpenBuffer( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_branch#OpenBuffer ( params )
+function! gitsupport#cmd_branch#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
   if empty( params )
-    call gitsupport#run#OpenBuffer( 'Git - branch' )
+    call gitsupport#run#OpenBuffer( 'Git - branch', 'mods', a:cmd_mods )
     call s:Run( params, cwd, 0 )
 
     setlocal filetype=gitsbranch

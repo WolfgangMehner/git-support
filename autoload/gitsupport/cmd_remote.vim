@@ -12,17 +12,17 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_remote#FromCmdLine ( q_params )
+function! gitsupport#cmd_remote#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
-  return gitsupport#cmd_remote#OpenBuffer( args )
+  return gitsupport#cmd_remote#OpenBuffer( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_remote#OpenBuffer ( params )
+function! gitsupport#cmd_remote#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
   if empty( params )
-    call gitsupport#run#OpenBuffer( 'Git - remote' )
+    call gitsupport#run#OpenBuffer( 'Git - remote', 'mods', a:cmd_mods )
     call s:Run( params, cwd, 0 )
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
