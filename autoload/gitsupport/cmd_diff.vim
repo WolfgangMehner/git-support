@@ -12,13 +12,13 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_diff#FromCmdLine ( q_params )
+function! gitsupport#cmd_diff#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
   call gitsupport#common#ExpandWildcards( args )
-  return gitsupport#cmd_diff#OpenBuffer( args, '' )
+  return gitsupport#cmd_diff#OpenBuffer( args, '', a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint )
+function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir( a:dir_hint )
 
@@ -31,7 +31,7 @@ function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint )
     let params += [ '--', expand( '%' ) ]
   endif
 
-  call gitsupport#run#OpenBuffer( 'Git - diff' )
+  call gitsupport#run#OpenBuffer( 'Git - diff', 'mods', a:cmd_mods )
 
   let &l:filetype = 'gitsdiff'
   let &l:foldmethod = 'syntax'

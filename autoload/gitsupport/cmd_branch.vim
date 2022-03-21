@@ -150,7 +150,7 @@ function! s:Show ()
     return s:ErrorMsg( 'no branch under the cursor' )
   endif
 
-  return gitsupport#cmd_show#OpenBuffer( [ branch_name ] )
+  return gitsupport#cmd_show#OpenBuffer( [ branch_name ], '' )
 endfunction
 
 function! s:Remote ( mode )

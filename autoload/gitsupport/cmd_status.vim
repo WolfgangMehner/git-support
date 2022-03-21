@@ -157,7 +157,7 @@ function! s:ShowDiff ( mode )
   endif
 
   if a:mode == 'default'
-    return gitsupport#cmd_diff#OpenBuffer( args, b:GitSupport_BaseDir )
+    return gitsupport#cmd_diff#OpenBuffer( args, b:GitSupport_BaseDir, '' )
   elseif a:mode == 'word'
     return gitsupport#cmd_term#Run( [ 'diff', '--word-diff=color' ] + args, b:GitSupport_BaseDir )
   endif
@@ -177,7 +177,7 @@ function! s:ShowLog ()
   endif
 
   let file_name_in_head = file_record.filename_alt
-  return gitsupport#cmd_log#OpenBuffer( [ '--stat', '--follow', '--', file_name_in_head ], [], b:GitSupport_BaseDir )
+  return gitsupport#cmd_log#OpenBuffer( [ '--stat', '--follow', '--', file_name_in_head ], [], b:GitSupport_BaseDir, '' )
 endfunction
 
 function! s:FileAction ( action )

@@ -20,13 +20,13 @@ let s:RevisionNames = {
       \ ':3:' : 'SOURCE_BRANCH',
       \ }
 
-function! gitsupport#cmd_show#FromCmdLine ( q_params )
+function! gitsupport#cmd_show#FromCmdLine ( q_params, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
   call gitsupport#common#ExpandWildcards( args )
-  return gitsupport#cmd_show#OpenBuffer ( args )
+  return gitsupport#cmd_show#OpenBuffer ( args, a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_show#OpenBuffer ( params )
+function! gitsupport#cmd_show#OpenBuffer ( params, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir()
 
@@ -46,7 +46,7 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
     let last_arg = substitute( last_arg, ':', '.', '' )
     let last_arg = substitute( last_arg, '/', '.', 'g' )
 
-    call gitsupport#run#OpenBuffer( last_arg )
+    call gitsupport#run#OpenBuffer( last_arg, 'mods', a:cmd_mods )
     call gitsupport#run#RunToBuffer( '', ['show'] + params, 'cwd', cwd )
 
     command! -nargs=0 -buffer  Help   :call <SID>HelpBlob()
@@ -56,7 +56,7 @@ function! gitsupport#cmd_show#OpenBuffer ( params )
     "filetype detect
     return
   else
-    call gitsupport#run#OpenBuffer( 'Git - show' )
+    call gitsupport#run#OpenBuffer( 'Git - show', 'mods', a:cmd_mods )
 
     let &l:filetype = 'gitslog'
     let &l:foldmethod = 'syntax'

@@ -107,9 +107,9 @@ function! s:Show ( mode )
   endif
 
   if a:mode == 'tag'
-    call gitsupport#cmd_show#OpenBuffer( [ tag_name ] )
+    call gitsupport#cmd_show#OpenBuffer( [ tag_name ], '' )
   elseif a:mode == 'commit'
-    call gitsupport#cmd_show#OpenBuffer( [ tag_name.'^{commit}' ] )
+    call gitsupport#cmd_show#OpenBuffer( [ tag_name.'^{commit}' ], '' )
   endif
 endfunction
 

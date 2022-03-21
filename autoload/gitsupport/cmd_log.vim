@@ -12,7 +12,7 @@
 "       License:  Copyright (c) 2020, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-function! gitsupport#cmd_log#FromCmdLine ( q_params, line1, line2, count )
+function! gitsupport#cmd_log#FromCmdLine ( q_params, line1, line2, count, cmd_mods )
   let args = gitsupport#common#ParseShellParseArgs( a:q_params )
   call gitsupport#common#ExpandWildcards( args )
   if a:count > 0 
@@ -20,10 +20,10 @@ function! gitsupport#cmd_log#FromCmdLine ( q_params, line1, line2, count )
   else
     let range_info = []
   endif
-  return gitsupport#cmd_log#OpenBuffer( args, range_info, '' )
+  return gitsupport#cmd_log#OpenBuffer( args, range_info, '', a:cmd_mods )
 endfunction
 
-function! gitsupport#cmd_log#OpenBuffer ( params, range_info, dir_hint )
+function! gitsupport#cmd_log#OpenBuffer ( params, range_info, dir_hint, cmd_mods )
   let params = a:params
   let cwd = gitsupport#services_path#GetWorkingDir( a:dir_hint )
 
@@ -31,7 +31,7 @@ function! gitsupport#cmd_log#OpenBuffer ( params, range_info, dir_hint )
     let params = [ '-L', a:range_info[0].','.a:range_info[1].':'.expand('%') ] + params
   endif
 
-  call gitsupport#run#OpenBuffer( 'Git - log' )
+  call gitsupport#run#OpenBuffer( 'Git - log', 'mods', a:cmd_mods )
 
   let &l:filetype = 'gitslog'
   let &l:foldmethod = 'syntax'
@@ -89,7 +89,7 @@ function! s:Show (  )
     return s:ErrorMsg( 'no commit under the cursor' )
   endif
 
-  return gitsupport#cmd_show#OpenBuffer( [ commit_name ] )
+  return gitsupport#cmd_show#OpenBuffer( [ commit_name ], '' )
 endfunction
 
 function! s:Checkout ()

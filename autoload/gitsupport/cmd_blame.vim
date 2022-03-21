@@ -135,7 +135,7 @@ function! s:Show ( mode )
       return s:ErrorMsg( 'no commit under the cursor' )
     endif
 
-    return gitsupport#cmd_show#OpenBuffer( [ commit_name ] )
+    return gitsupport#cmd_show#OpenBuffer( [ commit_name ], '' )
   endif
 endfunction
 
