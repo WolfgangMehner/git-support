@@ -144,7 +144,13 @@ function! s:CommitDate ( sys_time )
 endfunction
 
 function! s:CommitPopup ( buf_id, line )
+  call deletebufline( a:buf_id, 1, '$' )
+
   let file_name = s:GetInfo( a:line, 'position-repo' )[0]
+  if file_name == ''
+    return
+  endif
+
   let line_data = s:GetInfo( a:line, 'line' )
   let commit    = line_data.commit
 
@@ -175,7 +181,6 @@ function! s:CommitPopup ( buf_id, line )
     endif
   endif
 
-  call deletebufline( a:buf_id, 1, '$' )
   call setbufline( a:buf_id, 1, lines )
 endfunction
 
