@@ -22,6 +22,7 @@ endfunction
 
 function! s:BufferFromCmdLine ( args )
   let args = gitsupport#common#ParseShellParseArgs( a:args )
+  call gitsupport#common#ExpandWildcards( args )
   let cwd = gitsupport#services_path#GetWorkingDir()
 
   call gitsupport#run#OpenBuffer( 'Git - '.get( args, 0, 'git' ) )
