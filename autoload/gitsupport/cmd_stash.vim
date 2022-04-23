@@ -142,9 +142,9 @@ function! s:Show ( mode )
   endif
 
   if a:mode == 'show'
-    call gitsupport#cmd_stash#OpenBuffer( [ 'show', stash_name ] )
+    call gitsupport#cmd_stash#OpenBuffer( [ 'show', stash_name ], '' )
   elseif a:mode == 'patch'
-    call gitsupport#cmd_stash#OpenBuffer( [ 'show', '-p', stash_name ] )
+    call gitsupport#cmd_stash#OpenBuffer( [ 'show', '-p', stash_name ], '' )
   endif
 endfunction
 
