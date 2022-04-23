@@ -135,6 +135,17 @@
       "--unified="
     ]
   },
+  "fetch" : {
+    "include_remotes" : true,
+    "options" : [
+      "--dry-run",
+      "--prune",
+      "--prune-tags",
+      "--no-tags",
+      "--tags",
+      "--verbose"
+    ]
+  },
   "log" : {
     "include_branches" : true,
     "include_tags" : true,
@@ -199,6 +210,7 @@
       "--reverse",
       "--right-only",
       "--show-notes",
+      "--show-signature",
       "--since",
       "--skip",
       "--source",
@@ -378,6 +390,7 @@
       "--pretty=raw",
       "--pretty=short",
       "--show-notes",
+      "--show-signature",
       "--stat"
     ]
   },

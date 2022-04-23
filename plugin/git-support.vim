@@ -60,7 +60,7 @@ if s:Features.is_executable_git
   command! -nargs=0                                                                 GitCommitMerge     :call gitsupport#cmd_commit#FromCmdLine('merge','')
   command! -nargs=+                                                                 GitCommitMsg       :call gitsupport#cmd_commit#FromCmdLine('msg',<q-args>)
   command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitDiff            :call gitsupport#cmd_diff#FromCmdLine(<q-args>,"<mods>")
-  command! -nargs=*                                                                 GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
+  command! -nargs=* -complete=customlist,gitsupport#commandline#Complete            GitFetch           :call gitsupport#commands#FromCmdLine('direct','fetch '.<q-args>)
   command! -nargs=+ -complete=file                                                  GitGrep            :call gitsupport#cmd_grep#FromCmdLine("cwd",<q-args>,"<mods>")
   command! -nargs=+ -complete=file                                                  GitGrepTop         :call gitsupport#cmd_grep#FromCmdLine("top",<q-args>,"<mods>")
   command! -nargs=* -complete=customlist,gitsupport#commandline#Complete -range=-1  GitLog             :call gitsupport#cmd_log#FromCmdLine(<q-args>,<line1>,<line2>,<count>,"<mods>")
