@@ -575,6 +575,8 @@ function! s:ProcessTrackedFile(status_data, line, pathname_original)
         \ 'pathname_original': rename ? a:pathname_original : pathname,
         \ 'status': ' ',
         \ 'section': '',
+        \ 'rename_operation': rename_op,
+        \ 'similarity_score': similarity_score,
         \ 'submodule': s:ProcessSubmodule(submodule),
         \ 'hash_head': hash_head,
         \ 'hash_index': hash_index,
@@ -661,6 +663,14 @@ function! s:BuildIndex(line_index, list_section)
   for record in a:list_section
     let a:line_index[record.line_printed] = record
   endfor
+endfunction
+
+function! s:PrintRenameInfo(record)
+  if a:record.rename_operation == 'R'
+    return 'moved'
+  elseif a:record.rename_operation == 'C'
+    return 'copied'
+  endif
 endfunction
 
 function! s:PrintSubmoduleInfo(record_sub)
