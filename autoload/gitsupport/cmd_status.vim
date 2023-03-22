@@ -539,7 +539,7 @@ function! s:ProcessMetadata(status_data, line)
 endfunction
 
 function! s:ProcessSubmodule(submodule_string)
-  if a:submodule_string == 'N'
+  if a:submodule_string[0] == 'N'
     return {}
   else
     return {
@@ -584,13 +584,13 @@ function! s:ProcessTrackedFile(status_data, line, pathname_original)
     let record_s = copy(record)
     let record_s.status = status_staged
     let record_s.section = 'staged'
-    call insert(a:status_data.staged, record_s)
+    call add(a:status_data.staged, record_s)
   endif
   if status_unstaged != '.'
     let record_u = copy(record)
     let record_u.status = status_unstaged
     let record_u.section = 'unstaged'
-    call insert(a:status_data.unstaged, record_u)
+    call add(a:status_data.unstaged, record_u)
   endif
 endfunction
 
@@ -614,7 +614,7 @@ function! s:ProcessUnmergedFile(status_data, line)
         \ 'hash_merge2': hash_stage2,
         \ 'hash_merge3': hash_stage3,
         \ }
-  call insert(a:status_data.unmerged, record)
+  call add(a:status_data.unmerged, record)
 endfunction
 
 function! s:ProcessUntrackedFile(status_data, line, is_ignored)
@@ -622,7 +622,7 @@ function! s:ProcessUntrackedFile(status_data, line, is_ignored)
   " ! <path>
   let pathname = matchstr(a:line, '\S\s\+\zs.*')
   let status = a:is_ignored ? 'ignored' : 'untracked'
-  call insert(a:status_data[status], {
+  call add(a:status_data[status], {
         \ 'pathname': pathname,
         \ 'status': status,
         \ 'section': status,
@@ -663,6 +663,20 @@ function! s:BuildIndex(line_index, list_section)
   endfor
 endfunction
 
+function! s:PrintSubmoduleInfo(record_sub)
+  let res = ['submodule']
+  if a:record_sub.commit_changed
+    call add(res, 'commit changed')
+  endif
+  if a:record_sub.staged_changes
+    call add(res, 'modified content')
+  endif
+  if a:record_sub.unstaged_changes
+    call add(res, 'untracked content')
+  endif
+  return join(res, ', ')
+endfunction
+
 function! s:PrintFileSection(list_section, headers)
   let line_nr = line('$')+1
   let line_first = line_nr
@@ -672,7 +686,13 @@ function! s:PrintFileSection(list_section, headers)
     let line_nr += len(a:headers) + 1
 
     for record in a:list_section
-      call setline(line_nr, s:H8 . s:GetStatusString(record.status) . record.pathname)
+      if has_key(record, 'submodule') && !empty(record.submodule)
+        let additional = s:PrintSubmoduleInfo(record.submodule)
+      else
+        let additional = ''
+      endif
+      let additional = !empty(additional) ? ' ('.additional.')' : ''
+      call setline(line_nr, s:H8 . s:GetStatusString(record.status) . record.pathname . additional)
       let record.line_printed = line_nr
       let line_nr += 1
     endfor
