@@ -7,11 +7,11 @@ if exists("b:current_syntax")
 	finish
 endif
 
-" use 'GitDiffRegion' contained in 'GitLogCommit'
-syn include <sfile>:p:h/gitsdiff.vim
+" use 'GitDiffRegion' as a top-level category
+runtime! syntax/gitsdiff.vim
+unlet b:current_syntax
 
-"syn sync minlines=100
-syn sync fromstart
+syn sync minlines=50
 syn case match
 
 "-------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ syn case match
 " - GitStash
 " - GitAnnoTag
 
-syn region GitLogCommit  start=/^commit\s/ end=/^\%(commit\s\)\@=/ contains=GitLogHash,GitLogInfo,GitDiffRegion fold keepend
+syn region GitLogCommit  start=/^commit\s/ end=/^\%(commit\s\|diff\s\)\@=/ contains=GitLogHash,GitLogInfo keepend
 syn match  GitLogHash    "^commit\s.\+$" contained contains=GitLogDeco
 syn match  GitLogDeco    "(\zs.*\ze)" contained contains=GitLogRef
 syn match  GitLogRef     "tag: \zs[^,[:space:]]\+" contained
@@ -31,10 +31,10 @@ syn match  GitLogInfo    "^\w\+:\s.\+$"  contained
 syn match  GitLogInfo    "^Notes:\s*$"  contained
 syn match  GitLogInfo    "^Notes\s(.*):\s*$"  contained
 
-syn region GitStash      start=/^stash@{\d\+}:\s/ end=/^\%(stash@{\d\+}:\s\)\@=/ contains=GitStashName,GitDiffRegion fold keepend
+syn region GitStash      start=/^stash@{\d\+}:\s/ end=/^\%(stash@{\d\+}:\s\|diff\)\@=/ contains=GitStashName keepend
 syn match  GitStashName  "^stash@{\d\+}:\s.\+$" contained
 
-syn region GitAnnoTag    start=/^tag\s/ end=/^\%(commit\)\@=/ contains=GitTagName,GitLogInfo fold keepend
+syn region GitAnnoTag    start=/^tag\s/ end=/^\%(commit\)\@=/ contains=GitTagName keepend
 syn match  GitTagName    "^tag\s.\+$" contained
 
 "-------------------------------------------------------------------------------

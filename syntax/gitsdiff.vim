@@ -7,7 +7,7 @@ if exists("b:current_syntax")
 	finish
 endif
 
-syn sync fromstart
+syn sync minlines=50
 syn case match
 
 "-------------------------------------------------------------------------------
@@ -16,10 +16,12 @@ syn case match
 
 " top-level categories:
 " - GitDiffRegion
+" - GitDiffLines
+" - GitMergeLines
 
-syn region GitDiffRegion       start=/^diff / end=/^\%(diff \)\@=/ contains=GitDiffHeader,GitDiffLines,GitMergeLines fold
-syn region GitDiffLines        start=/^@@ /   end=/^\%(@@ \)\@=\|^\%(diff \)\@=/ contains=GitDiffRange,GitDiffLineP,GitDiffLineM fold contained
-syn region GitMergeLines       start=/^@@@ /  end=/^\%(@@@ \)\@=\|^\%(diff \)\@=/ contains=GitMergeRange,GitMergeLineP,GitMergeLineM,GitMergeConflict fold contained
+syn region GitDiffRegion       start=/^diff / end=/^\%(diff \)\@=/ contains=GitDiffHeader,GitDiffLines,GitMergeLines
+syn region GitDiffLines        start=/^@@ /   end=/^\%(@@ \)\@=\|^\%(diff \)\@=/ contains=GitDiffRange,GitDiffLineP,GitDiffLineM
+syn region GitMergeLines       start=/^@@@ /  end=/^\%(@@@ \)\@=\|^\%(diff \)\@=/ contains=GitMergeRange,GitMergeLineP,GitMergeLineM,GitMergeConflict
 
 syn match  GitDiffHeader       "^\w.*$"    contained
 syn match  GitDiffHeader       "^--- .*$"  contained

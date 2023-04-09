@@ -36,28 +36,28 @@ syn match  GitStatusTrackingLine     "^Tracking .*" contained contains=GitStatus
 syn match  GitStatusTrackingDiverge  "\[\zs.\+\ze\]" contained
 syn match  GitStatusTrackingCurrent  "\[\zsup-to-date\ze]" contained
 
-syn region GitStagedRegion      start=/^# Changes to be committed:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained
-syn region GitStagedRegion      start=/^Changes to be committed:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained
+syn region GitStagedRegion      start=/^# Changes to be committed:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained fold
+syn region GitStagedRegion      start=/^Changes to be committed:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitStagedFile  contained fold
 syn match  GitStagedFile        "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 syn match  GitStagedFile        "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitModifiedRegion    start=/^# Changes not staged for commit:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained
-syn region GitModifiedRegion    start=/^Changes not staged for commit:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained
+syn region GitModifiedRegion    start=/^# Changes not staged for commit:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained fold
+syn region GitModifiedRegion    start=/^Changes not staged for commit:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitModifiedFile  contained fold
 syn match  GitModifiedFile      "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 syn match  GitModifiedFile      "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
-syn region GitUntrackedRegion   start=/^# Untracked files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile  contained
-syn region GitUntrackedRegion   start=/^Untracked files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile  contained
+syn region GitUntrackedRegion   start=/^# Untracked files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile  contained fold
+syn region GitUntrackedRegion   start=/^Untracked files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitUntrackedFile  contained fold
 syn match  GitUntrackedFile     "^#\s\+\zs[^([:space:]].*$" contained
 syn match  GitUntrackedFile     "^\s\+\zs[^([:space:]].*$" contained
 
-syn region GitIgnoredRegion     start=/^# Ignored files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile  contained
-syn region GitIgnoredRegion     start=/^Ignored files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile  contained
+syn region GitIgnoredRegion     start=/^# Ignored files:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile  contained fold
+syn region GitIgnoredRegion     start=/^Ignored files:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitIgnoredFile  contained fold
 syn match  GitIgnoredFile       "^#\s\+\zs[^([:space:]].*$" contained
 syn match  GitIgnoredFile       "^\s\+\zs[^([:space:]].*$" contained
 
-syn region GitUnmergedRegion    start=/^# Unmerged paths:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile  contained
-syn region GitUnmergedRegion    start=/^Unmerged paths:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile  contained
+syn region GitUnmergedRegion    start=/^# Unmerged paths:/ end=/^\%(# \w\)\@=\|^#\@!/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile  contained fold
+syn region GitUnmergedRegion    start=/^Unmerged paths:/ end=/^\%(\w\)\@=/ contains=GitStatusHeader,GitStatusComment,GitUnmergedFile  contained fold
 syn match  GitUnmergedFile      "^#\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 syn match  GitUnmergedFile      "^\s\+\zs[[:alnum:][:space:]]\+:\s.\+" contained
 
