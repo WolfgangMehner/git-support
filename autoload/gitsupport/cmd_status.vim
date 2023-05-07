@@ -35,6 +35,7 @@ function! gitsupport#cmd_status#OpenBuffer ( params, cmd_mods )
 
   let &l:filetype = 'gitsstatus'
   let &l:foldmethod = 'manual'
+  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
   let &l:foldlevel = 2
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
@@ -462,7 +463,9 @@ function! s:Run(options, cwd, restore_cursor)
         \ 'untracked': [],
         \ 'ignored': [],
         \ 'line_index': {},
+        \ 'fold_index': {},
         \ }
+  let b:GitSupport_StatusData = status_data
 
   while !empty(list_status)
     let line = remove(list_status, 0)
@@ -499,13 +502,11 @@ function! s:Run(options, cwd, restore_cursor)
   call s:PrintFileSection(status_data.untracked, s:Sections.untracked.headers)
   call s:PrintFileSection(status_data.ignored, s:Sections.ignored.headers)
   call s:PrintNothingToCommit(status_data)
-  call s:AddFold(1, line('$'))
+  call s:AddFold(1, line('$'), 'Git Status')
 
   for key in ['staged', 'unstaged', 'unmerged', 'untracked', 'ignored']
     call s:BuildIndex(status_data.line_index, status_data[key])
   endfor
-
-  let b:GitSupport_StatusData = status_data
 
   call gitsupport#common#BufferSetPosition(restore_pos)
 
@@ -690,6 +691,7 @@ endfunction
 function! s:PrintFileSection(list_section, headers)
   let line_nr = line('$')+1
   let line_first = line_nr
+  let amount_submodules = 0
 
   if !empty(a:list_section)
     call setline(line_nr, a:headers + [''])
@@ -698,6 +700,7 @@ function! s:PrintFileSection(list_section, headers)
     for record in a:list_section
       if has_key(record, 'submodule') && !empty(record.submodule)
         let additional = s:PrintSubmoduleInfo(record.submodule)
+        let amount_submodules += 1
       else
         let additional = ''
       endif
@@ -707,8 +710,14 @@ function! s:PrintFileSection(list_section, headers)
       let line_nr += 1
     endfor
 
+    let amount_files = len(a:list_section) - amount_submodules
+    let fold_texts = [(amount_files).' files']
+    if amount_submodules > 0
+      call add(fold_texts, (amount_submodules).' submodules')
+    endif
+
     call setline(line_nr, [''])
-    call s:AddFold(line_first, line_nr)
+    call s:AddFold(line_first, line_nr, join(fold_texts, ', '))
   endif
 endfunction
 
@@ -727,8 +736,18 @@ function! s:GetStatusString ( status )
   return get( s:status_strings, a:status, s:status_strings[' '] )
 endfunction
 
-function! s:AddFold ( line_first, line_last )
-  silent exec printf( ':%d,%dfold', a:line_first, a:line_last )
+function! s:AddFold(line_first, line_last, fold_text)
+  let b:GitSupport_StatusData.fold_index[a:line_first.'-'.a:line_last] = a:fold_text
+  silent exec printf(':%d,%dfold', a:line_first, a:line_last)
+endfunction
+
+function! s:FoldText()
+  let fold_id = v:foldstart.'-'.v:foldend
+  let first_line = getline(v:foldstart)
+  let info = get(b:GitSupport_StatusData.fold_index, fold_id, '')
+
+  let head = '+-'.v:folddashes.' '
+  return head.first_line.' '.info.' '
 endfunction
 
 function! s:ErrorMsg ( ... )
@@ -737,6 +756,10 @@ function! s:ErrorMsg ( ... )
     echomsg line
   endfor
   echohl None
+endfunction
+
+function! s:SID ()
+  return matchstr( expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$' )
 endfunction
 
 function! s:ListHas ( list, items )
