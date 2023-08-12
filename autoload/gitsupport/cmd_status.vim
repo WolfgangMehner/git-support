@@ -31,12 +31,12 @@ function! gitsupport#cmd_status#OpenBuffer ( params, cmd_mods )
   endif
 
   call gitsupport#run#OpenBuffer( 'Git - status', 'mods', a:cmd_mods )
-  call s:Run( options, cwd, 0 )
 
   let &l:filetype = 'gitsstatus'
-  let &l:foldmethod = 'manual'
-  let &l:foldtext = '<SNR>'.s:SID().'_FoldText()'
-  let &l:foldlevel = 2
+  call gitsupport#fold#Init("")
+
+  call s:Run( options, cwd, 0 )
+
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
@@ -463,7 +463,6 @@ function! s:Run(options, cwd, restore_cursor)
         \ 'untracked': [],
         \ 'ignored': [],
         \ 'line_index': {},
-        \ 'fold_index': {},
         \ }
   let b:GitSupport_StatusData = status_data
 
@@ -502,7 +501,7 @@ function! s:Run(options, cwd, restore_cursor)
   call s:PrintFileSection(status_data.untracked, s:Sections.untracked.headers)
   call s:PrintFileSection(status_data.ignored, s:Sections.ignored.headers)
   call s:PrintNothingToCommit(status_data)
-  call s:AddFold(1, line('$'), 'Git Status')
+  call gitsupport#fold#AddFold(1, line('$'), 'Git Status')
 
   for key in ['staged', 'unstaged', 'unmerged', 'untracked', 'ignored']
     call s:BuildIndex(status_data.line_index, status_data[key])
@@ -510,7 +509,7 @@ function! s:Run(options, cwd, restore_cursor)
 
   call gitsupport#common#BufferSetPosition(restore_pos)
 
-  let &l:foldlevel = 2          " open folds closed by manual creation
+  call gitsupport#fold#SetLevel("", 2)   " open folds closed by manual creation
   let &l:modifiable = 0
 endfunction
 
@@ -717,7 +716,7 @@ function! s:PrintFileSection(list_section, headers)
     endif
 
     call setline(line_nr, [''])
-    call s:AddFold(line_first, line_nr, join(fold_texts, ', '))
+    call gitsupport#fold#AddFold(line_first, line_nr, (a:headers[0]).' '.join(fold_texts, ', '))
   endif
 endfunction
 
@@ -734,20 +733,6 @@ endfunction
 
 function! s:GetStatusString ( status )
   return get( s:status_strings, a:status, s:status_strings[' '] )
-endfunction
-
-function! s:AddFold(line_first, line_last, fold_text)
-  let b:GitSupport_StatusData.fold_index[a:line_first.'-'.a:line_last] = a:fold_text
-  silent exec printf(':%d,%dfold', a:line_first, a:line_last)
-endfunction
-
-function! s:FoldText()
-  let fold_id = v:foldstart.'-'.v:foldend
-  let first_line = getline(v:foldstart)
-  let info = get(b:GitSupport_StatusData.fold_index, fold_id, '')
-
-  let head = '+-'.v:folddashes.' '
-  return head.first_line.' '.info.' '
 endfunction
 
 function! s:ErrorMsg ( ... )
