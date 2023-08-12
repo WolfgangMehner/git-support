@@ -99,7 +99,7 @@ function! s:Run ( params, cwd, restore_cursor )
   call gitsupport#run#RunToBuffer( '', ['blame'] + a:params,
         \ 'cwd', a:cwd,
         \ 'restore_cursor', a:restore_cursor,
-        \ 'callback', Callback )
+        \ 'cb_textprocess', Callback )
   if s:use_popups
     call gitsupport#cursor_tracker#Add(bufnr(), 'git-blame', function('gitsupport#cmd_blame#PopupCallback'))
   endif
@@ -268,7 +268,7 @@ function! s:GetInfoAdvanded ( line_nr, property )
   endif
 endfunction
 
-function! s:ProcessPorcelain ( buf_nr, status )
+function! s:ProcessPorcelain(buf_nr, _)
   call s:ParsePorcelain( a:buf_nr )
   call s:RenderLines( a:buf_nr )
 endfunction

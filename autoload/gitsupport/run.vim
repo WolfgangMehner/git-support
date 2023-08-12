@@ -181,7 +181,8 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
         \ 'env_std': 0,
         \ 'cwd': '',
         \ 'keep': 0,
-        \ 'callback': function( 's:Empty' ),
+        \ 'cb_textprocess': function('s:Empty'),
+        \ 'cb_bufferenter': function('s:Empty'),
         \ 'restore_cursor': 0,
         \ }
 
@@ -233,7 +234,12 @@ function! s:JobWrapup ( job_data )
   let buf_nr = a:job_data.buf_nr
   let opts = a:job_data.opts
 
-  call opts.callback(buf_nr, status)
+  if opts.cb_textprocess != function('s:Empty')
+    call opts.cb_textprocess(buf_nr, status)
+  endif
+  if opts.cb_bufferenter != function('s:Empty')
+    call opts.cb_bufferenter(buf_nr, status)
+  endif
   if buf_nr == bufnr('%')
     call gitsupport#common#BufferSetPosition( opts.restore_cursor )
   endif
