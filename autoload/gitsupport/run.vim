@@ -233,10 +233,10 @@ function! s:JobWrapup ( job_data )
   let buf_nr = a:job_data.buf_nr
   let opts = a:job_data.opts
 
+  call opts.callback(buf_nr, status)
   if buf_nr == bufnr('%')
     call gitsupport#common#BufferSetPosition( opts.restore_cursor )
   endif
-  call opts.callback( buf_nr, status )
   if opts.has_syntax
     call setbufvar( buf_nr, '&syntax', 'ON' )
   endif

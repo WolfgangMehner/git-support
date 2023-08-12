@@ -276,13 +276,14 @@ endfunction
 let s:HEADER = 1
 let s:PARSE  = 2
 
-function! s:ParsePorcelain ( buf_nr )
+function! s:ParsePorcelain(buf_nr)
   let state = s:HEADER
 
+  let blame_data = getbufvar(a:buf_nr, "GitSupport_BlameData")
   let commit  = {}
   let line    = {}
-  let commits = b:GitSupport_BlameData.commits
-  let lines   = b:GitSupport_BlameData.lines
+  let commits = blame_data.commits
+  let lines   = blame_data.lines
   let line_original = -1
   let line_final    = -1
 
@@ -331,12 +332,12 @@ function! s:ParsePorcelain ( buf_nr )
   endfor
 endfunction
 
-function! s:RenderLines ( buf_nr )
-  let &l:modifiable = 1
+function! s:RenderLines(buf_nr)
   call deletebufline( a:buf_nr, 1, '$' )
 
-  let commits = b:GitSupport_BlameData.commits
-  let lines   = b:GitSupport_BlameData.lines
+  let blame_data = getbufvar(a:buf_nr, "GitSupport_BlameData")
+  let commits = blame_data.commits
+  let lines   = blame_data.lines
 
   for line in lines
     let commit = line.commit
@@ -349,8 +350,7 @@ function! s:RenderLines ( buf_nr )
     call appendbufline( a:buf_nr, '$', printf( '%s %12s %s', commit.hash[0:6], time_str, line.str ) )
   endfor
 
-  normal! gg"_dd
-  let &l:modifiable = 0
+  call deletebufline(a:buf_nr, 1)
 endfunction
 
 function! s:Empty ( ... )
