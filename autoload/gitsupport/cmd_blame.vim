@@ -101,7 +101,7 @@ function! s:Run ( params, cwd, restore_cursor )
         \ 'restore_cursor', a:restore_cursor,
         \ 'callback', Callback )
   if s:use_popups
-    call gitsupport#cursor_tracker#Add( 'gitsupport#cmd_blame#PopupCallback' )
+    call gitsupport#cursor_tracker#Add(bufnr(), 'git-blame', function('gitsupport#cmd_blame#PopupCallback'))
   endif
 endfunction
 
@@ -184,7 +184,7 @@ function! s:CommitPopup ( buf_id, line )
   call setbufline( a:buf_id, 1, lines )
 endfunction
 
-function! gitsupport#cmd_blame#PopupCallback ( event )
+function! gitsupport#cmd_blame#PopupCallback(_, event)
   if a:event == 'leave'
     if has_key ( b:GitSupport_BlameData, 'commit_popup' )
       call gitsupport#popup#Close( b:GitSupport_BlameData.commit_popup.win_id )
