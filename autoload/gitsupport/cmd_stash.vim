@@ -24,12 +24,12 @@ function! gitsupport#cmd_stash#OpenBuffer ( params, cmd_mods )
 
   if subcmd == 'list'
     call gitsupport#run#OpenBuffer( 'Git - stash list', 'mods', a:cmd_mods )
-    call s:Run( params, cwd, 0 )
+    call s:Run('list', params, cwd, 0)
 
     command! -nargs=0 -buffer  Help   :call <SID>Help()
     nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
-    nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+    nnoremap <silent> <buffer> u      :call <SID>Update("list")<CR>
 
     nnoremap <expr>   <buffer> sa     <SID>Save()
     nnoremap          <buffer> pu     :call <SID>Create()<CR>
@@ -46,15 +46,14 @@ function! gitsupport#cmd_stash#OpenBuffer ( params, cmd_mods )
     call gitsupport#run#OpenBuffer( 'Git - stash show', 'mods', a:cmd_mods )
 
     let &l:filetype = 'gitsdiff'
-    let &l:foldmethod = 'syntax'
-    let &l:foldlevel = 2
+    call gitsupport#fold#Init("")
 
-    call s:Run( params, cwd, 0 )
+    call s:Run('show', params, cwd, 0)
 
     command! -nargs=0 -buffer  Help   :call <SID>HelpShow()
     nnoremap          <buffer> <S-F1> :call <SID>HelpShow()<CR>
     nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
-    nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+    nnoremap <silent> <buffer> u      :call <SID>Update("show")<CR>
 
     let b:GitSupport_Param = params
     let b:GitSupport_CWD = cwd
@@ -96,14 +95,27 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params, cwd, restore_cursor )
-  call gitsupport#run#RunToBuffer( '', ['stash'] + a:params,
-        \ 'cwd', a:cwd,
-        \ 'restore_cursor', a:restore_cursor )
+function! s:Run(mode, params, cwd, restore_cursor)
+  if a:mode == 'list'
+    call gitsupport#run#RunToBuffer('', ['stash'] + a:params,
+          \ 'cwd', a:cwd,
+          \ 'restore_cursor', a:restore_cursor)
+  elseif a:mode == 'show'
+    let Callback = function('s:AddShowFolds')
+    call gitsupport#run#RunToBuffer('', ['stash'] + a:params,
+          \ 'cwd', a:cwd,
+          \ 'restore_cursor', a:restore_cursor,
+          \ 'cb_bufferenter', Callback)
+  endif
 endfunction
 
-function! s:Update ()
-  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
+function! s:Update(mode)
+  call s:Run(a:mode, b:GitSupport_Param, b:GitSupport_CWD, 1)
+endfunction
+
+function! s:AddShowFolds(buf_nr, _)
+  call gitsupport#cmd_log_folds#Add(a:buf_nr)
+  call gitsupport#fold#SetLevel("", 2)   " open folds closed by manual creation
 endfunction
 
 function! s:Save ()
