@@ -120,16 +120,14 @@ function! s:DryRun ( args )
   call gitsupport#run#OpenBuffer( 'Git - commit --dry-run' )
 
   let &l:filetype = 'gitsstatus'
-  let &l:foldmethod = 'syntax'
-  let &l:foldlevel = s:ListHas( args, [ '-v', '--verbose' ] ) ? 2 : 1
-  let &l:foldtext = 'GitS_FoldLog()'
+  call gitsupport#fold#Init("")
 
-  call s:Run( args, cwd, 0 )
+  call s:RunDry(args, cwd, 0)
 
   command! -nargs=0 -buffer  Help   :call <SID>Help()
   nnoremap          <buffer> <S-F1> :call <SID>Help()<CR>
   nnoremap <silent> <buffer> q      :call <SID>Quit()<CR>
-  nnoremap <silent> <buffer> u      :call <SID>Update()<CR>
+  nnoremap <silent> <buffer> u      :call <SID>UpdateDry()<CR>
 
   let b:GitSupport_Param = args
   let b:GitSupport_CWD = cwd
@@ -148,15 +146,22 @@ function! s:Quit ()
   close
 endfunction
 
-function! s:Run ( params, cwd, restore_cursor )
-  call gitsupport#run#RunToBuffer( '', ['commit'] + a:params,
+function! s:RunDry(params, cwd, restore_cursor)
+  let Callback = function('s:AddFolds')
+  call gitsupport#run#RunToBuffer('', ['commit'] + a:params,
         \ 'cwd', a:cwd,
         \ 'env_std', 1,
-        \ 'restore_cursor', a:restore_cursor )
+        \ 'restore_cursor', a:restore_cursor,
+        \ 'cb_bufferenter', Callback)
 endfunction
 
-function! s:Update ()
-  call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
+function! s:UpdateDry()
+  call s:RunDry(b:GitSupport_Param, b:GitSupport_CWD, 1)
+endfunction
+
+function! s:AddFolds(buf_nr, _)
+  call gitsupport#cmd_log_folds#Add(a:buf_nr)
+  call gitsupport#fold#SetLevel("", 2)   " open folds closed by manual creation
 endfunction
 
 function! s:ErrorMsg ( ... )

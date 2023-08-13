@@ -11,7 +11,7 @@
 "  Organization:  
 "       Version:  see variable g:GitSupport_Version below
 "       Created:  06.10.2012
-"      Revision:  14.09.2021
+"      Revision:  13.08.2023
 "       License:  Copyright (c) 2012-2021, Wolfgang Mehner
 "                 This program is free software; you can redistribute it and/or
 "                 modify it under the terms of the GNU General Public License as
@@ -127,60 +127,3 @@ endfunction
 augroup GitSupport
   autocmd VimEnter,ColorScheme * call s:HighlightingDefaults()
 augroup END
-
-"-------------------------------------------------------------------------------
-" GitS_FoldLog : fold text for 'git diff/log/show/status'   {{{1
-"
-" :WARNING:18.12.2020 12:19:WM: currently used by next gen modules,
-"   waiting for further refactoring
-"-------------------------------------------------------------------------------
-"
-function! GitS_FoldLog ()
-	let line = getline( v:foldstart )
-	let head = '+-'.v:folddashes.' '
-	let tail = ' ('.( v:foldend - v:foldstart + 1 ).' lines) '
-	"
-	if line =~ '^tag'
-		" search for the first line which starts with a space,
-		" this is the first line of the commit message
-		return head.'tag - '.substitute( line, '^tag\s\+', '', '' ).tail
-	elseif line =~ '^commit'
-		" search for the first line which starts with a space,
-		" this is the first line of the commit message
-		let pos = v:foldstart
-		while pos <= v:foldend
-			if getline(pos) =~ '^\s\+\S'
-				break
-			endif
-			let pos += 1
-		endwhile
-		if pos > v:foldend | let pos = v:foldstart | endif
-		return head.'commit - '.substitute( getline(pos), '^\s\+', '', '' ).tail
-	elseif line =~ '^diff'
-	  " take the filename from (we also consider backslashes):
-		"   diff --git a/<file> b/<file>
-		let file = matchstr ( line, 'a\([/\\]\)\zs\(.*\)\ze b\1\2\s*$' )
-		if file != ''
-			return head.'diff - '.file.tail
-		else
-			return head.line.tail
-		endif
-	elseif line =~ '^\a.*:$'
-		" we assume a line in the status comment block and try to guess the number of lines (=files)
-		" :TODO:20.03.2013 19:30:WM: (might be something else)
-		let filesstart = v:foldstart+1
-		let filesend   = v:foldend
-		while filesstart < v:foldend && getline(filesstart) =~ '\_^\s*\_$\|\_^\s\+('
-			let filesstart += 1
-		endwhile
-		while filesend > v:foldstart && getline(filesend) =~ '^\s*$'
-			let filesend -= 1
-		endwhile
-		return line.' '.( filesend - filesstart + 1 ).' files '
-	else
-		return head.line.tail
-	endif
-endfunction    " ----------  end of function GitS_FoldLog  ----------
-
-" }}}1
-"-------------------------------------------------------------------------------
