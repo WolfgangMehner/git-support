@@ -34,9 +34,7 @@ function! gitsupport#cmd_diff#OpenBuffer ( params, dir_hint, cmd_mods )
   call gitsupport#run#OpenBuffer( 'Git - diff', 'mods', a:cmd_mods )
 
   let &l:filetype = 'gitsdiff'
-  let &l:foldmethod = 'syntax'
-  let &l:foldlevel = 2
-  let &l:foldtext = 'GitS_FoldLog()'
+  call gitsupport#fold#Init("")
 
   call s:Run( params, cwd, 0 )
 
@@ -87,13 +85,19 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd, restore_cursor )
-  call gitsupport#run#RunToBuffer( '', ['diff'] + a:params,
+  let Callback = function('s:AddFolds')
+  call gitsupport#run#RunToBuffer('', ['diff'] + a:params,
         \ 'cwd', a:cwd,
-        \ 'restore_cursor', a:restore_cursor )
+        \ 'cb_bufferenter', Callback)
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD, 1 )
+endfunction
+
+function! s:AddFolds(buf_nr, _)
+  call gitsupport#cmd_log_folds#Add(a:buf_nr)
+  call gitsupport#fold#SetLevel("", 2)   " open folds closed by manual creation
 endfunction
 
 function! s:Jump ( mode )

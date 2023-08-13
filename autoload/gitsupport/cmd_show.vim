@@ -59,9 +59,7 @@ function! gitsupport#cmd_show#OpenBuffer ( params, cmd_mods )
     call gitsupport#run#OpenBuffer( 'Git - show', 'mods', a:cmd_mods )
 
     let &l:filetype = 'gitslog'
-    let &l:foldmethod = 'syntax'
-    let &l:foldlevel = 3
-    let &l:foldtext = 'GitS_FoldLog()'
+    call gitsupport#fold#Init("")
 
     call s:Run( params, cwd )
 
@@ -110,11 +108,17 @@ function! s:Quit ()
 endfunction
 
 function! s:Run ( params, cwd )
-  call gitsupport#run#RunToBuffer( '', ['show'] + a:params,
-        \ 'cwd', a:cwd )
+  let Callback = function('s:AddFolds')
+  call gitsupport#run#RunToBuffer('', ['show'] + a:params,
+        \ 'cwd', a:cwd,
+        \ 'cb_bufferenter', Callback)
 endfunction
 
 function! s:Update ()
   call s:Run( b:GitSupport_Param, b:GitSupport_CWD )
 endfunction
 
+function! s:AddFolds(buf_nr, _)
+  call gitsupport#cmd_log_folds#Add(a:buf_nr)
+  call gitsupport#fold#SetLevel("", 3)   " open folds closed by manual creation
+endfunction

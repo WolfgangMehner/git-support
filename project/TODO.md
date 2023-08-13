@@ -22,7 +22,3 @@
 ## Refactor
 
 - make `:GitLog` paged
-- do not use `sync fromstart` in syntax highlighting,
-  is extremely slow for diff and log
-- rename function `GitS_FoldLog` into `GitS_FoldLogTxt`
-- set `foldmethod` individually and not in `s:OpenGitBuffer`
