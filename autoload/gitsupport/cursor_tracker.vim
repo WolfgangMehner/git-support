@@ -24,8 +24,8 @@ function! s:Callback(action)
 
   if action == 'close'
     call gitsupport#log#Info('remove cursor tracker autocommands for buffer', buf_nr)
-    call remove(s:CursorTrackerState.buffers, buf_nr)
     call s:ClearAutocmd(buf_nr)
+    call remove(s:CursorTrackerState.buffers, buf_nr)
   else
     let buffer_info = get(s:CursorTrackerState.buffers, buf_nr, {'ids': {}})
     for [ id, Callback ] in items(buffer_info.ids)
@@ -48,6 +48,25 @@ function! gitsupport#cursor_tracker#Add(buf_nr, id, callback)
   if !has_key(buffer_info.ids, id)
     call gitsupport#log#Info('add cursor tracker for buffer', buf_nr, 'and ID', id)
     let buffer_info.ids[id] = a:callback
+  endif
+endfunction
+
+function! gitsupport#cursor_tracker#Remove(buf_nr, id)
+  let buf_nr = string(a:buf_nr)
+  let id = a:id
+  let buffers = s:CursorTrackerState.buffers
+
+  if has_key(buffers, buf_nr)
+    let buffer_info = buffers[buf_nr]
+    if has_key(buffer_info.ids, id)
+      call gitsupport#log#Info('remove cursor tracker for buffer', buf_nr, 'and ID', id)
+      call remove(buffer_info.ids, id)
+    endif
+    if empty(buffer_info.ids)
+      call gitsupport#log#Info('remove cursor tracker autocommands for buffer', buf_nr)
+      call s:ClearAutocmd(buf_nr)
+      call remove(buffers, buf_nr)
+    endif
   endif
 endfunction
 

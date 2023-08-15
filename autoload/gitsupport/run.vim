@@ -229,24 +229,46 @@ function! gitsupport#run#RunToBuffer ( cmd, params, ... )
   endif
 endfunction
 
+let s:jobs_wrapup_delayed = {}
+
 function! s:JobWrapup ( job_data )
   let status = a:job_data.status
   let buf_nr = a:job_data.buf_nr
   let opts = a:job_data.opts
 
+  let is_current_buffer = buf_nr == bufnr('%')
+
   if opts.cb_textprocess != function('s:Empty')
     call opts.cb_textprocess(buf_nr, status)
   endif
   if opts.cb_bufferenter != function('s:Empty')
-    call opts.cb_bufferenter(buf_nr, status)
+    if is_current_buffer
+      call opts.cb_bufferenter(buf_nr, status)
+    else
+      let s:jobs_wrapup_delayed[buf_nr] = a:job_data
+      call gitsupport#cursor_tracker#Add(buf_nr, 'job-wrapup', function('s:JobWrapupBufferEnter'))
+    endif
   endif
-  if buf_nr == bufnr('%')
+  if is_current_buffer
     call gitsupport#common#BufferSetPosition( opts.restore_cursor )
   endif
   if opts.has_syntax
     call setbufvar( buf_nr, '&syntax', 'ON' )
   endif
   call setbufvar( buf_nr, '&modifiable', opts.is_modifiable )
+endfunction
+
+function! s:JobWrapupBufferEnter(buf_nr, action)
+  if a:action == 'enter' || a:action == 'move' || a:action == 'hold'
+    let buf_nr = a:buf_nr
+    let job_data = get(s:jobs_wrapup_delayed, buf_nr, {})
+    if !empty(job_data)
+      let opts = job_data.opts
+      call opts.cb_bufferenter(buf_nr, job_data.status)
+      call gitsupport#cursor_tracker#Remove(buf_nr, 'job-wrapup')
+      call remove(s:jobs_wrapup_delayed, buf_nr)
+    endif
+  endif
 endfunction
 
 function! s:JobRunNoBackground ( cmd, params, opts )
