@@ -116,6 +116,8 @@ let s:Git_CustomMenu = [
       \ [ '&merge, abort',             ':GitMerge',   ':GitMerge --abort<EXECUTE>' ],
       \ ]
 
+let s:Git_LoggingEnabled = 'no'
+
 call s:ApplyDefaultSetting( 'Git_AddExpandEmpty',       'no' )
 call s:ApplyDefaultSetting( 'Git_CheckoutExpandEmpty',  'no' )
 call s:ApplyDefaultSetting( 'Git_DiffExpandEmpty',      'no' )
@@ -135,6 +137,8 @@ call s:GetGlobalSetting ( 'Git_Env.LANG', 'Git_Lang' )
 call s:GetGlobalSetting ( 'Git_LoadMenus' )
 call s:GetGlobalSetting ( 'Git_RootMenu' )
 call s:GetGlobalSetting ( 'Git_CustomMenu' )
+
+call s:GetGlobalSetting ('Git_LoggingEnabled')
 
 if ! has_key( s:Git_Env, 'LANG' )
 	if s:Git_Executable =~# '^LANG=\S\+\s\S'
@@ -193,6 +197,8 @@ let s:Features = {
       \ 'vim_has_json_decode':  has('patch-7.4.1304'),
       \ 'vim_full_job_support': has('patch-8.0.0902'),
       \ 'vim_has_popups':       has('patch-8.1.1612'),
+      \
+      \ 'is_logging_enabled': s:Git_LoggingEnabled == 'yes',
       \ }
 
 function! gitsupport#config#Features ()

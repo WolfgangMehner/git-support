@@ -12,14 +12,13 @@
 "       License:  Copyright (c) 2023, Wolfgang Mehner
 "-------------------------------------------------------------------------------
 
-let s:EnableLogging = 0
+let s:Features = gitsupport#config#Features()
+let s:EnableLogging = s:Features.is_logging_enabled
 
-function! s:WriteLog(prefix, lines)
-  if !s:EnableLogging
-    return
+function! s:WriteLog(prefix, chunks)
+  if s:EnableLogging
+    call writefile([(strftime('%c')).' '.a:prefix.' '.join(a:chunks, ' ')], expand('<sfile>:p:h').'/gitsupport.log', 'a')
   endif
-
-  call writefile([a:prefix.' '.join(a:lines, ' ')], expand('<sfile>:p:h').'/gitsupport.log', 'a')
 endfunction
 
 function! gitsupport#log#Info(...)
