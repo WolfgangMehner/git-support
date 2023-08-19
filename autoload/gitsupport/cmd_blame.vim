@@ -284,8 +284,6 @@ function! s:ParsePorcelain(buf_nr)
   let line    = {}
   let commits = blame_data.commits
   let lines   = blame_data.lines
-  let line_original = -1
-  let line_final    = -1
 
   for line_raw in getbufline( a:buf_nr, 1, '$' )
     if state == s:HEADER

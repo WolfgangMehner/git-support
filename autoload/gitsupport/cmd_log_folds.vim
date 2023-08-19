@@ -44,7 +44,7 @@ function! s:FinishCommit(commit, line_nr)
     let msg = commit.first_line
     let info = 'commit '.commit.hash[0:7].' '.msg
     if !empty(commit.diffs)
-      let info += ' ('.len(commit.diffs).' files)'
+      let info .= ' ('.len(commit.diffs).' files)'
     endif
     call gitsupport#fold#AddFold(commit.line_start, a:line_nr, info)
   endif

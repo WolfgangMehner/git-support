@@ -88,6 +88,7 @@ function! s:Run ( params, cwd, restore_cursor )
   let Callback = function('s:AddFolds')
   call gitsupport#run#RunToBuffer('', ['diff'] + a:params,
         \ 'cwd', a:cwd,
+        \ 'restore_cursor', a:restore_cursor,
         \ 'cb_bufferenter', Callback)
 endfunction
 
