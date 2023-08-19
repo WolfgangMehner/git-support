@@ -37,7 +37,14 @@ function! gitsupport#run_nvim#JobRun ( cmd, params, opts )
   let job_id = jobstart( [a:cmd] + a:params, job_data )
 
   if job_id > 0
-    let g:all_jobs[job_id] = { 'job': job_id, 'buf': bufnr('%'), 'line_accu': '', 'buf_nr': bufnr('%'), 'opts': a:opts, 'wrap_up': a:opts.wrap_up, }
+    let g:all_jobs[job_id] = {
+          \ 'job': job_id,
+          \ 'buf_nr': bufnr('%'),
+          \ 'results': {'status': -1,},
+          \ 'opts': a:opts,
+          \ 'wrap_up': a:opts.wrap_up,
+          \ '_line_accu': '',
+          \ }
   endif
 endfunction
 
@@ -51,27 +58,27 @@ endfunction
 function! s:JobOutput ( job_id, data, event )
   let line_data = a:data
   let job_data = g:all_jobs[ a:job_id ]
-  let buf = job_data.buf
+  let buf_nr = job_data.buf_nr
 
   if line_data == ['']   " EOF
-    if job_data.line_accu != ''
-      call nvim_buf_set_lines( buf, -2, -2, 1, [ job_data.line_accu ] )
-      let job_data.line_accu = ''
+    if job_data._line_accu != ''
+      call nvim_buf_set_lines(buf_nr, -2, -2, 1, [job_data._line_accu])
+      let job_data._line_accu = ''
     endif
     return
   endif
 
-  let first_line = job_data.line_accu . line_data[0]
-  let job_data.line_accu = line_data[-1]
+  let first_line = job_data._line_accu . line_data[0]
+  let job_data._line_accu = line_data[-1]
 
-  call nvim_buf_set_lines( buf, -2, -2, 1, [ first_line ] )
-  call nvim_buf_set_lines( buf, -2, -2, 1, line_data[1:-2] )
+  call nvim_buf_set_lines(buf_nr, -2, -2, 1, [ first_line ])
+  call nvim_buf_set_lines(buf_nr, -2, -2, 1, line_data[1:-2])
 endfunction
 
 function! s:JobExit ( job_id, status, event )
   let job_id = a:job_id
   let job_data = g:all_jobs[ job_id ]
-  let job_data.status = a:status
+  let job_data.results.status = a:status
 
   call s:JobWrapup( job_id )
 endfunction

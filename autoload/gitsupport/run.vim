@@ -231,8 +231,13 @@ endfunction
 
 let s:jobs_wrapup_delayed = {}
 
+" job_data
+" - buf_nr (int, buffer related to the job)
+" - opts (dict, as set when starting job)
+" - results (dict, results of the execution)
+"   - status (int, process exit code)
 function! s:JobWrapup ( job_data )
-  let status = a:job_data.status
+  let status = a:job_data.results.status
   let buf_nr = a:job_data.buf_nr
   let opts = a:job_data.opts
 
@@ -264,7 +269,7 @@ function! s:JobWrapupBufferEnter(buf_nr, action)
     let job_data = get(s:jobs_wrapup_delayed, buf_nr, {})
     if !empty(job_data)
       let opts = job_data.opts
-      call opts.cb_bufferenter(buf_nr, job_data.status)
+      call opts.cb_bufferenter(buf_nr, job_data.results.status)
       call gitsupport#cursor_tracker#Remove(buf_nr, 'job-wrapup')
       call remove(s:jobs_wrapup_delayed, buf_nr)
     endif
